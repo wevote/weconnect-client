@@ -130,7 +130,7 @@ class Footer extends Component {
           <FooterMainWrapper>
             <Suspense fallback={<span>&nbsp;</span>}>
               <DelayedLoad waitBeforeShow={1000}>
-                <div>FooterMain Here</div>
+                <div>== FooterMain Here ==</div>
               </DelayedLoad>
             </Suspense>
           </FooterMainWrapper>
@@ -138,7 +138,7 @@ class Footer extends Component {
         {showFooterBar && (
           <FooterBarWrapper className={isWebApp() ? 'footroom-wrapper' : 'footroom-wrapper-cordova'}>
             <Suspense fallback={<span>&nbsp;</span>}>
-              <div>FooterBar Here</div>
+              <div>== FooterBar Here ==</div>
             </Suspense>
           </FooterBarWrapper>
         )}

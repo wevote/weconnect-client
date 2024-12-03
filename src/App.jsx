@@ -4,16 +4,16 @@ import PropTypes from 'prop-types';
 import React, { Component, Suspense } from 'react';
 import ReactGA from 'react-ga4';
 import TagManager from 'react-gtm-module';
-import { Redirect, Route, Switch, withRouter } from 'react-router-dom';
+import { Route, Switch, withRouter } from 'react-router-dom';
 import styled from 'styled-components';
 import VoterActions from './js/actions/VoterActions';
 import VoterSessionActions from './js/actions/VoterSessionActions';
 import muiTheme from './js/common/components/Style/muiTheme';
 import LoadingWheelComp from './js/common/components/Widgets/LoadingWheelComp';
-import AppObservableStore, { messageService } from './js/common/stores/AppObservableStore';
+import AppObservableStore, { messageService } from './js/stores/AppObservableStore';
 import { getAndroidSize, getIOSSizeString, hasDynamicIsland, isIOS } from './js/common/utils/cordovaUtils';
 import historyPush from './js/common/utils/historyPush';
-import { isWeVoteMarketingSite, normalizedHref } from './js/common/utils/hrefUtils';
+import { normalizedHref } from './js/common/utils/hrefUtils';
 import initializejQuery from './js/common/utils/initializejQuery';
 import { isAndroid, isCordova, isWebApp } from './js/common/utils/isCordovaOrWebApp';
 import { renderLog } from './js/common/utils/logging';
@@ -25,9 +25,10 @@ import VoterStore from './js/stores/VoterStore';
 
 // Root URL pages
 
-const FAQ = React.lazy(() => import(/* webpackChunkName: 'FAQ' */ './js/pages/More/FAQ'));
+const FAQ = React.lazy(() => import(/* webpackChunkName: 'FAQ' */ './js/pages/FAQ'));
 const Footer = React.lazy(() => import(/* webpackChunkName: 'Footer' */ './js/components/Navigation/Footer'));
 const PageNotFound = React.lazy(() => import(/* webpackChunkName: 'PageNotFound' */ './js/pages/PageNotFound'));
+const TeamMembers = React.lazy(() => import(/* webpackChunkName: 'FAQ' */ './js/pages/TeamMembers'));
 
 // There are just too many "prop spreadings" in the use of Route, if someone can figure out an alternative...
 /* eslint-disable react/jsx-props-no-spreading */
@@ -61,18 +62,13 @@ class App extends Component {
     this.appStateSubscription = messageService.getMessage().subscribe(() => this.onAppObservableStoreChange());
     this.voterStoreListener = VoterStore.addListener(this.onVoterStoreChange.bind(this));
 
-    let { hostname } = window.location;
-    hostname = hostname || '';
+    // let { hostname } = window.location;
+    // hostname = hostname || '';
     initializejQuery(() => {
-      AppObservableStore.siteConfigurationRetrieve(hostname);
+      // AppObservableStore.siteConfigurationRetrieve(hostname);
     });
     // console.log('href in App.js componentDidMount: ', window.location.href);
     // console.log('normalizedHrefPage in App.js componentDidMount: ', normalizedHref());
-    const onWeVoteUS = (hostname && (hostname.toLowerCase() === 'wevote.us'));
-    const onMobileApp = false;
-    if (isAndroid()) {         // December 12, 2023: All sorts of problems with sign-in with Facebook on Android, so disabling it here
-      webAppConfig.ENABLE_FACEBOOK = false;   // This overrides the config setting for the entire Android app
-    }
 
     if (isCordova()) {
       const size = isIOS() ?  getIOSSizeString() : getAndroidSize();
@@ -80,12 +76,12 @@ class App extends Component {
       console.log('Cordova:   Header, hasDynamicIsland', hasDynamicIsland());
     }
 
-    this.bypass2FA();
+    // this.bypass2FA();
   }
 
   componentDidUpdate (prevProps) {
     if (prevProps.location.search !== this.props.location.search) {
-      this.bypass2FA();
+      // this.bypass2FA();
     }
   }
 
@@ -221,7 +217,7 @@ class App extends Component {
     const voterDeviceId = VoterStore.voterDeviceId();
     if (cid && cid !== voterDeviceId) {
       VoterSessionActions.setVoterDeviceIdCookie(cid);
-      VoterActions.voterRetrieve();
+      // VoterActions.voterRetrieve();
     }
   }
 
@@ -233,17 +229,16 @@ class App extends Component {
 
   render () {
     renderLog('App');
-    const { hideHeader, showReadyLight, enableFullStory } = this.state;
-    const isNotWeVoteMarketingSite = !isWeVoteMarketingSite();
+    const { hideHeader } = this.state;
     // const firstVisit = !cookies.getItem('voter_device_id');
-    const loadingPageHtml = (
-      <div id="loading-screen">
-        <div style={{ display: 'flex', position: 'fixed', height: '100vh', width: '100vw', top: 0, left: 0, backgroundColor: '#fff', justifyContent: 'center', alignItems: 'center', fontSize: '20px', color: '#2E3C5D', flexDirection: 'column', fontFamily: '\'Source Sans Pro\', sans-serif', textAlign: 'center' }}>
-          <h1 style={{ fontFamily: '\'Source Sans Pro\', sans-serif', fontSize: '32px', fontWeight: 'normal', color: '#2E3C5D' }}>Loading your ballot...</h1>
-          <div style={{ margin: '0 15px', textAlign: 'center' }}>Thank you for being a voter!</div>
-        </div>
-      </div>
-    );
+    // const loadingPageHtml = (
+    //   <div id="loading-screen">
+    //     <div style={{ display: 'flex', position: 'fixed', height: '100vh', width: '100vw', top: 0, left: 0, backgroundColor: '#fff', justifyContent: 'center', alignItems: 'center', fontSize: '20px', color: '#2E3C5D', flexDirection: 'column', fontFamily: '\'Source Sans Pro\', sans-serif', textAlign: 'center' }}>
+    //       <h1 style={{ fontFamily: '\'Source Sans Pro\', sans-serif', fontSize: '32px', fontWeight: 'normal', color: '#2E3C5D' }}>Loading your ballot...</h1>
+    //       <div style={{ margin: '0 15px', textAlign: 'center' }}>Thank you for being a voter!</div>
+    //     </div>
+    //   </div>
+    // );
 
     if (isWebApp()) {
       // console.log('WebApp: href in App.js render: ', window.location.href);
@@ -275,6 +270,7 @@ class App extends Component {
               <Suspense fallback={<LoadingWheelComp />}>
                 <Switch>
                   <Route path="/faq" exact><FAQ /></Route>
+                  <Route path="/team-members/:teamId" exact component={TeamMembers} />
 
                   <Route path="*" component={PageNotFound} />
                 </Switch>

@@ -59,22 +59,6 @@ function innerAjax (options) {
   }
   // Switch between master API server and CDN
   if (options.endpoint === 'allBallotItemsRetrieve' ||
-    options.endpoint === 'candidateRetrieve' ||
-    options.endpoint === 'candidatesQuery' ||
-    options.endpoint === 'candidatesRetrieve' ||
-    options.endpoint === 'challengeRetrieve' ||
-    options.endpoint === 'defaultPricing' ||
-    options.endpoint === 'electionsRetrieve' ||
-    options.endpoint === 'issueDescriptionsRetrieve' ||
-    options.endpoint === 'issueOrganizationsRetrieve' ||
-    options.endpoint === 'issuesUnderBallotItemsRetrieve' ||
-    options.endpoint === 'measureRetrieve' ||
-    options.endpoint === 'officeRetrieve' ||
-    // options.endpoint === 'organizationRetrieve' || // Includes data a client can update, and needs to be fresh
-    options.endpoint === 'politicianRetrieve' ||
-    options.endpoint === 'positionListForBallotItem' ||
-    options.endpoint === 'representativesQuery' ||
-    options.endpoint === 'twitterIdentityRetrieve' ||
     options.endpoint === 'voterGuidesUpcomingRetrieve' ||
     options.endpoint === 'voterGuidesRetrieve'
   ) {
@@ -114,7 +98,7 @@ export default function $ajax (options) {
         clearInterval(waitForJQuery);
         innerAjax(options);
       }
-      if (loop++ > 400) {
+      if (loop++ > 400 && loop < 405) {
         throw new Error('$ajax could not load jQuery within 20 seconds');
       }
     }, 10);

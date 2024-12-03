@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import React, { Component, Suspense } from 'react';
 // import styled from 'styled-components';
 import VoterActions from '../../actions/VoterActions';
-import AppObservableStore, { messageService } from '../../common/stores/AppObservableStore';
+import AppObservableStore, { messageService } from '../../stores/AppObservableStore';
 import apiCalming from '../../common/utils/apiCalming';
 import { normalizedHref } from '../../common/utils/hrefUtils';
 import { isCordova } from '../../common/utils/isCordovaOrWebApp';
@@ -36,7 +36,7 @@ export default class Header extends Component {
     //   dumpCssFromId('header-container');
     // }
     if (VoterStore.getVoterWeVoteId() === '' && apiCalming('voterRetrieve', 500)) {
-      VoterActions.voterRetrieve();
+      // VoterActions.voterRetrieve();
     }
   }
 

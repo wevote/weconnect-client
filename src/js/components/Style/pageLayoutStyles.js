@@ -1,7 +1,7 @@
 import { AppBar } from '@mui/material';
 import styled from 'styled-components';
 import standardBoxShadow from '../../common/components/Style/standardBoxShadow';
-import AppObservableStore from '../../common/stores/AppObservableStore';
+import AppObservableStore from '../../stores/AppObservableStore';
 import { hasDynamicIsland, hasIPhoneNotch, isAndroidSizeMD, isAndroidSizeWide, isAndroidSizeXL, isIOS, isIOSAppOnMac, isIPad, isIPad11in, isIPadMini, isIPhone14Pro, isIPhone4p7in, isIPhone5p5inEarly, isIPhone5p5inMini, isIPhone6p1in, isIPhone6p5in } from '../../common/utils/cordovaUtils';
 import { normalizedHrefPage } from '../../common/utils/hrefUtils';
 import { isAndroid, isCordova, isWebApp } from '../../common/utils/isCordovaOrWebApp';

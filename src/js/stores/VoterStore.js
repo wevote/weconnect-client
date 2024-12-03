@@ -1,7 +1,7 @@
 import { ReduceStore } from 'flux/utils';
 import VoterActions from '../actions/VoterActions'; // eslint-disable-line import/no-cycle
 import Dispatcher from '../common/dispatcher/Dispatcher';
-import AppObservableStore from '../common/stores/AppObservableStore'; // eslint-disable-line import/no-cycle
+import AppObservableStore from './AppObservableStore'; // eslint-disable-line import/no-cycle
 import apiCalming from '../common/utils/apiCalming';
 import Cookies from '../common/utils/js-cookie/Cookies';
 import stringContains from '../common/utils/stringContains';

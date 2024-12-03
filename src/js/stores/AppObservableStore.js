@@ -1,10 +1,10 @@
 import { Subject } from 'rxjs';
-import VoterActions from '../../actions/VoterActions'; // eslint-disable-line import/no-cycle
-import stringContains from '../utils/stringContains';
-import webAppConfig from '../../config';
-import VoterStore from '../../stores/VoterStore'; // eslint-disable-line import/no-cycle
-import { dumpObjProps } from '../../utils/appleSiliconUtils';
-import $ajax from '../../utils/service';
+import VoterActions from '../actions/VoterActions'; // eslint-disable-line import/no-cycle
+import stringContains from '../common/utils/stringContains';
+import webAppConfig from '../config';
+import VoterStore from './VoterStore'; // eslint-disable-line import/no-cycle
+import { dumpObjProps } from '../utils/appleSiliconUtils';
+import $ajax from '../utils/service';
 
 const subject = new Subject();
 

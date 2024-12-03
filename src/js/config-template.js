@@ -1,6 +1,7 @@
 /* eslint-disable */
 // Note that we import these values where needed as "webAppConfig"
 module.exports = {
+  WECONNECT_NAME_FOR_BROWSER_TAB_TITLE: 'WeConnect',
   WECONNECT_URL_PROTOCOL: 'http://', // 'http://' for local dev (if not using SSL), or 'https://' for live server
   WECONNECT_HOSTNAME: 'localhost:4000', // Don't add 'http...' here.  Live server: 'WeVote.US', Quality: 'quality.WeVote.US', developers: 'localhost:4000'
   WECONNECT_IMAGE_PATH_FOR_CORDOVA: 'https://wevote.us',   // If you are not working with Cordova, you don't need to change this
@@ -68,4 +69,6 @@ module.exports = {
   GOOGLE_ANALYTICS_TRACKING_ID: '',
   GOOGLE_MAPS_API_KEY: '',
   GOOGLE_RECAPTCHA_KEY: '',
+  OPEN_REPLAY_PROJECT_KEY: '',
+  OPEN_REPLAY_INGEST_POINT: 'https://openreplay.wevote.us/ingest',
 };

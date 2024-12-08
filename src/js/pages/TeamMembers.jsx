@@ -1,16 +1,20 @@
+import { Button } from '@mui/material';
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { withStyles } from '@mui/styles';
 import AppObservableStore, { messageService } from '../stores/AppObservableStore';
+import PersonStore from '../stores/PersonStore';
 import TeamActions from '../actions/TeamActions';
 import TeamStore from '../stores/TeamStore';
 import { PageContentContainer } from '../components/Style/pageLayoutStyles';
 import webAppConfig from '../config';
+import { renderLog } from '../common/utils/logging';
 
 
-const TeamMembers = ({ match }) => {  //  classes, teamId
+const TeamMembers = ({ classes, match }) => {  //  classes, teamId
+  renderLog('TeamMembers');  // Set LOG_RENDER_EVENTS to log all renders
   const [teamId, setTeamId] = React.useState(-1);
   const [teamMemberList, setTeamMemberList] = React.useState([]);
   const [teamMemberCount, setTeamMemberCount] = React.useState(0);
@@ -18,28 +22,43 @@ const TeamMembers = ({ match }) => {  //  classes, teamId
   const onAppObservableStoreChange = () => {
   };
 
-  const onTeamStoreChange = () => {
-    const teamMemberListTemp = TeamStore.getTeamMemberList(teamId);
+  const onRetrieveTeamChange = () => {
+    const { params } = match;
+    setTeamId(params.teamId);
+    const teamMemberListTemp = TeamStore.getTeamMemberList(params.teamId);
+    // console.log('TeamMembers onRetrieveTeamChange, params.teamId:', params.teamId, ', TeamStore.getTeamMemberList:', teamMemberListTemp);
     setTeamMemberList(teamMemberListTemp);
     setTeamMemberCount(teamMemberListTemp.length);
   };
 
-  React.useEffect(() => {
-    const { params: {
-      teamId: teamIdIncoming,
-    } } = match;
-    setTeamId(teamIdIncoming);
+  const onPersonStoreChange = () => {
+    onRetrieveTeamChange();
+  };
 
-    console.log('Fetching team members for:', teamIdIncoming);
+  const onTeamStoreChange = () => {
+    onRetrieveTeamChange();
+  };
+
+  const addTeamMemberClick = () => {
+    AppObservableStore.setGlobalVariableState('addPersonDrawerOpen', true);
+    AppObservableStore.setGlobalVariableState('addPersonDrawerTeamId', true);
+  };
+
+  React.useEffect(() => {
+    const { params } = match;
+
     const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
     onAppObservableStoreChange();
+    const personStoreListener = PersonStore.addListener(onPersonStoreChange);
+    onPersonStoreChange();
     const teamStoreListener = TeamStore.addListener(onTeamStoreChange);
     onTeamStoreChange();
 
-    TeamActions.teamRetrieve(teamIdIncoming);
+    TeamActions.teamRetrieve(params.teamId);
 
     return () => {
       appStateSubscription.unsubscribe();
+      personStoreListener.remove();
       teamStoreListener.remove();
     };
   }, []);
@@ -56,9 +75,24 @@ const TeamMembers = ({ match }) => {  //  classes, teamId
         <link rel="canonical" href={`${webAppConfig.WECONNECT_URL_FOR_SEO}/team-members`} />
       </Helmet>
       <PageContentContainer>
-        Team Members (
-        {teamMemberCount}
-        )
+        <div>
+          Team Members (
+          {teamMemberCount}
+          )
+        </div>
+        <Button
+          classes={{ root: classes.addTeamMemberButtonRoot }}
+          color="primary"
+          variant="outlined"
+          onClick={addTeamMemberClick}
+        >
+          Add
+        </Button>
+        {teamMemberList.map((teamMember) => (
+          <div key={teamMember.id}>
+            {teamMember.firstName}
+          </div>
+        ))}
         {pigsCanFly && (
           <SearchBarWrapper>Team Members will fly here</SearchBarWrapper>
         )}
@@ -72,13 +106,15 @@ TeamMembers.propTypes = {
   match: PropTypes.object.isRequired,
 };
 
-const styles = () => ({
-  buttonDesktop: {
-    padding: '2px 16px',
-    borderRadius: 5,
+const styles = (theme) => ({
+  ballotButtonIconRoot: {
+    marginRight: 8,
   },
-  searchButton: {
-    borderRadius: 50,
+  addTeamMemberButtonRoot: {
+    width: 100,
+    [theme.breakpoints.down('md')]: {
+      width: '100%',
+    },
   },
 });
 

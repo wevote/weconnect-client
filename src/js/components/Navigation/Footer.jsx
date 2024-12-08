@@ -3,6 +3,7 @@ import React, { Component, Suspense } from 'react';
 import styled from 'styled-components';
 import { normalizedHref } from '../../common/utils/hrefUtils';
 import { isWebApp } from '../../common/utils/isCordovaOrWebApp';
+import { renderLog } from '../../common/utils/logging';
 import { handleResize } from '../../common/utils/isMobileScreenSize';
 import AppObservableStore, { messageService } from '../../stores/AppObservableStore';
 import { getApplicationViewBooleans } from '../../utils/applicationUtils';
@@ -122,6 +123,7 @@ class Footer extends Component {
   }
 
   render () {
+    renderLog('Footer');  // Set LOG_RENDER_EVENTS to log all renders
     const { /* doShowHeader, doShowFooter, */ showFooterBar, showFooterMain } = this.state;
     // console.log('Footer render showFooterMain:', showFooterMain);
     return (

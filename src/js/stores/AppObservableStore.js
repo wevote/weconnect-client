@@ -21,7 +21,8 @@ export const messageService = {
 
 const nonFluxState = {
   activityTidbitWeVoteIdForDrawer: '',
-  blockCampaignXRedirectOnSignIn: false, // When signing in from the header, don't mark a campaign as supported
+  addPersonDrawerOpen: false,
+  addPersonDrawerTeamId: -1, // Team ID used when adding a new person
   blockChallengeRedirectOnSignIn: false, // When signing in from the header, don't mark a challenge as supported
   challengeParticipantNameWithHighestRankByChallengeWeVoteId: {}, // Key is challengeWeVoteId, value is name for voter with the highest rank for that challenge
   challengeParticipantRankOfVoterByChallengeWeVoteId: {}, // Key is challengeWeVoteId, value is rank of voter for that challenge
@@ -42,7 +43,6 @@ const nonFluxState = {
   hideWeVoteLogo: false,
   hostname: '',
   observableUpdateCounter: 0,
-  organizationModalBallotItemWeVoteId: '',
   openReplayEnabled: false,
   openReplayPending: false,
   openReplayTracker: undefined,
@@ -90,10 +90,6 @@ const nonFluxState = {
 
 
 export default {
-  blockCampaignXRedirectOnSignIn () {
-    return nonFluxState.blockCampaignXRedirectOnSignIn;
-  },
-
   blockChallengeRedirectOnSignIn () {
     return nonFluxState.blockChallengeRedirectOnSignIn;
   },
@@ -158,12 +154,8 @@ export default {
     return nonFluxState.currentPathname;
   },
 
-  getPositionDrawerBallotItemWeVoteId () {
-    return nonFluxState.positionDrawerBallotItemWeVoteId;
-  },
-
-  getPositionDrawerOrganizationWeVoteId () {
-    return nonFluxState.positionDrawerOrganizationWeVoteId;
+  getGlobalVariableState (globalVariableName) {
+    return nonFluxState[globalVariableName];
   },
 
   getGoogleAnalyticsEnabled () {
@@ -208,10 +200,6 @@ export default {
 
   getHostname () {
     return nonFluxState.hostname || '';
-  },
-
-  getOrganizationModalBallotItemWeVoteId () {
-    return nonFluxState.organizationModalBallotItemWeVoteId;
   },
 
   getPendingSnackMessage () {
@@ -373,11 +361,6 @@ export default {
     messageService.sendMessage('state updated activityTidbitWeVoteIdForDrawerAndOpen');
   },
 
-  setBlockCampaignXRedirectOnSignIn (value) {
-    nonFluxState.blockCampaignXRedirectOnSignIn = value;
-    messageService.sendMessage('state updated blockCampaignXRedirectOnSignIn');
-  },
-
   setBlockChallengeRedirectOnSignIn (value) {
     nonFluxState.blockChallengeRedirectOnSignIn = value;
     messageService.sendMessage('state updated blockChallengeRedirectOnSignIn');
@@ -409,6 +392,11 @@ export default {
   setGetStartedMode (getStartedMode) {
     nonFluxState.getStartedMode = getStartedMode;
     messageService.sendMessage('state updated getStartedMode');
+  },
+
+  setGlobalVariableState (globalVariableName, newState) {
+    nonFluxState[globalVariableName] = newState;
+    messageService.sendMessage(`state updated ${globalVariableName}`);
   },
 
   setHideOrganizationModalBallotItemInfo (hide) {
@@ -466,24 +454,9 @@ export default {
     messageService.sendMessage('state updated openReplayVoterWeVoteId');
   },
 
-  setOrganizationModalBallotItemWeVoteId (ballotItemWeVoteId) {
-    nonFluxState.organizationModalBallotItemWeVoteId = ballotItemWeVoteId;
-    messageService.sendMessage('state updated organizationModalBallotItemWeVoteId');
-  },
-
   setPendingSnackMessage (message, severity) {
     nonFluxState.pendingSnackMessage = message;
     nonFluxState.pendingSnackSeverity = severity;
-  },
-
-  setPositionDrawerBallotItemWeVoteId (ballotItemWeVoteId) {
-    nonFluxState.positionDrawerBallotItemWeVoteId = ballotItemWeVoteId;
-    messageService.sendMessage('state updated positionDrawerBallotItemWeVoteId');
-  },
-
-  setPositionDrawerOrganizationWeVoteId (organizationWeVoteId) {
-    nonFluxState.positionDrawerOrganizationWeVoteId = organizationWeVoteId;
-    messageService.sendMessage('state updated positionDrawerOrganizationWeVoteId');
   },
 
   setRecommendedCampaignListFirstRetrieveInitiated (value) {

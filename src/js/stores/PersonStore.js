@@ -1,6 +1,7 @@
 import { ReduceStore } from 'flux/utils';
 import Dispatcher from '../common/dispatcher/Dispatcher';
 import Cookies from '../common/utils/js-cookie/Cookies';
+import arrayContains from '../common/utils/arrayContains';
 
 class PersonStore extends ReduceStore {
   getInitialState () {
@@ -44,6 +45,7 @@ class PersonStore extends ReduceStore {
 
   getPersonById (personId) {
     const { allCachedPeopleDict } = this.getState();
+    // console.log('PersonStore getPersonById:', personId, ', allCachedPeopleDict:', allCachedPeopleDict);
     return allCachedPeopleDict[personId] || {};
   }
 
@@ -57,10 +59,39 @@ class PersonStore extends ReduceStore {
   }
 
   reduce (state, action) {
+    let { allCachedPeopleDict } = state;
+    let revisedState = state;
+    let teamId = -1;
+    let teamMemberList = [];
+
     switch (action.type) {
-      case 'clearEmailAddressStatus':
-        // console.log('VoterStore clearEmailAddressStatus');
-        return { ...state, emailAddressStatus: {} };
+      case 'team-retrieve':
+        if (!action.res.success) {
+          console.log('PersonStore ', action.type, ' FAILED action.res:', action.res);
+          return state;
+        }
+        teamId = action.res.teamId || -1;
+        teamMemberList = action.res.teamMemberList || [];
+        revisedState = state;
+
+        // console.log('PersonStore team-retrieve start allCachedPeopleDict:', allCachedPeopleDict);
+        if (!allCachedPeopleDict) {
+          allCachedPeopleDict = {};
+        }
+        if (teamId > 0) {
+          teamMemberList.forEach((person) => {
+            // console.log('PersonStore team-retrieve adding person:', person);
+            if (person && (person.id >= 0) && !arrayContains(person.id, allCachedPeopleDict)) {
+              allCachedPeopleDict[person.id] = person;
+            }
+          });
+          // console.log('allCachedPeopleDict:', allCachedPeopleDict);
+          revisedState = {
+            ...revisedState,
+            allCachedPeopleDict,
+          };
+        }
+        return revisedState;
 
       default:
         return state;

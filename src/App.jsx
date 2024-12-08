@@ -17,7 +17,6 @@ import { normalizedHref } from './js/common/utils/hrefUtils';
 import initializejQuery from './js/common/utils/initializejQuery';
 import { isAndroid, isCordova, isWebApp } from './js/common/utils/isCordovaOrWebApp';
 import { renderLog } from './js/common/utils/logging';
-import Header from './js/components/Navigation/Header';
 import HeaderBarSuspense from './js/components/Navigation/HeaderBarSuspense';
 import webAppConfig from './js/config';
 import VoterStore from './js/stores/VoterStore';
@@ -25,8 +24,10 @@ import VoterStore from './js/stores/VoterStore';
 
 // Root URL pages
 
+const Drawers = React.lazy(() => import(/* webpackChunkName: 'Drawers' */ './js/components/Drawers/Drawers'));
 const FAQ = React.lazy(() => import(/* webpackChunkName: 'FAQ' */ './js/pages/FAQ'));
 const Footer = React.lazy(() => import(/* webpackChunkName: 'Footer' */ './js/components/Navigation/Footer'));
+const Header = React.lazy(() => import(/* webpackChunkName: 'Header' */ './js/components/Navigation/Header'));
 const PageNotFound = React.lazy(() => import(/* webpackChunkName: 'PageNotFound' */ './js/pages/PageNotFound'));
 const TeamMembers = React.lazy(() => import(/* webpackChunkName: 'FAQ' */ './js/pages/TeamMembers'));
 
@@ -266,6 +267,9 @@ class App extends Component {
               {/* DO NOT put SnackNotifier or anything else that is non-essential here (to keep it out of the main chunk). */}
               <Suspense fallback={<HeaderBarSuspense />}>
                 <Header hideHeader={hideHeader} params={{ }} pathname={normalizedHref()} />
+              </Suspense>
+              <Suspense fallback={<></>}>
+                <Drawers />
               </Suspense>
               <Suspense fallback={<LoadingWheelComp />}>
                 <Switch>

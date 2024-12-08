@@ -33,6 +33,7 @@ class TeamStore extends ReduceStore {
     const teamMemberList = [];
     for (let i = 0; i < personIdList.length; i++) {
       const person = PersonStore.getPersonById(personIdList[i]);
+      // console.log('TeamStore getTeamMemberList person:', person);
       if (person) {
         teamMemberList.push(person);
       }
@@ -70,7 +71,7 @@ class TeamStore extends ReduceStore {
             }
           });
           allCachedTeamMembersDict[teamId] = teamMemberIdList;
-          console.log('allCachedTeamMembersDict:', allCachedTeamMembersDict);
+          // console.log('allCachedTeamMembersDict:', allCachedTeamMembersDict);
           // console.log('allCachedOrganizationsDict:', allCachedOrganizationsDict);
           revisedState = {
             ...revisedState,

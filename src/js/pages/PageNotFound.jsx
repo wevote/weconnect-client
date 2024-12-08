@@ -51,6 +51,18 @@ PageNotFound.propTypes = {
   classes: PropTypes.object,
 };
 
+const styles = (theme) => ({
+  ballotButtonIconRoot: {
+    marginRight: 8,
+  },
+  ballotButtonRoot: {
+    width: 250,
+    [theme.breakpoints.down('md')]: {
+      width: '100%',
+    },
+  },
+});
+
 const Wrapper = styled('div')(({ theme }) => (`
   ${theme.breakpoints.down('md')} {
     margin: 1em 0;
@@ -72,17 +84,5 @@ const EmptyBallotText = styled('p')(({ theme }) => (`
     margin: 1em;
   }
 `));
-
-const styles = (theme) => ({
-  ballotButtonIconRoot: {
-    marginRight: 8,
-  },
-  ballotButtonRoot: {
-    width: 250,
-    [theme.breakpoints.down('md')]: {
-      width: '100%',
-    },
-  },
-});
 
 export default withStyles(styles)(PageNotFound);

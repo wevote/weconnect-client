@@ -10,7 +10,7 @@ const webAppConfig = require("./src/js/config");
 module.exports = function (PROD) {
   const port = 4000; // PROD ? 3000 : 3003;
   const opts = { redirect: true };
-  const hostname = PROD ? webAppConfig.WE_VOTE_HOSTNAME : "localhost";
+  const hostname = PROD ? webAppConfig.HOSTNAME : "localhost";
   const secureCertificateInstalled = webAppConfig.SECURE_CERTIFICATE_INSTALLED || false;
 
   app.use("/", express.static("build", opts));

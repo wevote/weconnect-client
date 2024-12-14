@@ -1,28 +1,30 @@
 /* eslint-disable */
 // Note that we import these values where needed as "webAppConfig"
 module.exports = {
-  WECONNECT_NAME_FOR_BROWSER_TAB_TITLE: 'WeConnect',
-  WECONNECT_URL_PROTOCOL: 'http://', // 'http://' for local dev (if not using SSL), or 'https://' for live server
-  WECONNECT_HOSTNAME: 'localhost:4000', // Don't add 'http...' here.  Live server: 'WeVote.US', Quality: 'quality.WeVote.US', developers: 'localhost:4000'
-  WECONNECT_IMAGE_PATH_FOR_CORDOVA: 'https://wevote.us',   // If you are not working with Cordova, you don't need to change this
+  // weconnect React server for the "weconnect" web app
+  NAME_FOR_BROWSER_TAB_TITLE: 'WeConnect',
+  PROTOCOL: 'http://', // 'http://' for local dev (if not using SSL), or 'https://' for live server
+  HOSTNAME: 'localhost:4000', // Don't add 'http...' here.  Live server: 'WeVote.US', Quality: 'quality.WeVote.US', developers: 'localhost:4000'
+  PORT: 'localhost:4000', // Don't add 'http...' here.  Live server: 'WeVote.US', Quality: 'quality.WeVote.US', developers: 'localhost:4000'
+  IMAGE_PATH_FOR_CORDOVA: 'https://wevote.us',   // If you are not working with Cordova, you don't need to change this
   SECURE_CERTIFICATE_INSTALLED: false,
 
   ///////////////////////////////////////////////
   // Keep both configuration blocks below, but only uncomment one of them at a time.
-  //// Connecting to local WeConnect APIs ////
-  WECONNECT_SERVER_ROOT_URL: 'http://localhost:8080/',
-  WECONNECT_SERVER_ADMIN_ROOT_URL: 'http://localhost:8080/admin/',
-  WECONNECT_SERVER_API_ROOT_URL: 'http://localhost:8080/apis/v1/',
-  WECONNECT_SERVER_API_CDN_ROOT_URL: 'http://localhost:8080/apis/v1/',
+  //// Connecting to local WeConnect "weconnect-server" APIs ////
+  WECONNECT_SERVER_ROOT_URL: 'http://localhost:4500/',
+  WECONNECT_SERVER_ADMIN_ROOT_URL: 'http://localhost:4500/admin/',
+  WECONNECT_SERVER_API_ROOT_URL: 'http://localhost:4500/apis/v1/',
+  WECONNECT_SERVER_API_CDN_ROOT_URL: 'http://localhost:4500/apis/v1/',
   //// Connecting to live WeConnect APIs ////
   // WECONNECT_SERVER_ROOT_URL: 'https://weconnectserver.org/',
   // WECONNECT_SERVER_ADMIN_ROOT_URL: 'https://weconnectserver.org/admin/',
   // WECONNECT_SERVER_API_ROOT_URL: 'https://weconnectserver.org/apis/v1/',
   // WECONNECT_SERVER_API_CDN_ROOT_URL: 'https://cdn.weconnectserver.org/apis/v1/',
 
-  // For when we need to connect to the WeVoteServer APIs
+  // For when we need to connect to the WeVoteServer (Python) APIs
   WE_VOTE_URL_PROTOCOL: 'http://', // 'http://' for local dev (if not using SSL), or 'https://' for live server
-  WE_VOTE_HOSTNAME: 'localhost:3000', // Don't add 'http...' here.  Live server: 'WeVote.US', Quality: 'quality.WeVote.US', developers: 'localhost:3000'
+  WE_VOTE_HOSTNAME: 'localhost:8000', // Don't add 'http...' here.  Live server: 'WeVote.US', Quality: 'quality.WeVote.US', developers: 'localhost:3000'
 
   ///////////////////////////////////////////////
   // Keep both configuration blocks below, but only uncomment one of them at a time.

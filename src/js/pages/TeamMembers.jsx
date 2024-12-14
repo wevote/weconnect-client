@@ -70,7 +70,7 @@ const TeamMembers = ({ classes, match }) => {  //  classes, teamId
         <title>
           Team Members -
           {' '}
-          {webAppConfig.WECONNECT_NAME_FOR_BROWSER_TAB_TITLE}
+          {webAppConfig.NAME_FOR_BROWSER_TAB_TITLE}
         </title>
         <link rel="canonical" href={`${webAppConfig.WECONNECT_URL_FOR_SEO}/team-members`} />
       </Helmet>

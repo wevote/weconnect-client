@@ -162,7 +162,8 @@
     "react-truncate-markup": "~5.1.0",
     "rxjs": "^6.6.7",
     "styled-components": "~5.3.11",
-    "topojson-client": "^3.1.0"
+    "topojson-client": "^3.1.0",
+    "validator": "^13.12.0"
   },
   "eslintConfig": {
     "extends": [

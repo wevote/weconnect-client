@@ -8,7 +8,7 @@ module.exports = {
   PORT: 'localhost:4000', // Don't add 'http...' here.  Live server: 'WeVote.US', Quality: 'quality.WeVote.US', developers: 'localhost:4000'
   IMAGE_PATH_FOR_CORDOVA: 'https://wevote.us',   // If you are not working with Cordova, you don't need to change this
   SECURE_CERTIFICATE_INSTALLED: false,
-  URL_FOR_SEO: 'https://wevoteconnect.org',
+  WECONNECT_URL_FOR_SEO: 'https://wevoteconnect.org',
 
   ///////////////////////////////////////////////
   // Keep both configuration blocks below, but only uncomment one of them at a time.

@@ -6,7 +6,6 @@ import ReactGA from 'react-ga4';
 import TagManager from 'react-gtm-module';
 import { Route, Switch, withRouter } from 'react-router-dom';
 import styled from 'styled-components';
-import VoterActions from './js/actions/VoterActions';
 import VoterSessionActions from './js/actions/VoterSessionActions';
 import muiTheme from './js/common/components/Style/muiTheme';
 import LoadingWheelComp from './js/common/components/Widgets/LoadingWheelComp';
@@ -15,11 +14,12 @@ import { getAndroidSize, getIOSSizeString, hasDynamicIsland, isIOS } from './js/
 import historyPush from './js/common/utils/historyPush';
 import { normalizedHref } from './js/common/utils/hrefUtils';
 import initializejQuery from './js/common/utils/initializejQuery';
-import { isAndroid, isCordova, isWebApp } from './js/common/utils/isCordovaOrWebApp';
+import { isCordova, isWebApp } from './js/common/utils/isCordovaOrWebApp';
 import { renderLog } from './js/common/utils/logging';
 import HeaderBarSuspense from './js/components/Navigation/HeaderBarSuspense';
 import webAppConfig from './js/config';
 import VoterStore from './js/stores/VoterStore';
+import Login from './js/pages/Login';
 // importRemoveCordovaListenersToken1  -- Do not remove this line!
 
 // Root URL pages
@@ -274,6 +274,7 @@ class App extends Component {
               <Suspense fallback={<LoadingWheelComp />}>
                 <Switch>
                   <Route path="/faq" exact><FAQ /></Route>
+                  <Route path="/login" exact><Login /></Route>
                   <Route path="/team-members/:teamId" exact component={TeamMembers} />
 
                   <Route path="*" component={PageNotFound} />

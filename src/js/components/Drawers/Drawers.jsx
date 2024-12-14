@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { withStyles } from '@mui/styles';
 import AddPersonDrawer from './AddPersonDrawer';
+import AddTeamDrawer from './AddTeamDrawer';
 import { messageService } from '../../stores/AppObservableStore';
 import { renderLog } from '../../common/utils/logging';
 
@@ -25,6 +26,7 @@ const Drawers = () => {  //  classes, teamId
   return (
     <Suspense fallback={<></>}>
       <AddPersonDrawer />
+      <AddTeamDrawer />
     </Suspense>
   );
 };

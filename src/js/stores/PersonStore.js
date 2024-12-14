@@ -7,21 +7,43 @@ class PersonStore extends ReduceStore {
   getInitialState () {
     return {
       allCachedPeopleDict: {}, // This is a dictionary key: personId, value: person dict
-      person: {  // The person who is signed in
+      mostRecentPersonIdSaved: -1,
+      mostRecentPersonSaved: {
         firstName: '',
         lastName: '',
-        personDeviceId: '',
+        personId: '',
       },
+      searchResults: [],
     };
   }
 
-  getFirstName () {
-    return this.getState().person.firstName || '';
+  getFirstName (personId) {
+    const person = this.getPersonById(personId);
+    return person.firstName || '';
   }
 
-  getFirstPlusLastName () {
-    const storedFirstName = this.getFirstName();
-    const storedLastName = this.getLastName();
+  getFullNamePreferred (personId) {
+    const person = this.getPersonById(personId);
+    let fullName = '';
+    if (person.id >= 0) {
+      if (person.firstNamePreferred) {
+        fullName += person.firstNamePreferred;
+      } else if (person.firstName) {
+        fullName += person.firstName;
+      }
+      if (fullName.length > 0 && person.lastName) {
+        fullName += ' ';
+      }
+      if (person.lastName) {
+        fullName += person.lastName;
+      }
+    }
+    return fullName;
+  }
+
+  getFirstPlusLastName (personId) {
+    const storedFirstName = this.getFirstName(personId);
+    const storedLastName = this.getLastName(personId);
     let displayName = '';
     if (storedFirstName && String(storedFirstName) !== '') {
       displayName = storedFirstName;
@@ -35,12 +57,17 @@ class PersonStore extends ReduceStore {
     return displayName;
   }
 
-  getLastName () {
-    return this.getState().person.lastName || '';
+  getLastName (personId) {
+    const person = this.getPersonById(personId);
+    return person.lastName || '';
   }
 
-  getPerson () {
-    return this.getState().person;
+  getMostRecentPersonChanged () {
+    // console.log('PersonStore getMostRecentPersonChanged Id:', this.getState().mostRecentPersonIdSaved);
+    if (this.getState().mostRecentPersonIdSaved !== -1) {
+      return this.getPersonById(this.getState().mostRecentPersonIdSaved);
+    }
+    return {};
   }
 
   getPersonById (personId) {
@@ -53,32 +80,77 @@ class PersonStore extends ReduceStore {
     return this.getState().person.personDeviceId || Cookies.get('personDeviceId');
   }
 
-  getStateCode () {
-    // This defaults to state_code_from_ip_address but is overridden by the address the voter defaults to, or enters in text_for_map_search
-    return this.getState().person.stateCode || '';
+  getStateCode (personId) {
+    const person = this.getPersonById(personId);
+    return person.stateCode || '';
+  }
+
+  getSearchResults () {
+    // console.log('PersonStore getSearchResults:', this.getState().searchResults);
+    return this.getState().searchResults || [];
   }
 
   reduce (state, action) {
-    let { allCachedPeopleDict } = state;
+    const { allCachedPeopleDict } = state;
+    let personId = -1;
     let revisedState = state;
+    let searchResults = [];
     let teamId = -1;
     let teamMemberList = [];
 
     switch (action.type) {
-      case 'team-retrieve':
+      case 'person-list-retrieve':
         if (!action.res.success) {
           console.log('PersonStore ', action.type, ' FAILED action.res:', action.res);
           return state;
         }
-        teamId = action.res.teamId || -1;
-        teamMemberList = action.res.teamMemberList || [];
         revisedState = state;
-
-        // console.log('PersonStore team-retrieve start allCachedPeopleDict:', allCachedPeopleDict);
-        if (!allCachedPeopleDict) {
-          allCachedPeopleDict = {};
+        // console.log('PersonStore person-list-retrieve personList:', action.res.personList);
+        if (action.res.isSearching && action.res.isSearching === true) {
+          // console.log('PersonStore isSearching:', action.res.isSearching);
+          searchResults = action.res.personList;
+          // console.log('PersonStore searchResults:', searchResults);
+          revisedState = {
+            ...revisedState,
+            searchResults,
+          };
         }
-        if (teamId > 0) {
+        // console.log('PersonStore revisedState:', revisedState);
+        return revisedState;
+
+      case 'person-save':
+        if (!action.res.success) {
+          console.log('PersonStore ', action.type, ' FAILED action.res:', action.res);
+          return state;
+        }
+        revisedState = state;
+        personId = action.res.personId || -1;
+
+        if (personId >= 0) {
+          // console.log('PersonStore person-save personId:', personId);
+          allCachedPeopleDict[personId] = action.res;
+          revisedState = {
+            ...revisedState,
+            allCachedPeopleDict,
+            mostRecentPersonIdSaved: personId,
+          };
+        } else {
+          console.log('PersonStore person-save MISSING personId:', personId);
+        }
+        return revisedState;
+
+      case 'team-retrieve':
+      case 'team-save':
+        if (!action.res.success) {
+          console.log('PersonStore ', action.type, ' FAILED action.res:', action.res);
+          return state;
+        }
+        revisedState = state;
+        teamId = action.res.teamId || -1;
+
+        // console.log('PersonStore ', action.type, ' start allCachedPeopleDict:', allCachedPeopleDict);
+        if (teamId >= 0 && action.res.teamMemberList) {
+          teamMemberList = action.res.teamMemberList || [];
           teamMemberList.forEach((person) => {
             // console.log('PersonStore team-retrieve adding person:', person);
             if (person && (person.id >= 0) && !arrayContains(person.id, allCachedPeopleDict)) {

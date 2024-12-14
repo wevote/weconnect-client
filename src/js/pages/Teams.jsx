@@ -15,45 +15,38 @@ import apiCalming from '../common/utils/apiCalming';
 import { renderLog } from '../common/utils/logging';
 
 
-const TeamMembers = ({ classes, match }) => {  //  classes, teamId
-  renderLog('TeamMembers');  // Set LOG_RENDER_EVENTS to log all renders
-  const [teamId, setTeamId] = React.useState(-1);
-  const [teamMemberList, setTeamMemberList] = React.useState([]);
-  const [teamMemberCount, setTeamMemberCount] = React.useState(0);
+const Teams = ({ classes, match }) => {  //  classes, teamId
+  renderLog('Teams');  // Set LOG_RENDER_EVENTS to log all renders
+  const [teamList, setTeamList] = React.useState([]);
+  const [teamCount, setTeamCount] = React.useState(0);
 
   const onAppObservableStoreChange = () => {
   };
 
-  const onRetrieveTeamChange = () => {
+  const onRetrieveTeamListChange = () => {
     const { params } = match;
-    setTeamId(params.teamId);
-    const teamMemberListTemp = TeamStore.getTeamMemberList(params.teamId);
-    // console.log('TeamMembers onRetrieveTeamChange, params.teamId:', params.teamId, ', TeamStore.getTeamMemberList:', teamMemberListTemp);
-    setTeamMemberList(teamMemberListTemp);
-    setTeamMemberCount(teamMemberListTemp.length);
+    const teamListTemp = TeamStore.getTeamList(params.teamId);
+    // console.log('Teams onRetrieveTeamListChange, params.teamId:', params.teamId, ', TeamStore.getTeamList:', teamListTemp);
+    setTeamList(teamListTemp);
+    setTeamCount(teamListTemp.length);
   };
 
   const onPersonStoreChange = () => {
-    const { params } = match;
-    onRetrieveTeamChange();
-    if (apiCalming(`teamRetrieve-${params.teamId}`, 1000)) {
-      TeamActions.teamRetrieve(params.teamId);
-    }
+    onRetrieveTeamListChange();
   };
 
   const onTeamStoreChange = () => {
-    onRetrieveTeamChange();
+    onRetrieveTeamListChange();
+    if (apiCalming('teamListRetrieve', 1000)) {
+      TeamActions.teamListRetrieve();
+    }
   };
 
-  const addTeamMemberClick = () => {
-    const { params } = match;
-    AppObservableStore.setGlobalVariableState('addPersonDrawerOpen', true);
-    AppObservableStore.setGlobalVariableState('addPersonDrawerTeamId', params.teamId);
+  const addTeamClick = () => {
+    AppObservableStore.setGlobalVariableState('addTeamDrawerOpen', true);
   };
 
   React.useEffect(() => {
-    const { params } = match;
-
     const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
     onAppObservableStoreChange();
     const personStoreListener = PersonStore.addListener(onPersonStoreChange);
@@ -61,8 +54,8 @@ const TeamMembers = ({ classes, match }) => {  //  classes, teamId
     const teamStoreListener = TeamStore.addListener(onTeamStoreChange);
     onTeamStoreChange();
 
-    if (apiCalming(`teamRetrieve-${params.teamId}`, 1000)) {
-      TeamActions.teamRetrieve(params.teamId);
+    if (apiCalming('teamListRetrieve', 1000)) {
+      TeamActions.teamListRetrieve();
     }
 
     return () => {
@@ -77,45 +70,42 @@ const TeamMembers = ({ classes, match }) => {  //  classes, teamId
     <div>
       <Helmet>
         <title>
-          Team Members -
+          Teams -
           {' '}
-          {webAppConfig.NAME_FOR_BROWSER_TAB_TITLE}
+          {webAppConfig.WECONNECT_NAME_FOR_BROWSER_TAB_TITLE}
         </title>
         <link rel="canonical" href={`${webAppConfig.WECONNECT_URL_FOR_SEO}/team-members`} />
       </Helmet>
       <PageContentContainer>
         <div>
-          Team Members (
-          {teamMemberCount}
-          ) -
-          {' '}
-          <Link to="/teams">home</Link>
+          Teams (
+          {teamCount}
+          )
         </div>
         <Button
-          classes={{ root: classes.addTeamMemberButtonRoot }}
+          classes={{ root: classes.addTeamButtonRoot }}
           color="primary"
           variant="outlined"
-          onClick={addTeamMemberClick}
+          onClick={addTeamClick}
         >
           Add
         </Button>
-        {teamMemberList.map((teamMember) => (
-          <div key={teamMember.id}>
-            {teamMember.firstName}
-            {' '}
-            {teamMember.lastName}
+        {teamList.map((team) => (
+          <div key={`team-${team.id}`}>
+            <Link to={`/team-members/${team.id}`}>
+              {team.teamName}
+            </Link>
           </div>
         ))}
         {pigsCanFly && (
-          <SearchBarWrapper>Team Members will fly here</SearchBarWrapper>
+          <SearchBarWrapper>Teams will fly here</SearchBarWrapper>
         )}
       </PageContentContainer>
     </div>
   );
 };
-TeamMembers.propTypes = {
+Teams.propTypes = {
   classes: PropTypes.object.isRequired,
-  // teamId: PropTypes.number.isRequired,
   match: PropTypes.object.isRequired,
 };
 
@@ -123,7 +113,7 @@ const styles = (theme) => ({
   ballotButtonIconRoot: {
     marginRight: 8,
   },
-  addTeamMemberButtonRoot: {
+  addTeamButtonRoot: {
     width: 100,
     [theme.breakpoints.down('md')]: {
       width: '100%',
@@ -137,4 +127,4 @@ const SearchBarWrapper = styled('div')`
   width: 100%;
 `;
 
-export default withStyles(styles)(TeamMembers);
+export default withStyles(styles)(Teams);

@@ -11,7 +11,7 @@ import { hasIPhoneNotch } from '../../common/utils/cordovaUtils';
 import { renderLog } from '../../common/utils/logging';
 
 
-const DrawerTemplateA = ({ classes, drawerOpenGlobalVariableName, headerFixedJsx, headerTitleJsx, mainContentJsx }) => {  //  classes, teamId
+const DrawerTemplateA = ({ classes, drawerId, drawerOpenGlobalVariableName, headerFixedJsx, headerTitleJsx, mainContentJsx }) => {  //  classes, teamId
   renderLog('DrawerTemplateA');  // Set LOG_RENDER_EVENTS to log all renders
   const [drawerOpen, setDrawerOpen] = React.useState(false);
   const [scrolledDown, setScrolledDown] = React.useState(false);
@@ -54,7 +54,7 @@ const DrawerTemplateA = ({ classes, drawerOpenGlobalVariableName, headerFixedJsx
       anchor="right"
       classes={{ paper: classes.drawer }}
       direction="left"
-      id="addPersonDrawer"
+      id={drawerId}
       onClose={() => AppObservableStore.setGlobalVariableState(drawerOpenGlobalVariableName, false)}
       open={drawerOpen}
     >
@@ -66,7 +66,7 @@ const DrawerTemplateA = ({ classes, drawerOpenGlobalVariableName, headerFixedJsx
           <IconButton
             aria-label="Close"
             className={classes.closeButton}
-            id="closeOrganizationModal"
+            id={`${drawerId}Close`}
             onClick={() => AppObservableStore.setGlobalVariableState(drawerOpenGlobalVariableName, false)}
             size="large"
           >
@@ -76,7 +76,7 @@ const DrawerTemplateA = ({ classes, drawerOpenGlobalVariableName, headerFixedJsx
           </IconButton>
         </CloseDrawerIconWrapper>
       </DrawerHeaderWrapper>
-      <DrawerHeaderAnimateDownOuterContainer id="politicianHeaderContainer" scrolledDown={scrolledDown}>
+      <DrawerHeaderAnimateDownOuterContainer id={`${drawerId}AnimateDownId`} scrolledDown={scrolledDown}>
         <DrawerHeaderAnimateDownInnerContainer>
           {headerFixedJsx}
         </DrawerHeaderAnimateDownInnerContainer>
@@ -89,6 +89,7 @@ const DrawerTemplateA = ({ classes, drawerOpenGlobalVariableName, headerFixedJsx
 };
 DrawerTemplateA.propTypes = {
   classes: PropTypes.object.isRequired,
+  drawerId: PropTypes.string,
   drawerOpenGlobalVariableName: PropTypes.string,
   mainContentJsx: PropTypes.object,
   headerTitleJsx: PropTypes.object,

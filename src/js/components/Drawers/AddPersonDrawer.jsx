@@ -5,18 +5,15 @@ import { withStyles } from '@mui/styles';
 import DrawerTemplateA from './DrawerTemplateA';
 import AppObservableStore, { messageService } from '../../stores/AppObservableStore';
 import PersonStore from '../../stores/PersonStore';
-// import TeamActions from '../actions/TeamActions';
 import TeamStore from '../../stores/TeamStore';
-import SearchBar2024 from '../../common/components/Search/SearchBar2024';
 import { renderLog } from '../../common/utils/logging';
+import AddPersonDrawerMainContent from './AddPersonDrawerMainContent';
 
 
 const AddPersonDrawer = ({ classes }) => {  //  classes, teamId
   renderLog('AddPersonDrawer');  // Set LOG_RENDER_EVENTS to log all renders
-  const [mainContentJsx, setMainContentJsx] = React.useState(<></>);
   const [headerTitleJsx, setHeaderTitleJsx] = React.useState(<></>);
   const [headerFixedJsx, setHeaderFixedJsx] = React.useState(<></>);
-  const [searchText, setSearchText] = React.useState('');
   const [teamId, setTeamId] = React.useState(-1);
 
   const onAppObservableStoreChange = () => {
@@ -34,14 +31,6 @@ const AddPersonDrawer = ({ classes }) => {  //  classes, teamId
     onRetrieveTeamChange();
   };
 
-  const searchFunction = (incomingSearchText) => {
-    setSearchText(incomingSearchText);
-  };
-
-  const clearFunction = () => {
-    setSearchText('');
-  }
-
   React.useEffect(() => {
     const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
     onAppObservableStoreChange();
@@ -51,18 +40,6 @@ const AddPersonDrawer = ({ classes }) => {  //  classes, teamId
     onTeamStoreChange();
 
     setHeaderTitleJsx(<>Add Team Member</>);
-    setMainContentJsx(
-      <AddPersonDrawerWrapper>
-        <SearchBarWrapper>
-          <SearchBar2024
-            placeholder="Search by name"
-            searchFunction={searchFunction}
-            clearFunction={clearFunction}
-            searchUpdateDelayTime={250}
-          />
-        </SearchBarWrapper>
-      </AddPersonDrawerWrapper>
-    );
 
     return () => {
       appStateSubscription.unsubscribe();
@@ -73,8 +50,9 @@ const AddPersonDrawer = ({ classes }) => {  //  classes, teamId
 
   return (
     <DrawerTemplateA
-      drawerOpenGlobalVariableName={'addPersonDrawerOpen'}
-      mainContentJsx={mainContentJsx}
+      drawerId="addPersonDrawer"
+      drawerOpenGlobalVariableName="addPersonDrawerOpen"
+      mainContentJsx={<AddPersonDrawerMainContent />}
       headerTitleJsx={headerTitleJsx}
       headerFixedJsx={headerFixedJsx}
     />

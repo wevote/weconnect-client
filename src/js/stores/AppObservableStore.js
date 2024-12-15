@@ -23,6 +23,7 @@ const nonFluxState = {
   activityTidbitWeVoteIdForDrawer: '',
   addPersonDrawerOpen: false,
   addPersonDrawerTeamId: -1, // Team ID used when adding a new person
+  addTeamDrawerOpen: false,
   blockChallengeRedirectOnSignIn: false, // When signing in from the header, don't mark a challenge as supported
   challengeParticipantNameWithHighestRankByChallengeWeVoteId: {}, // Key is challengeWeVoteId, value is name for voter with the highest rank for that challenge
   challengeParticipantRankOfVoterByChallengeWeVoteId: {}, // Key is challengeWeVoteId, value is rank of voter for that challenge
@@ -34,6 +35,10 @@ const nonFluxState = {
   chosenSiteLogoUrl: '',
   chosenWebsiteName: '',
   currentPathname: '',
+  emailPersonalChanged: false,
+  emailPersonalToBeSaved: '',
+  firstNameChanged: false,
+  firstNameToBeSaved: '',
   getStartedMode: '',
   getVoterGuideSettingsDashboardEditMode: '',
   googleAnalyticsEnabled: false,
@@ -42,6 +47,8 @@ const nonFluxState = {
   hideOrganizationModalPositions: false,
   hideWeVoteLogo: false,
   hostname: '',
+  lastNameChanged: false,
+  lastNameToBeSaved: '',
   observableUpdateCounter: 0,
   openReplayEnabled: false,
   openReplayPending: false,
@@ -82,6 +89,8 @@ const nonFluxState = {
   siteConfigurationHasBeenRetrieved: false,
   siteOwnerOrganizationWeVoteId: '',
   storeSignInStartFullUrl: false,
+  teamNameChanged: false,
+  teamNameToBeSaved: '',
   viewingOrganizationVoterGuide: false,
   voterBallotItemsRetrieveHasBeenCalled: false,
   voterExternalIdHasBeenSavedOnce: {}, // Dict with externalVoterId and membershipOrganizationWeVoteId as keys, and true/false as value

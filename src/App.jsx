@@ -29,7 +29,8 @@ const FAQ = React.lazy(() => import(/* webpackChunkName: 'FAQ' */ './js/pages/FA
 const Footer = React.lazy(() => import(/* webpackChunkName: 'Footer' */ './js/components/Navigation/Footer'));
 const Header = React.lazy(() => import(/* webpackChunkName: 'Header' */ './js/components/Navigation/Header'));
 const PageNotFound = React.lazy(() => import(/* webpackChunkName: 'PageNotFound' */ './js/pages/PageNotFound'));
-const TeamMembers = React.lazy(() => import(/* webpackChunkName: 'FAQ' */ './js/pages/TeamMembers'));
+const TeamMembers = React.lazy(() => import(/* webpackChunkName: 'TeamMembers' */ './js/pages/TeamMembers'));
+const Teams = React.lazy(() => import(/* webpackChunkName: 'Teams' */ './js/pages/Teams'));
 
 // There are just too many "prop spreadings" in the use of Route, if someone can figure out an alternative...
 /* eslint-disable react/jsx-props-no-spreading */
@@ -275,7 +276,9 @@ class App extends Component {
                 <Switch>
                   <Route path="/faq" exact><FAQ /></Route>
                   <Route path="/login" exact><Login /></Route>
+                  <Route path="/teams" exact component={Teams} />
                   <Route path="/team-members/:teamId" exact component={TeamMembers} />
+                  <Route path="/" exact component={Teams} />
 
                   <Route path="*" component={PageNotFound} />
                 </Switch>

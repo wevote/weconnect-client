@@ -8,6 +8,7 @@ module.exports = {
   PORT: 'localhost:4000', // Don't add 'http...' here.  Live server: 'WeVote.US', Quality: 'quality.WeVote.US', developers: 'localhost:4000'
   IMAGE_PATH_FOR_CORDOVA: 'https://wevote.us',   // If you are not working with Cordova, you don't need to change this
   SECURE_CERTIFICATE_INSTALLED: false,
+  WECONNECT_URL_FOR_SEO: 'https://wevoteconnect.org',
 
   ///////////////////////////////////////////////
   // Keep both configuration blocks below, but only uncomment one of them at a time.
@@ -22,9 +23,9 @@ module.exports = {
   // WECONNECT_SERVER_API_ROOT_URL: 'https://weconnectserver.org/apis/v1/',
   // WECONNECT_SERVER_API_CDN_ROOT_URL: 'https://cdn.weconnectserver.org/apis/v1/',
 
-  // For when we need to connect to the WeVoteServer (Python) APIs
+  // For when we need to connect to the WeVote WebApp front end
   WE_VOTE_URL_PROTOCOL: 'http://', // 'http://' for local dev (if not using SSL), or 'https://' for live server
-  WE_VOTE_HOSTNAME: 'localhost:8000', // Don't add 'http...' here.  Live server: 'WeVote.US', Quality: 'quality.WeVote.US', developers: 'localhost:3000'
+  WE_VOTE_HOSTNAME: 'localhost:3000', // Don't add 'http...' here.  Live server: 'WeVote.US', Quality: 'quality.WeVote.US', developers: 'localhost:3000'
 
   ///////////////////////////////////////////////
   // Keep both configuration blocks below, but only uncomment one of them at a time.

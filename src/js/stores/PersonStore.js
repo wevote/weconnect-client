@@ -17,6 +17,22 @@ class PersonStore extends ReduceStore {
     };
   }
 
+  getAllCachedPeopleList () {
+    const { allCachedPeopleDict } = this.getState();
+    const personListRaw = Object.values(allCachedPeopleDict);
+
+    const personList = [];
+    let personFiltered;
+    let personRaw;
+    for (let i = 0; i < personListRaw.length; i++) {
+      personRaw = personListRaw[i];
+      // console.log('PersonStore getAllCachedPeopleList person:', person);
+      personFiltered = personRaw;
+      personList.push(personFiltered);
+    }
+    return personList;
+  }
+
   getFirstName (personId) {
     const person = this.getPersonById(personId);
     return person.firstName || '';
@@ -92,6 +108,7 @@ class PersonStore extends ReduceStore {
 
   reduce (state, action) {
     const { allCachedPeopleDict } = state;
+    let personTemp = {};
     let personId = -1;
     let revisedState = state;
     let searchResults = [];
@@ -99,6 +116,34 @@ class PersonStore extends ReduceStore {
     let teamMemberList = [];
 
     switch (action.type) {
+      case 'add-person-to-team':
+        if (!action.res.success) {
+          console.log('PersonStore ', action.type, ' FAILED action.res:', action.res);
+          return state;
+        }
+        revisedState = state;
+        // if (action.res.teamId >= 0) {
+        //   teamId = action.res.teamId;
+        // } else {
+        //   teamId = -1;
+        // }
+
+        // console.log('PersonStore ', action.type, ' start action.res:', action.res);
+        if (action.res) {
+          personTemp = action.res;
+          // console.log('PersonStore add-person-to-team:', personTemp);
+          // Only add to allCachedPeopleDict if they aren't already in the dictionary, since the person data that comes back with this API response is partial data
+          if (personTemp && (personTemp.personId >= 0) && !arrayContains(personTemp.personId, allCachedPeopleDict)) {
+            allCachedPeopleDict[personTemp.personId] = personTemp;
+          }
+          // console.log('allCachedPeopleDict:', allCachedPeopleDict);
+          revisedState = {
+            ...revisedState,
+            allCachedPeopleDict,
+          };
+        }
+        return revisedState;
+
       case 'person-list-retrieve':
         if (!action.res.success) {
           console.log('PersonStore ', action.type, ' FAILED action.res:', action.res);
@@ -115,6 +160,19 @@ class PersonStore extends ReduceStore {
             searchResults,
           };
         }
+        if (action.res.personList) {
+          action.res.personList.forEach((person) => {
+            // console.log('PersonStore team-retrieve adding person:', person);
+            if (person && (person.id >= 0)) {
+              allCachedPeopleDict[person.id] = person;
+            }
+          });
+          // console.log('allCachedPeopleDict:', allCachedPeopleDict);
+          revisedState = {
+            ...revisedState,
+            allCachedPeopleDict,
+          };
+        }
         // console.log('PersonStore revisedState:', revisedState);
         return revisedState;
 
@@ -124,7 +182,11 @@ class PersonStore extends ReduceStore {
           return state;
         }
         revisedState = state;
-        personId = action.res.personId || -1;
+        if (action.res.personId >= 0) {
+          personId = action.res.personId;
+        } else {
+          personId = -1;
+        }
 
         if (personId >= 0) {
           // console.log('PersonStore person-save personId:', personId);
@@ -146,7 +208,11 @@ class PersonStore extends ReduceStore {
           return state;
         }
         revisedState = state;
-        teamId = action.res.teamId || -1;
+        if (action.res.teamId >= 0) {
+          teamId = action.res.teamId;
+        } else {
+          teamId = -1;
+        }
 
         // console.log('PersonStore ', action.type, ' start allCachedPeopleDict:', allCachedPeopleDict);
         if (teamId >= 0 && action.res.teamMemberList) {

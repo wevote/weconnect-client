@@ -6,6 +6,7 @@ import PropTypes from 'prop-types';
 import AppObservableStore, { messageService } from '../../stores/AppObservableStore';
 import PersonActions from '../../actions/PersonActions';
 import PersonStore from '../../stores/PersonStore';
+import TeamStore from '../../stores/TeamStore';
 import { renderLog } from '../../common/utils/logging';
 import prepareDataPackageFromAppObservableStore from '../../common/utils/prepareDataPackageFromAppObservableStore';
 
@@ -46,6 +47,10 @@ const AddPersonForm = ({ classes }) => {  //  classes, teamId
   const saveNewPerson = () => {
     const acceptedVariables = ['emailPersonal', 'firstName', 'lastName'];
     const data = prepareDataPackageFromAppObservableStore(acceptedVariables);
+    if (teamId >= 0) {
+      data.teamId = teamId;
+      data.teamName = TeamStore.getTeamById(teamId).teamName;
+    }
     // console.log('saveNewPerson data:', data);
     PersonActions.personSave('-1', data);
   };
@@ -55,7 +60,7 @@ const AddPersonForm = ({ classes }) => {  //  classes, teamId
       const newEmailPersonal = event.target.value;
       AppObservableStore.setGlobalVariableState('emailPersonalChanged', true);
       AppObservableStore.setGlobalVariableState('emailPersonalToBeSaved', newEmailPersonal);
-      console.log('updateEmailPersonal:', newEmailPersonal);
+      // console.log('updateEmailPersonal:', newEmailPersonal);
       setEmailPersonal(newEmailPersonal);
     }
   };
@@ -65,7 +70,7 @@ const AddPersonForm = ({ classes }) => {  //  classes, teamId
       const newFirstName = event.target.value;
       AppObservableStore.setGlobalVariableState('firstNameChanged', true);
       AppObservableStore.setGlobalVariableState('firstNameToBeSaved', newFirstName);
-      console.log('updateFirstName:', newFirstName);
+      // console.log('updateFirstName:', newFirstName);
       setFirstName(newFirstName);
     }
   };
@@ -75,7 +80,7 @@ const AddPersonForm = ({ classes }) => {  //  classes, teamId
       const newLastName = event.target.value;
       AppObservableStore.setGlobalVariableState('lastNameChanged', true);
       AppObservableStore.setGlobalVariableState('lastNameToBeSaved', newLastName);
-      console.log('updateLastName:', newLastName);
+      // console.log('updateLastName:', newLastName);
       setLastName(newLastName);
     }
   };

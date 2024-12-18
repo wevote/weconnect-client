@@ -27,19 +27,19 @@ class TeamStore extends ReduceStore {
 
   getTeamById (teamId) {
     const { allCachedTeamsDict } = this.getState();
-    console.log('TeamStore getTeamById:', teamId, ', allCachedTeamsDict:', allCachedTeamsDict);
+    // console.log('TeamStore getTeamById:', teamId, ', allCachedTeamsDict:', allCachedTeamsDict);
     return allCachedTeamsDict[teamId] || {};
   }
 
   getTeamList () {
     const { allCachedTeamsDict } = this.getState();
-    const teamMemberListRaw = Object.values(allCachedTeamsDict);
+    const teamListRaw = Object.values(allCachedTeamsDict);
 
     const teamList = [];
     let teamFiltered;
     let teamRaw;
-    for (let i = 0; i < teamMemberListRaw.length; i++) {
-      teamRaw = teamMemberListRaw[i];
+    for (let i = 0; i < teamListRaw.length; i++) {
+      teamRaw = teamListRaw[i];
       // console.log('TeamStore getTeamMemberList person:', person);
       teamFiltered = teamRaw;
       teamList.push(teamFiltered);
@@ -61,6 +61,16 @@ class TeamStore extends ReduceStore {
     return teamMemberList;
   }
 
+  getTeamMemberPersonIdList (teamId) {
+    const { allCachedTeamMembersDict } = this.getState();
+    return allCachedTeamMembersDict[teamId] || [];
+  }
+
+  getTeamName (teamId) {
+    const team = this.getTeamById(teamId);
+    return team.teamName || '';
+  }
+
   reduce (state, action) {
     const { allCachedTeamMembersDict, allCachedTeamsDict } = state;
     let personId = -1;
@@ -77,10 +87,19 @@ class TeamStore extends ReduceStore {
           return state;
         }
         revisedState = state;
-        personId = action.res.personId || -1;
-        teamId = action.res.teamId || -1;
+        // console.log('TeamStore add-person-to-team action.res: ', action.res);
+        if (action.res.personId >= 0) {
+          personId = action.res.personId;
+        } else {
+          personId = -1;
+        }
+        if (action.res.teamId >= 0) {
+          teamId = action.res.teamId;
+        } else {
+          teamId = -1;
+        }
         if (personId >= 0 && teamId >= 0) {
-          console.log('TeamStore add-person-to-team personId: ', personId, ', teamId:', teamId);
+          // console.log('TeamStore add-person-to-team personId: ', personId, ', teamId:', teamId);
           // Start with existing teamMemberList
           teamMemberIdList = allCachedTeamMembersDict[teamId] || [];
           // Check if personId is already in teamMemberListAdd personId to teamMemberList
@@ -97,6 +116,42 @@ class TeamStore extends ReduceStore {
           console.log('TeamStore add-person-to-team MISSING personId: ', personId, ' OR teamId:', teamId);
         }
 
+        return revisedState;
+
+      case 'remove-person-from-team':
+        if (!action.res.success) {
+          console.log('TeamStore ', action.type, ' FAILED action.res:', action.res);
+          return state;
+        }
+        revisedState = state;
+        // console.log('TeamStore add-person-to-team action.res: ', action.res);
+        if (action.res.personId >= 0) {
+          personId = action.res.personId;
+        } else {
+          personId = -1;
+        }
+        if (action.res.teamId >= 0) {
+          teamId = action.res.teamId;
+        } else {
+          teamId = -1;
+        }
+        if (personId >= 0 && teamId >= 0) {
+          // console.log('TeamStore remove-person-from-team personId: ', personId, ', teamId:', teamId);
+          // Start with existing teamMemberList
+          teamMemberIdList = allCachedTeamMembersDict[teamId] || [];
+          // If personId is in teamMemberListAdd, remove it
+          if (arrayContains(personId, teamMemberIdList)) {
+            teamMemberIdList = teamMemberIdList.filter((item) => item !== personId);
+            allCachedTeamMembersDict[teamId] = teamMemberIdList;
+            revisedState = {
+              ...revisedState,
+              allCachedTeamMembersDict,
+              mostRecentTeamMemberIdSaved: personId,
+            };
+          }
+        } else {
+          console.log('TeamStore remove-person-from-team MISSING personId: ', personId, ' OR teamId:', teamId);
+        }
         return revisedState;
 
       case 'team-list-retrieve':
@@ -133,7 +188,11 @@ class TeamStore extends ReduceStore {
           console.log('TeamStore ', action.type, ' FAILED action.res:', action.res);
           return state;
         }
-        teamId = action.res.teamId || -1;
+        if (action.res.teamId >= 0) {
+          teamId = action.res.teamId;
+        } else {
+          teamId = -1;
+        }
         teamMemberIdList = [];
         revisedState = state;
 
@@ -169,7 +228,11 @@ class TeamStore extends ReduceStore {
           return state;
         }
         revisedState = state;
-        teamId = action.res.teamId || -1;
+        if (action.res.teamId >= 0) {
+          teamId = action.res.teamId;
+        } else {
+          teamId = -1;
+        }
         if (teamId >= 0) {
           console.log('TeamStore team-save teamId:', teamId);
           allCachedTeamsDict[teamId] = action.res;

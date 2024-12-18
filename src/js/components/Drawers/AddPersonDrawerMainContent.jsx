@@ -9,27 +9,41 @@ import PersonStore from '../../stores/PersonStore';
 import TeamStore from '../../stores/TeamStore';
 import apiCalming from '../../common/utils/apiCalming';
 import SearchBar2024 from '../../common/components/Search/SearchBar2024';
+import DesignTokenColors from '../../common/components/Style/DesignTokenColors';
+import arrayContains from '../../common/utils/arrayContains';
 import { renderLog } from '../../common/utils/logging';
-import AddPersonForm from '../AddPerson/AddPersonForm';
+import AddPersonForm from '../Person/AddPersonForm';
 
 
 const AddPersonDrawerMainContent = ({ classes }) => {  //  classes, teamId
   renderLog('AddPersonDrawerMainContent');  // Set LOG_RENDER_EVENTS to log all renders
+  const [allCachedPeopleList, setAllCachedPeopleList] = React.useState([]);
   const [searchText, setSearchText] = React.useState('');
   const [personSearchResultsList, setPersonSearchResultsList] = React.useState([]);
   const [teamId, setTeamId] = React.useState(-1);
+  const [teamMemberPersonIdList, setTeamMemberPersonIdList] = React.useState([]);
 
   const onAppObservableStoreChange = () => {
+    // console.log('AddPersonDrawerMainContent AppObservableStore-addPersonDrawerTeamId: ', AppObservableStore.getGlobalVariableState('addPersonDrawerTeamId'));
     setTeamId(AppObservableStore.getGlobalVariableState('addPersonDrawerTeamId'));
   };
 
   const onPersonStoreChange = () => {
     const personSearchResultsListTemp = PersonStore.getSearchResults();
     // console.log('AddPersonDrawerMainContent personSearchResultsList:', personSearchResultsListTemp);
+    setAllCachedPeopleList(PersonStore.getAllCachedPeopleList());
     setPersonSearchResultsList(personSearchResultsListTemp);
+    const teamIdTemp = AppObservableStore.getGlobalVariableState('addPersonDrawerTeamId');
+    // console.log('AddPersonDrawerMainContent-onPersonStoreChange teamIdTemp: ', teamIdTemp, ', teamMemberPersonIdList:', TeamStore.getTeamMemberPersonIdList(teamIdTemp));
+    setTeamMemberPersonIdList(TeamStore.getTeamMemberPersonIdList(teamIdTemp));
+    setTeamId(teamIdTemp);
   };
 
   const onTeamStoreChange = () => {
+    const teamIdTemp = AppObservableStore.getGlobalVariableState('addPersonDrawerTeamId');
+    // console.log('AddPersonDrawerMainContent-onTeamStoreChange teamIdTemp: ', teamIdTemp, ', teamMemberPersonIdList:', TeamStore.getTeamMemberPersonIdList(teamIdTemp));
+    setTeamMemberPersonIdList(TeamStore.getTeamMemberPersonIdList(teamIdTemp));
+    setTeamId(teamIdTemp);
   };
 
   const searchFunction = (incomingSearchText) => {
@@ -38,13 +52,15 @@ const AddPersonDrawerMainContent = ({ classes }) => {  //  classes, teamId
       searchingJustStarted = true;
     }
     const isSearching = (incomingSearchText && incomingSearchText.length > 0);
-    if (apiCalming(`addPersonToTeamSearch-${teamId}-${incomingSearchText}`, 60000)) { // Only once per 60 seconds
-      PersonActions.personListRetrieve();
+    const teamIdTemp = AppObservableStore.getGlobalVariableState('addPersonDrawerTeamId');
+    if (apiCalming(`addPersonToTeamSearch-${teamIdTemp}-${incomingSearchText}`, 60000)) { // Only once per 60 seconds
+      PersonActions.personListRetrieve(incomingSearchText);
     }
     setSearchText(incomingSearchText);
   };
 
   const clearFunction = () => {
+    setPersonSearchResultsList([]);
     setSearchText('');
   };
 
@@ -56,16 +72,17 @@ const AddPersonDrawerMainContent = ({ classes }) => {  //  classes, teamId
     const teamStoreListener = TeamStore.addListener(onTeamStoreChange);
     onTeamStoreChange();
 
+    if (apiCalming('personListRetrieve', 30000)) {
+      PersonActions.personListRetrieve();
+    }
+
     return () => {
+      // console.log('AddPersonDrawerMainContent cleanup');
       appStateSubscription.unsubscribe();
       personStoreListener.remove();
       teamStoreListener.remove();
     };
   }, []);
-
-  React.useEffect(() => {
-  }, [personSearchResultsList]);
-  const personSearchResultsListTemp = PersonStore.getSearchResults();
 
   return (
     <AddPersonDrawerMainContentWrapper>
@@ -77,23 +94,47 @@ const AddPersonDrawerMainContent = ({ classes }) => {  //  classes, teamId
           searchUpdateDelayTime={750}
         />
       </SearchBarWrapper>
-      <AddPersonForm />
-      {(personSearchResultsListTemp && personSearchResultsListTemp.length > 0) && (
+      {(personSearchResultsList && personSearchResultsList.length > 0) && (
         <PersonSearchResultsWrapper>
-          <PersonSearchResultsTitle>Search Results:</PersonSearchResultsTitle>
-          <PersonSearchResultsList>
-            {personSearchResultsListTemp.map((person, index) => (
-              <PersonSearchResultsItem key={`personResult-${person.id}`}>
+          <PersonListTitle>Search Results:</PersonListTitle>
+          <PersonList>
+            {personSearchResultsList.map((person, index) => (
+              <PersonItem key={`personResult-${person.id}`}>
                 {person.firstName}
                 {' '}
                 {person.lastName}
-                {' '}
-                <AddPersonToTeamLinkStyle onClick={() => TeamActions.addPersonToTeam(person.id, teamId)}>add</AddPersonToTeamLinkStyle>
-              </PersonSearchResultsItem>
+                {!arrayContains(person.id, teamMemberPersonIdList) && (
+                  <>
+                    {' '}
+                    <SpanWithLinkStyle onClick={() => TeamActions.addPersonToTeam(person.id, teamId)}>add</SpanWithLinkStyle>
+                  </>
+                )}
+              </PersonItem>
             ))}
-          </PersonSearchResultsList>
+          </PersonList>
         </PersonSearchResultsWrapper>
       )}
+      <PersonDirectoryWrapper>
+        <PersonListTitle>All Staff:</PersonListTitle>
+        <PersonList>
+          {allCachedPeopleList.map((person, index) => (
+            <PersonItem key={`personResult-${person.id}`}>
+              {person.firstName}
+              {' '}
+              {person.lastName}
+              {!arrayContains(person.id, teamMemberPersonIdList) && (
+                <>
+                  {' '}
+                  <SpanWithLinkStyle onClick={() => TeamActions.addPersonToTeam(person.id, teamId)}>add</SpanWithLinkStyle>
+                </>
+              )}
+            </PersonItem>
+          ))}
+        </PersonList>
+      </PersonDirectoryWrapper>
+      <AddPersonWrapper>
+        <AddPersonForm />
+      </AddPersonWrapper>
     </AddPersonDrawerMainContentWrapper>
   );
 };
@@ -107,19 +148,27 @@ const styles = () => ({
 const AddPersonDrawerMainContentWrapper = styled('div')`
 `;
 
-const AddPersonToTeamLinkStyle = styled('span')`
-  text-decoration:underline;
-  color:#206DB3; /* primary500 */
-  cursor:pointer;
+const AddPersonWrapper = styled('div')`
+  margin-top: 32px;
 `;
 
-const PersonSearchResultsItem = styled('div')`
+const SpanWithLinkStyle = styled('span')`
+  text-decoration: underline;
+  color: ${DesignTokenColors.primary500};
+  cursor: pointer;
 `;
 
-const PersonSearchResultsList = styled('div')`
+const PersonDirectoryWrapper = styled('div')`
+  margin-top: 16px;
 `;
 
-const PersonSearchResultsTitle = styled('div')`
+const PersonItem = styled('div')`
+`;
+
+const PersonList = styled('div')`
+`;
+
+const PersonListTitle = styled('div')`
 `;
 
 const PersonSearchResultsWrapper = styled('div')`

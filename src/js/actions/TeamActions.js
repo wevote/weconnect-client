@@ -4,15 +4,27 @@ import TeamStore from '../stores/TeamStore'; // eslint-disable-line import/no-cy
 
 export default {
   addPersonToTeam (personId, teamId) {
-    console.log('TeamActions, addPersonToTeam personId:', personId, ', teamId:', teamId);
-    const teamMemberName = PersonStore.getFullNamePreferred(personId) || '';
+    // console.log('TeamActions, addPersonToTeam personId:', personId, ', teamId:', teamId);
+    const teamMemberFirstName = PersonStore.getFirstName(personId) || '';
+    const teamMemberLastName = PersonStore.getLastName(personId) || '';
+    const teamName = TeamStore.getTeamName(teamId) || '';
     const data = {
       personId,
       teamId,
-      teamMemberName,
-      teamName: TeamStore.getTeamById(teamId).teamName || '',
+      teamMemberFirstName,
+      teamMemberLastName,
+      teamName,
     };
     Dispatcher.loadEndpoint('add-person-to-team', data);
+  },
+
+  removePersonFromTeam (personId, teamId) {
+    // console.log('TeamActions, removePersonFromTeam personId:', personId, ', teamId:', teamId);
+    const data = {
+      personId,
+      teamId,
+    };
+    Dispatcher.loadEndpoint('remove-person-from-team', data);
   },
 
   teamRetrieve (teamId = '') {

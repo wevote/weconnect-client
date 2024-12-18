@@ -8,7 +8,7 @@ import { messageService } from '../../stores/AppObservableStore';
 import TeamStore from '../../stores/TeamStore';
 import SearchBar2024 from '../../common/components/Search/SearchBar2024';
 import { renderLog } from '../../common/utils/logging';
-import AddTeamForm from '../AddTeam/AddTeamForm';
+import AddTeamForm from '../Team/AddTeamForm';
 
 
 const AddTeamDrawer = ({ classes }) => {  //  classes, teamId

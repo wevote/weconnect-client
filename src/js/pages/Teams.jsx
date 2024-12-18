@@ -10,13 +10,16 @@ import PersonStore from '../stores/PersonStore';
 import TeamActions from '../actions/TeamActions';
 import TeamStore from '../stores/TeamStore';
 import { PageContentContainer } from '../components/Style/pageLayoutStyles';
+import TeamMemberList from '../components/Team/TeamMemberList';
 import webAppConfig from '../config';
 import apiCalming from '../common/utils/apiCalming';
 import { renderLog } from '../common/utils/logging';
+import DesignTokenColors from '../common/components/Style/DesignTokenColors';
 
 
 const Teams = ({ classes, match }) => {  //  classes, teamId
   renderLog('Teams');  // Set LOG_RENDER_EVENTS to log all renders
+  const [showAllTeamMembers, setShowAllTeamMembers] = React.useState(false);
   const [teamList, setTeamList] = React.useState([]);
   const [teamCount, setTeamCount] = React.useState(0);
 
@@ -25,6 +28,7 @@ const Teams = ({ classes, match }) => {  //  classes, teamId
 
   const onRetrieveTeamListChange = () => {
     const { params } = match;
+    setShowAllTeamMembers(true);
     const teamListTemp = TeamStore.getTeamList(params.teamId);
     // console.log('Teams onRetrieveTeamListChange, params.teamId:', params.teamId, ', TeamStore.getTeamList:', teamListTemp);
     setTeamList(teamListTemp);
@@ -65,7 +69,6 @@ const Teams = ({ classes, match }) => {  //  classes, teamId
     };
   }, []);
 
-  const pigsCanFly = false;
   return (
     <div>
       <Helmet>
@@ -80,7 +83,13 @@ const Teams = ({ classes, match }) => {  //  classes, teamId
         <div>
           Teams (
           {teamCount}
-          )
+          ) -
+          {' '}
+          {showAllTeamMembers ? (
+            <SpanWithLinkStyle>hide people</SpanWithLinkStyle>
+          ) : (
+            <SpanWithLinkStyle>show people</SpanWithLinkStyle>
+          )}
         </div>
         <Button
           classes={{ root: classes.addTeamButtonRoot }}
@@ -88,18 +97,20 @@ const Teams = ({ classes, match }) => {  //  classes, teamId
           variant="outlined"
           onClick={addTeamClick}
         >
-          Add
+          Add Team
         </Button>
         {teamList.map((team) => (
-          <div key={`team-${team.id}`}>
-            <Link to={`/team-members/${team.id}`}>
-              {team.teamName}
-            </Link>
-          </div>
+          <OneTeamWrapper key={`team-${team.id}`}>
+            <OneTeamHeader>
+              <Link to={`/team-members/${team.id}`}>
+                {team.teamName}
+              </Link>
+            </OneTeamHeader>
+            {showAllTeamMembers && (
+              <TeamMemberList teamId={team.id} />
+            )}
+          </OneTeamWrapper>
         ))}
-        {pigsCanFly && (
-          <SearchBarWrapper>Teams will fly here</SearchBarWrapper>
-        )}
       </PageContentContainer>
     </div>
   );
@@ -114,17 +125,23 @@ const styles = (theme) => ({
     marginRight: 8,
   },
   addTeamButtonRoot: {
-    width: 100,
+    width: 120,
     [theme.breakpoints.down('md')]: {
       width: '100%',
     },
   },
 });
 
-const SearchBarWrapper = styled('div')`
-  // margin-top: 14px;
-  // margin-bottom: 8px;
-  width: 100%;
+const OneTeamHeader = styled('div')`
+`;
+
+const OneTeamWrapper = styled('div')`
+`;
+
+const SpanWithLinkStyle = styled('span')`
+  text-decoration: underline;
+  color: ${DesignTokenColors.primary500};
+  cursor: pointer;
 `;
 
 export default withStyles(styles)(Teams);

@@ -10,6 +10,7 @@ import TeamStore from '../../stores/TeamStore';
 import { renderLog } from '../../common/utils/logging';
 import prepareDataPackageFromAppObservableStore from '../../common/utils/prepareDataPackageFromAppObservableStore';
 
+const FIELDS_IN_FORM = ['emailPersonal', 'firstName', 'lastName'];
 
 const AddPersonForm = ({ classes }) => {  //  classes, teamId
   renderLog('AddPersonForm');  // Set LOG_RENDER_EVENTS to log all renders
@@ -25,12 +26,11 @@ const AddPersonForm = ({ classes }) => {  //  classes, teamId
   const saveNewPersonSuccessful = () => {
     AppObservableStore.setGlobalVariableState('addPersonDrawerOpen', false);
     AppObservableStore.setGlobalVariableState('addPersonDrawerTeamId', -1);
-    AppObservableStore.setGlobalVariableState('emailPersonalChanged', false);
-    AppObservableStore.setGlobalVariableState('emailPersonalToBeSaved', '');
-    AppObservableStore.setGlobalVariableState('firstNameChanged', false);
-    AppObservableStore.setGlobalVariableState('firstNameToBeSaved', '');
-    AppObservableStore.setGlobalVariableState('lastNameChanged', false);
-    AppObservableStore.setGlobalVariableState('lastNameToBeSaved', '');
+    for (let i = 0; i < FIELDS_IN_FORM.length; i++){
+      const fieldName = FIELDS_IN_FORM[i];
+      AppObservableStore.setGlobalVariableState(`${fieldName}Changed`, false);
+      AppObservableStore.setGlobalVariableState(`${fieldName}ToBeSaved`, '');
+    }
   };
 
   const onPersonStoreChange = () => {
@@ -45,7 +45,7 @@ const AddPersonForm = ({ classes }) => {  //  classes, teamId
   };
 
   const saveNewPerson = () => {
-    const acceptedVariables = ['emailPersonal', 'firstName', 'lastName'];
+    const acceptedVariables = FIELDS_IN_FORM;
     const data = prepareDataPackageFromAppObservableStore(acceptedVariables);
     if (teamId >= 0) {
       data.teamId = teamId;

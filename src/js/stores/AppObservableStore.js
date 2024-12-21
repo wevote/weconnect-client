@@ -35,6 +35,9 @@ const nonFluxState = {
   chosenSiteLogoUrl: '',
   chosenWebsiteName: '',
   currentPathname: '',
+  editPersonDrawerOpen: false,
+  editPersonDrawerPersonId: -1,
+  editPersonDrawerTeamId: -1,
   emailPersonalChanged: false,
   emailPersonalToBeSaved: '',
   firstNameChanged: false,
@@ -406,6 +409,15 @@ export default {
   setGlobalVariableState (globalVariableName, newState) {
     nonFluxState[globalVariableName] = newState;
     messageService.sendMessage(`state updated ${globalVariableName}`);
+  },
+
+  setGlobalVariableStateInBulk (globalVariableStateDict) {
+    const keys = Object.keys(globalVariableStateDict);
+    const values = Object.values(globalVariableStateDict);
+    for (let i = 0; i < keys.length; i++) {
+      nonFluxState[keys[i]] = values[i];
+    }
+    messageService.sendMessage('state updated multiple global variables');
   },
 
   setHideOrganizationModalBallotItemInfo (hide) {

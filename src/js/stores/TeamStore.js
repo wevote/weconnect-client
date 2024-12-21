@@ -49,6 +49,7 @@ class TeamStore extends ReduceStore {
 
   getTeamMemberList (teamId) {
     const { allCachedTeamMembersDict } = this.getState();
+    // console.log('TeamStore getTeamMemberList teamId:', teamId, ', allCachedTeamMembersDict:', allCachedTeamMembersDict);
     const personIdList = allCachedTeamMembersDict[teamId] || [];
     const teamMemberList = [];
     for (let i = 0; i < personIdList.length; i++) {
@@ -165,13 +166,14 @@ class TeamStore extends ReduceStore {
           if (team && (team.id >= 0)) {
             allCachedTeamsDict[team.id] = team;
             if (team.teamMemberList) {
+              teamMemberIdList = [];
               teamMemberList = team.teamMemberList || [];
               teamMemberList.forEach((person) => {
                 if (person && (person.id >= 0) && !arrayContains(person.id, teamMemberIdList)) {
                   teamMemberIdList.push(person.id);
                 }
               });
-              allCachedTeamMembersDict[teamId] = teamMemberIdList;
+              allCachedTeamMembersDict[team.id] = teamMemberIdList;
             }
           }
         });
@@ -197,7 +199,7 @@ class TeamStore extends ReduceStore {
         revisedState = state;
 
         // console.log('OrganizationStore issueDescriptionsRetrieve issueList:', issueList);
-        if (teamId > 0) {
+        if (teamId >= 0) {
           allCachedTeamsDict[teamId] = action.res;
           if (action.res.teamMemberList) {
             // If missing teamMemberList do not alter data in the store

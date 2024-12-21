@@ -23,7 +23,7 @@ export default {
     }
   },
 
-  personSave (personId = '', incomingData = {}) {
+  personSave (personId = 0, incomingData = {}) {
     // console.log('PersonActions, personSave personId:', personId, ', incomingData:', incomingData);
     const data = {
       personId,

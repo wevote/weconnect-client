@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { withStyles } from '@mui/styles';
-import { messageService } from '../../stores/AppObservableStore';
+import AppObservableStore, { messageService } from '../../stores/AppObservableStore';
 import PersonStore from '../../stores/PersonStore';
 import TeamStore from '../../stores/TeamStore';
 import { renderLog } from '../../common/utils/logging';
@@ -16,6 +16,7 @@ const TeamMemberList = ({ classes, teamId }) => {
   };
 
   const onRetrieveTeamListChange = () => {
+    // console.log('TeamMemberList onRetrieveTeamListChange, teamId:', teamId, ', TeamStore.getTeamMemberList:', TeamStore.getTeamMemberList(teamId));
     setTeamMemberList(TeamStore.getTeamMemberList(teamId));
   };
 
@@ -25,6 +26,11 @@ const TeamMemberList = ({ classes, teamId }) => {
 
   const onTeamStoreChange = () => {
     onRetrieveTeamListChange();
+  };
+
+  const editPersonClick = (personId) => {
+    AppObservableStore.setGlobalVariableState('editPersonDrawerOpen', true);
+    AppObservableStore.setGlobalVariableState('editPersonDrawerPersonId', personId);
   };
 
   React.useEffect(() => {
@@ -47,7 +53,20 @@ const TeamMemberList = ({ classes, teamId }) => {
     <TeamMembersWrapper>
       {teamMemberList.map((person) => (
         <OnePersonWrapper key={`teamMember-${person.personId}`}>
-          <PersonCell width={200}>{person.firstName}</PersonCell>
+          <PersonCell
+            id={`fullNamePreferred-personId-${person.personId}`}
+            onClick={() => editPersonClick(person.personId)}
+            style={{ cursor: 'pointer' }}
+            width={150}
+          >
+            {PersonStore.getFullNamePreferred(person.personId)}
+          </PersonCell>
+          <PersonCell id={`location-personId-${person.personId}`} smallFont width={125}>
+            {PersonStore.getPersonById(person.personId).location}
+          </PersonCell>
+          <PersonCell id={`jobTitle-personId-${person.personId}`} smallestFont width={190}>
+            {PersonStore.getPersonById(person.personId).jobTitle}
+          </PersonCell>
         </OnePersonWrapper>
       ))}
     </TeamMembersWrapper>
@@ -77,10 +96,17 @@ const OnePersonWrapper = styled('div')`
 `;
 
 const PersonCell = styled('div', {
-  shouldForwardProp: (prop) => !['width'].includes(prop),
-})(({ width }) => (`
+  shouldForwardProp: (prop) => !['smallFont', 'smallestFont', 'width'].includes(prop),
+})(({ smallFont, smallestFont, width }) => (`
+  align-content: center;
+  border-bottom: 1px solid #ccc;
+  ${(smallFont && !smallestFont) ? 'font-size: .9em;' : ''};
+  ${(smallestFont && !smallFont) ? 'font-size: .8em;' : ''};
+  height: 22px;
   ${width ? `max-width: ${width}px;` : ''};
   ${width ? `min-width: ${width}px;` : ''};
+  overflow: hidden;
+  white-space: nowrap;
   ${width ? `width: ${width}px;` : ''};
 `));
 

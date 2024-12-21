@@ -86,9 +86,9 @@ const Teams = ({ classes, match }) => {  //  classes, teamId
           ) -
           {' '}
           {showAllTeamMembers ? (
-            <SpanWithLinkStyle>hide people</SpanWithLinkStyle>
+            <SpanWithLinkStyle onClick={() => setShowAllTeamMembers(false)}>hide people</SpanWithLinkStyle>
           ) : (
-            <SpanWithLinkStyle>show people</SpanWithLinkStyle>
+            <SpanWithLinkStyle onClick={() => setShowAllTeamMembers(true)}>show people</SpanWithLinkStyle>
           )}
         </div>
         <Button
@@ -102,9 +102,16 @@ const Teams = ({ classes, match }) => {  //  classes, teamId
         {teamList.map((team) => (
           <OneTeamWrapper key={`team-${team.id}`}>
             <OneTeamHeader>
-              <Link to={`/team-members/${team.id}`}>
-                {team.teamName}
-              </Link>
+              <TeamHeaderCell largeFont titleCell width={275}>
+                <Link to={`/team-members/${team.id}`}>
+                  {team.teamName}
+                </Link>
+              </TeamHeaderCell>
+              {showAllTeamMembers && (
+                <TeamHeaderCell width={190}>
+                  Title / Volunteering Love
+                </TeamHeaderCell>
+              )}
             </OneTeamHeader>
             {showAllTeamMembers && (
               <TeamMemberList teamId={team.id} />
@@ -133,6 +140,10 @@ const styles = (theme) => ({
 });
 
 const OneTeamHeader = styled('div')`
+  align-items: center;
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 10px;
 `;
 
 const OneTeamWrapper = styled('div')`
@@ -143,5 +154,20 @@ const SpanWithLinkStyle = styled('span')`
   color: ${DesignTokenColors.primary500};
   cursor: pointer;
 `;
+
+const TeamHeaderCell = styled('div', {
+  shouldForwardProp: (prop) => !['largeFont', 'titleCell', 'width'].includes(prop),
+})(({ largeFont, titleCell, width }) => (`
+  align-content: center;
+  ${(titleCell) ? '' : 'border-bottom: 1px solid #ccc;'}
+  ${(largeFont) ? 'font-size: 1.1em;' : 'font-size: .8em;'};
+  ${(titleCell) ? '' : 'font-weight: 550;'}
+  height: 22px;
+  ${width ? `max-width: ${width}px;` : ''};
+  ${width ? `min-width: ${width}px;` : ''};
+  overflow: hidden;
+  white-space: nowrap;
+  ${width ? `width: ${width}px;` : ''};
+`));
 
 export default withStyles(styles)(Teams);

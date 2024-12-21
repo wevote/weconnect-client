@@ -113,6 +113,7 @@ class PersonStore extends ReduceStore {
     let revisedState = state;
     let searchResults = [];
     let teamId = -1;
+    let teamList = [];
     let teamMemberList = [];
 
     switch (action.type) {
@@ -199,6 +200,33 @@ class PersonStore extends ReduceStore {
         } else {
           console.log('PersonStore person-save MISSING personId:', personId);
         }
+        return revisedState;
+
+      case 'team-list-retrieve':
+        if (!action.res.success) {
+          console.log('TeamStore ', action.type, ' FAILED action.res:', action.res);
+          return state;
+        }
+        teamList = action.res.teamList || [];
+        revisedState = state;
+        teamList.forEach((team) => {
+          if (team && (team.id >= 0)) {
+            if (team.teamMemberList) {
+              teamMemberList = team.teamMemberList || [];
+              teamMemberList.forEach((person) => {
+                // console.log('PersonStore team-retrieve adding person:', person);
+                if (person && (person.id >= 0) && !arrayContains(person.id, allCachedPeopleDict)) {
+                  allCachedPeopleDict[person.id] = person;
+                }
+              });
+            }
+          }
+        });
+
+        revisedState = {
+          ...revisedState,
+          allCachedPeopleDict,
+        };
         return revisedState;
 
       case 'team-retrieve':

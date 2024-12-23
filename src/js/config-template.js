@@ -13,32 +13,32 @@ module.exports = {
   ///////////////////////////////////////////////
   // Keep both configuration blocks below, but only uncomment one of them at a time.
   //// Connecting to local WeConnect "weconnect-server" APIs ////
-  WECONNECT_SERVER_ROOT_URL: 'http://localhost:4500/',
-  WECONNECT_SERVER_ADMIN_ROOT_URL: 'http://localhost:4500/admin/',
-  WECONNECT_SERVER_API_ROOT_URL: 'http://localhost:4500/apis/v1/',
-  WECONNECT_SERVER_API_CDN_ROOT_URL: 'http://localhost:4500/apis/v1/',
+  STAFF_API_SERVER_ROOT_URL: 'http://localhost:4500/',
+  STAFF_API_SERVER_ADMIN_ROOT_URL: 'http://localhost:4500/admin/',
+  STAFF_API_SERVER_API_ROOT_URL: 'http://localhost:4500/apis/v1/',
+  STAFF_API_SERVER_API_CDN_ROOT_URL: 'http://localhost:4500/apis/v1/',
   //// Connecting to live WeConnect APIs ////
-  // WECONNECT_SERVER_ROOT_URL: 'https://weconnectserver.org/',
-  // WECONNECT_SERVER_ADMIN_ROOT_URL: 'https://weconnectserver.org/admin/',
-  // WECONNECT_SERVER_API_ROOT_URL: 'https://weconnectserver.org/apis/v1/',
-  // WECONNECT_SERVER_API_CDN_ROOT_URL: 'https://cdn.weconnectserver.org/apis/v1/',
+  // STAFF_API_SERVER_ROOT_URL: 'https://weconnectserver.org/',
+  // STAFF_API_SERVER_ADMIN_ROOT_URL: 'https://weconnectserver.org/admin/',
+  // STAFF_API_SERVER_API_ROOT_URL: 'https://weconnectserver.org/apis/v1/',
+  // STAFF_API_SERVER_API_CDN_ROOT_URL: 'https://cdn.weconnectserver.org/apis/v1/',
 
   // For when we need to connect to the WeVote WebApp front end
-  WE_VOTE_URL_PROTOCOL: 'http://', // 'http://' for local dev (if not using SSL), or 'https://' for live server
-  WE_VOTE_HOSTNAME: 'localhost:3000', // Don't add 'http...' here.  Live server: 'WeVote.US', Quality: 'quality.WeVote.US', developers: 'localhost:3000'
+  VOTER_FRONT_END_APP_URL_PROTOCOL: 'http://', // 'http://' for local dev (if not using SSL), or 'https://' for live server
+  VOTER_FRONT_END_APP_HOSTNAME: 'localhost:3000', // Don't add 'http...' here.  Live server: 'WeVote.US', Quality: 'quality.WeVote.US', developers: 'localhost:3000'
 
   ///////////////////////////////////////////////
   // Keep both configuration blocks below, but only uncomment one of them at a time.
   //// Connecting to local WeVoteServer APIs ////
-  // WE_VOTE_SERVER_ROOT_URL: 'http://localhost:8000/',
-  // WE_VOTE_SERVER_ADMIN_ROOT_URL: 'http://localhost:8000/admin/',
-  // WE_VOTE_SERVER_API_ROOT_URL: 'http://localhost:8000/apis/v1/',
-  // WE_VOTE_SERVER_API_CDN_ROOT_URL: 'http://localhost:8000/apis/v1/',
+  // VOTER_FRONT_END_APP_SERVER_ROOT_URL: 'http://localhost:8000/',
+  // VOTER_API_SERVER_ADMIN_ROOT_URL: 'http://localhost:8000/admin/',
+  // VOTER_API_SERVER_API_ROOT_URL: 'http://localhost:8000/apis/v1/',
+  // VOTER_API_SERVER_API_CDN_ROOT_URL: 'http://localhost:8000/apis/v1/',
   //// Connecting to live WeVoteServer APIs ////
-  WE_VOTE_SERVER_ROOT_URL: 'https://api.wevoteusa.org/',
-  WE_VOTE_SERVER_ADMIN_ROOT_URL: 'https://api.wevoteusa.org/admin/',
-  WE_VOTE_SERVER_API_ROOT_URL: 'https://api.wevoteusa.org/apis/v1/',
-  WE_VOTE_SERVER_API_CDN_ROOT_URL: 'https://cdn.wevoteusa.org/apis/v1/',
+  VOTER_API_SERVER_ROOT_URL: 'https://api.wevoteusa.org/',
+  VOTER_API_SERVER_ADMIN_ROOT_URL: 'https://api.wevoteusa.org/admin/',
+  VOTER_API_SERVER_API_ROOT_URL: 'https://api.wevoteusa.org/apis/v1/',
+  VOTER_API_SERVER_API_CDN_ROOT_URL: 'https://cdn.wevoteusa.org/apis/v1/',
 
   ENABLE_NEXT_RELEASE_FEATURES: true,
   ENABLE_WORKBOX_SERVICE_WORKER: false,  // After setting this false, in Chrome DevTools go to Application Tab, Application/Service Worker and for the sw.js click the "unregister" button to the right

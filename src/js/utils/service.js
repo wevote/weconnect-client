@@ -7,9 +7,9 @@ import { httpLog } from '../common/utils/logging';
 
 const defaults = {
   dataType: 'json',
-  baseUrl: webAppConfig.WECONNECT_SERVER_API_ROOT_URL,
-  baseCdnUrl: webAppConfig.WECONNECT_SERVER_API_CDN_ROOT_URL,
-  url: webAppConfig.WECONNECT_SERVER_API_ROOT_URL,
+  baseUrl: webAppConfig.STAFF_API_SERVER_API_ROOT_URL,
+  baseCdnUrl: webAppConfig.STAFF_API_SERVER_API_CDN_ROOT_URL,
+  url: webAppConfig.STAFF_API_SERVER_API_ROOT_URL,
   query: {},
   method: 'GET',
   data () {

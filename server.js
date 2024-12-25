@@ -1,5 +1,8 @@
 /* eslint-disable */
 // start the express server
+
+// December 2024: Copied from WebApp may not be needed, currently not used
+
 const express = require("express");
 const app = express();
 const fs = require("fs");

@@ -822,7 +822,7 @@ export default {
           let onChosenFullDomainUrl = false;
 
           if (isCordovaLocal()) {
-            newHostname = webAppConfig.WE_VOTE_HOSTNAME;
+            newHostname = webAppConfig.HOSTNAME;
           }
 
           onWeVoteRootUrl = this.isOnWeVoteRootUrl();

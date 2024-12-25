@@ -12,10 +12,13 @@ import { renderLog } from '../common/utils/logging';
 /* global $  */
 
 const Login = ({ classes }) => {
-  const nameFldRef = useRef('');
+  const firstNameFldRef = useRef('');
+  const lastNameFldRef = useRef('');
+  const emailPersonalFldRef = useRef('');
+  const emailOfficialFldRef = useRef('');
   const locationFldRef = useRef('');
-  const emailFldRef = useRef('');
-  const email2FldRef = useRef('');
+  // const zipFldRef = useRef('');
+  // const stateFldRef = useRef('');
   const passwordFldRef = useRef('');
   const confirmPasswordFldRef = useRef('');
   const [showCreateStuff, setShowCreateStuff] = React.useState(false);
@@ -25,14 +28,29 @@ const Login = ({ classes }) => {
   renderLog('Login');  // Set LOG_RENDER_EVENTS to log all renders
 
   const loginApi = (email, password) => {
-    console.log(`${webAppConfig.WECONNECT_SERVER_API_ROOT_URL}login`);
-    $.post(`${webAppConfig.WECONNECT_SERVER_API_ROOT_URL}login/`,
+    if (!validator.isEmail(email)) {
+      setWarningLine('Please enter a valid email address.');
+      return;
+    }
+    if (validator.isEmpty(password)) {
+      setWarningLine('Password cannot be blank.');
+      return;
+    }
+
+    console.log(`${webAppConfig.STAFF_API_SERVER_API_ROOT_URL}login`);
+    $.ajaxSetup({
+      crossDomain: true,
+      xhrFields: {
+        withCredentials: true,
+      },
+    });
+    $.post(`${webAppConfig.STAFF_API_SERVER_API_ROOT_URL}login/`,
       { email, password },
       (data, status) => {
         console.log(`/login response -- status: '${status}',  data: ${JSON.stringify(data)}`);
         if (data.userId > 0) {
           setWarningLine('');
-          setSuccessLine(`Cheers! &nbsp;You are signed in! &nbsp;Person #${data.userId}.`);
+          setSuccessLine(`Cheers person #${data.userId}!  You are signed in!`);
         } else {
           setWarningLine(data.errors.msg);
           setSuccessLine('');
@@ -40,24 +58,67 @@ const Login = ({ classes }) => {
       });
   };
 
-  const signupApi = (name, location, email, email2, password, confirmPassword) => {
-    $.post(`${webAppConfig.WECONNECT_SERVER_API_ROOT_URL}signup`,
-      { name, location, email, email2, password, confirmPassword },
+  const signupApi = (firstName, lastName, location, emailPersonal, emailOfficial, password, confirmPassword) => {
+    const postURL = `${webAppConfig.STAFF_API_SERVER_API_ROOT_URL}signup`;
+    console.log('postURL: ', postURL);
+    try {
+      $.ajaxSetup({
+        crossDomain: true,
+        xhrFields: {
+          withCredentials: true,
+        },
+      });
+      $.post(postURL,
+        {
+          firstName,
+          lastName,
+          location,
+          emailPersonal,
+          emailOfficial,
+          password,
+          confirmPassword,
+        },
+        (data, status) => {
+          console.log(`/signup response -- status: '${status}',  data: ${JSON.stringify(data)}`);
+          let errStr = '';
+          for (let i = 0; i < data.errors.length; i++) {
+            errStr += data.errors[i].msg;
+          }
+          setWarningLine(errStr);
+          if (data.personCreated) {
+            setSuccessLine(`user # ${data.userId} created, and signedIn is ${data.signedIn}`);
+          }
+        });
+    } catch (e) {
+      console.log('signup error', e);
+    }
+  };
+
+  const testAuthApi = () => {
+    $.ajaxSetup({
+      crossDomain: true,
+      xhrFields: {
+        withCredentials: true,
+      },
+    });
+    $.post(`${webAppConfig.STAFF_API_SERVER_API_ROOT_URL}auth-test`,
+      {},
       (data, status) => {
-        console.log(`/signup response -- status: '${status}',  data: ${JSON.stringify(data)}`);
+        console.log(`/test-auth response -- status: '${status}',  data: ${JSON.stringify(data)}`);
         let errStr = '';
         for (let i = 0; i < data.errors.length; i++) {
           errStr += data.errors[i].msg;
         }
         setWarningLine(errStr);
         if (data.personCreated) {
-          setSuccessLine(`user # ${data.userId} created, and signedIn is ${data.signedIn}`);
+          setSuccessLine(`user # ${data.userId} auth checked, and signedIn is ${data.signedIn}`);
         }
       });
   };
 
+
   const loginPressed = () => {
-    const email =  emailFldRef.current.value;
+    const email =  emailPersonalFldRef.current.value;
     const password = passwordFldRef.current.value;
 
     if (email.length === 0 || password.length === 0) {
@@ -77,24 +138,32 @@ const Login = ({ classes }) => {
     } else {
       setWarningLine('');
       let errStr = '';
-      const name =  nameFldRef.current.value;
+      const firstName =  firstNameFldRef.current.value;
+      const lastName =  lastNameFldRef.current.value;
       const location =  locationFldRef.current.value;
-      const email =  emailFldRef.current.value;
-      const email2 =  email2FldRef.current.value;
+      const emailPersonal =  emailPersonalFldRef.current.value;
+      const emailOfficial =  emailOfficialFldRef.current.value;
+      // const zipCode =  zipFldRef.current.value;
+      // const stateCode =  stateFldRef.current.value;
       const password = passwordFldRef.current.value;
       const confirmPassword = confirmPasswordFldRef.current.value;
-      if (!validator.isEmail(email)) errStr += 'Please enter a valid primary email address.';
-      if (!validator.isEmail(email2)) errStr += 'Please enter a valid secondary email address.';
+      if (!validator.isEmail(emailPersonal)) errStr += 'Please enter a valid personal email address.';
+      if (emailOfficial.length > 0 && !validator.isEmail(emailOfficial)) errStr += 'Please enter a valid secondary email address.';
       if (!validator.isLength(password, { min: 8 })) errStr += 'Password must be at least 8 characters long';
       if (validator.escape(password) !== validator.escape(confirmPassword)) errStr += 'Passwords do not match';
 
       if (errStr.length) {
         setWarningLine(errStr);
       } else {
-        signupApi(name, location, email, email2, password, confirmPassword);
+        signupApi(firstName, lastName, location, emailPersonal, emailOfficial, password, confirmPassword);
       }
     }
   };
+
+  const testPressed = () => {
+    testAuthApi();
+  };
+
 
   return (
     <div>
@@ -112,12 +181,37 @@ const Login = ({ classes }) => {
 
         <div id="warningLine" style={{ color: 'red', paddingTop: '10px', paddingBottom: '20px' }}>{warningLine}</div>
         <div id="successLine" style={{ color: 'green', paddingTop: '10px', paddingBottom: '20px' }}>{successLine}</div>
+        <span style={{ display: 'flex' }}>
+          <TextField id="outlined-basic"
+                     label="First Name"
+                     variant="outlined"
+                     inputRef={firstNameFldRef}
+                     sx={{ paddingBottom: '15px',
+                       paddingRight: '10px',
+                       display: showCreateStuff ? 'block' : 'none'  }}
+          />
+          <TextField id="outlined-basic"
+                     label="Last Name"
+                     variant="outlined"
+                     inputRef={lastNameFldRef}
+                     sx={{ paddingBottom: '15px',
+                       display: showCreateStuff ? 'block' : 'none'  }}
+          />
+        </span>
         <TextField id="outlined-basic"
-                   label="Name"
+                   label={showCreateStuff ? 'Your personal email' : 'Your email address'}
+                   helperText={showCreateStuff ? 'Required' : ''}
                    variant="outlined"
-                   inputRef={nameFldRef}
+                   inputRef={emailPersonalFldRef}
+                   sx={{ display: 'block', paddingBottom: '15px' }}
+        />
+        <TextField id="outlined-basic"
+                   label="Second Email"
+                   helperText="Optional, possibly your wevote.us email"
+                   variant="outlined"
+                   inputRef={emailOfficialFldRef}
                    sx={{ paddingBottom: '15px',
-                     display: showCreateStuff ? 'block' : 'none'  }}
+                     display: showCreateStuff ? 'block' : 'none' }}
         />
         <TextField id="outlined-basic"
                    label="Location"
@@ -127,33 +221,22 @@ const Login = ({ classes }) => {
                    sx={{ paddingBottom: '15px',
                      display: showCreateStuff ? 'block' : 'none'  }}
         />
-        <TextField id="outlined-basic"
-                   label="Email"
-                   helperText={showCreateStuff ? 'Required, possibly your personal email' : ''}
-                   variant="outlined"
-                   inputRef={emailFldRef}
-                   sx={{ display: 'block', paddingBottom: '15px' }}
-        />
-        <TextField id="outlined-basic"
-                   label="Second Email"
-                   helperText="Optional, possibly your wevote.us email"
-                   variant="outlined"
-                   inputRef={email2FldRef}
-                   sx={{ paddingBottom: '15px',
-                     display: showCreateStuff ? 'block' : 'none' }}
-        />
-        <TextField id="outlined-basic"
-                   label="Password"
-                   variant="outlined"
-                   inputRef={passwordFldRef}
-                   sx={{ display: 'block', paddingBottom: '15px' }}
-        />
-        <TextField id="outlined-basic"
-                   label="Confirm Password"
-                   variant="outlined"
-                   inputRef={confirmPasswordFldRef}
-                   sx={{ paddingBottom: '15px', display: showCreateStuff ? 'block' : 'none'  }}
-        />
+        <span style={{ display: 'flex' }}>
+          <TextField id="outlined-basic"
+                     label="Password"
+                     variant="outlined"
+                     inputRef={passwordFldRef}
+                     defaultValue="12345678"
+                     sx={{ display: 'block', paddingBottom: '15px' }}
+          />
+          <TextField id="outlined-basic"
+                     label="Confirm Password"
+                     variant="outlined"
+                     inputRef={confirmPasswordFldRef}
+                     defaultValue="12345678"
+                     sx={{ padding: '0 0 15px 10px', display: showCreateStuff ? 'block' : 'none'  }}
+          />
+        </span>
         <span style={{ display: 'flex' }}>
           <Button
             classes={{ root: classes.loginButtonRoot }}
@@ -174,6 +257,14 @@ const Login = ({ classes }) => {
           onClick={createPressed}
         >
           {showCreateStuff ? 'Save New Account' : 'Create Account'}
+        </Button>
+        <Button
+          classes={{ root: classes.buttonDesktop }}
+          color="primary"
+          variant="contained"
+          onClick={testPressed}
+        >
+          Test Auth
         </Button>
 
         <div style={{ paddingTop: '80px' }}>

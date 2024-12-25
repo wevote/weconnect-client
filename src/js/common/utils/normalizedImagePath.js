@@ -5,7 +5,7 @@ export function isCordova () {
 
 // Webapp image paths are "absolute" relative to the running webapp cwd,
 // for Cordova, we need them to include the http path to the server.
-// Note: You can point WE_VOTE_IMAGE_PATH_FOR_CORDOVA to your local webapp if you need
+// Note: You can point VOTER_FRONT_END_APP_IMAGE_PATH_FOR_CORDOVA to your local webapp if you need
 // images that are not yet on the production servers
 export default function normalizedImagePath (path) {
   if (isCordova()) {

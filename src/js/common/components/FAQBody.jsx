@@ -142,7 +142,7 @@ export default class FAQBody extends Component {
         <Suspense fallback={<></>}>
           <OpenExternalWebSite
             linkIdAttribute="weVoteAboutUsPage"
-            url={`${webAppConfig.WE_VOTE_URL_PROTOCOL + webAppConfig.WE_VOTE_HOSTNAME}/more/about`}
+            url={`${webAppConfig.VOTER_FRONT_END_APP_URL_PROTOCOL + webAppConfig.VOTER_FRONT_END_APP_HOSTNAME}/more/about`}
             target="_blank"
             body="volunteer board members"
           />

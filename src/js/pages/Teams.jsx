@@ -118,6 +118,13 @@ const Teams = ({ classes, match }) => {  //  classes, teamId
             )}
           </OneTeamWrapper>
         ))}
+        <div style={{ padding: '100px 0 25px 0', fontWeight: '700' }}>
+          <Link to={`/login`}>
+            Sign in
+          </Link>
+
+        </div>
+
       </PageContentContainer>
     </div>
   );

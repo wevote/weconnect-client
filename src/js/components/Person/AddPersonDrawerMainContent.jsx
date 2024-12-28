@@ -2,6 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { withStyles } from '@mui/styles';
+import { SpanWithLinkStyle } from '../Style/linkStyles';
 import AppObservableStore, { messageService } from '../../stores/AppObservableStore';
 import PersonActions from '../../actions/PersonActions';
 import TeamActions from '../../actions/TeamActions';
@@ -9,10 +10,9 @@ import PersonStore from '../../stores/PersonStore';
 import TeamStore from '../../stores/TeamStore';
 import apiCalming from '../../common/utils/apiCalming';
 import SearchBar2024 from '../../common/components/Search/SearchBar2024';
-import DesignTokenColors from '../../common/components/Style/DesignTokenColors';
 import arrayContains from '../../common/utils/arrayContains';
 import { renderLog } from '../../common/utils/logging';
-import AddPersonForm from '../Person/AddPersonForm';
+import AddPersonForm from './AddPersonForm';
 
 
 const AddPersonDrawerMainContent = ({ classes }) => {  //  classes, teamId
@@ -150,12 +150,6 @@ const AddPersonDrawerMainContentWrapper = styled('div')`
 
 const AddPersonWrapper = styled('div')`
   margin-top: 32px;
-`;
-
-const SpanWithLinkStyle = styled('span')`
-  text-decoration: underline;
-  color: ${DesignTokenColors.primary500};
-  cursor: pointer;
 `;
 
 const PersonDirectoryWrapper = styled('div')`

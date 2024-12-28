@@ -25,7 +25,7 @@ const AddTeamForm = ({ classes }) => {  //  classes, teamId
 
   const onTeamStoreChange = () => {
     const mostRecentTeamChanged = TeamStore.getMostRecentTeamChanged();
-    console.log('AddTeamForm onTeamStoreChange mostRecentTeamChanged:', mostRecentTeamChanged);
+    // console.log('AddTeamForm onTeamStoreChange mostRecentTeamChanged:', mostRecentTeamChanged);
     // TODO: Figure out why teamName is not being updated locally
     // console.log('teamName:', teamName);
     if (mostRecentTeamChanged.teamName === AppObservableStore.getGlobalVariableState('teamNameToBeSaved')) {
@@ -69,21 +69,22 @@ const AddTeamForm = ({ classes }) => {  //  classes, teamId
     <AddTeamFormWrapper>
       <FormControl classes={{ root: classes.formControl }}>
         <TextField
+          autoFocus
           // classes={{ root: classes.textField }} // Not working yet
           id="teamNameToBeSaved"
           label="Team Name"
           name="teamNameToBeSaved"
           margin="dense"
-          variant="outlined"
+          onChange={updateTeamName}
           placeholder="Team Name"
           value={teamName}
-          onChange={updateTeamName}
+          variant="outlined"
         />
         <Button
           classes={{ root: classes.saveNewTeamButton }}
           color="primary"
-          variant="contained"
           onClick={saveNewTeam}
+          variant="contained"
         >
           Save New Team
         </Button>

@@ -1,48 +1,34 @@
-import React, { Suspense } from 'react';
+import React from 'react';
 import styled from 'styled-components';
-import PropTypes from 'prop-types';
 import { withStyles } from '@mui/styles';
 import AddPersonDrawer from './AddPersonDrawer';
+import EditQuestionnaireDrawer from './EditQuestionnaireDrawer';
 import AddTeamDrawer from './AddTeamDrawer';
 import EditPersonDrawer from './EditPersonDrawer';
-import { messageService } from '../../stores/AppObservableStore';
+import EditQuestionDrawer from './EditQuestionDrawer';
+import PersonProfileDrawer from './PersonProfileDrawer';
 import { renderLog } from '../../common/utils/logging';
 
 
 const Drawers = () => {  //  classes, teamId
   renderLog('Drawers');  // Set LOG_RENDER_EVENTS to log all renders
 
-  const onAppObservableStoreChange = () => {
-  };
-
-  React.useEffect(() => {
-    const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
-    onAppObservableStoreChange();
-
-    return () => {
-      appStateSubscription.unsubscribe();
-    };
-  }, []);
-
   return (
-    <Suspense fallback={<></>}>
+    <DrawersWrapper>
+      <PersonProfileDrawer />
       <AddPersonDrawer />
       <AddTeamDrawer />
       <EditPersonDrawer />
-    </Suspense>
+      <EditQuestionDrawer />
+      <EditQuestionnaireDrawer />
+    </DrawersWrapper>
   );
-};
-Drawers.propTypes = {
-  match: PropTypes.object,
 };
 
 const styles = () => ({
 });
 
-const SearchBarWrapper = styled('div')`
-  // margin-top: 14px;
-  // margin-bottom: 8px;
-  width: 100%;
+const DrawersWrapper = styled('div')`
 `;
 
 export default withStyles(styles)(Drawers);

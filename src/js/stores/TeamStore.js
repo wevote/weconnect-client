@@ -2,6 +2,7 @@ import { ReduceStore } from 'flux/utils';
 import Dispatcher from '../common/dispatcher/Dispatcher';
 import PersonStore from './PersonStore';
 import arrayContains from '../common/utils/arrayContains';
+import convertToInteger from '../common/utils/convertToInteger';
 
 class TeamStore extends ReduceStore {
   getInitialState () {
@@ -18,7 +19,7 @@ class TeamStore extends ReduceStore {
   }
 
   getMostRecentTeamChanged () {
-    console.log('TeamStore getMostRecentTeamChanged Id:', this.getState().mostRecentTeamIdSaved);
+    // console.log('TeamStore getMostRecentTeamChanged Id:', this.getState().mostRecentTeamIdSaved);
     if (this.getState().mostRecentTeamIdSaved !== -1) {
       return this.getTeamById(this.getState().mostRecentTeamIdSaved);
     }
@@ -75,8 +76,10 @@ class TeamStore extends ReduceStore {
   reduce (state, action) {
     const { allCachedTeamMembersDict, allCachedTeamsDict } = state;
     let personId = -1;
+    let personIdTemp = -1;
     let revisedState = state;
     let teamId = -1;
+    let teamIdTemp = -1;
     let teamList = [];
     let teamMemberList = [];
     let teamMemberIdList = [];
@@ -89,8 +92,9 @@ class TeamStore extends ReduceStore {
         }
         revisedState = state;
         // console.log('TeamStore add-person-to-team action.res: ', action.res);
-        if (action.res.personId >= 0) {
-          personId = action.res.personId;
+        personIdTemp = convertToInteger(action.res.personId);
+        if (personIdTemp >= 0) {
+          personId = personIdTemp;
         } else {
           personId = -1;
         }
@@ -126,13 +130,15 @@ class TeamStore extends ReduceStore {
         }
         revisedState = state;
         // console.log('TeamStore add-person-to-team action.res: ', action.res);
-        if (action.res.personId >= 0) {
-          personId = action.res.personId;
+        personIdTemp = convertToInteger(action.res.personId);
+        if (personIdTemp >= 0) {
+          personId = personIdTemp;
         } else {
           personId = -1;
         }
-        if (action.res.teamId >= 0) {
-          teamId = action.res.teamId;
+        teamIdTemp = convertToInteger(action.res.teamId);
+        if (teamIdTemp >= 0) {
+          teamId = teamIdTemp;
         } else {
           teamId = -1;
         }
@@ -190,11 +196,14 @@ class TeamStore extends ReduceStore {
           console.log('TeamStore ', action.type, ' FAILED action.res:', action.res);
           return state;
         }
-        if (action.res.teamId >= 0) {
-          teamId = action.res.teamId;
+        teamIdTemp = convertToInteger(action.res.teamId);
+        if (teamIdTemp >= 0) {
+          teamId = teamIdTemp;
         } else {
           teamId = -1;
+          console.log('TeamStore team-retrieve MISSING teamId: ', teamId);
         }
+        // console.log('TeamStore team-retrieve teamId:', teamId);
         teamMemberIdList = [];
         revisedState = state;
 
@@ -230,13 +239,14 @@ class TeamStore extends ReduceStore {
           return state;
         }
         revisedState = state;
-        if (action.res.teamId >= 0) {
-          teamId = action.res.teamId;
+        teamIdTemp = convertToInteger(action.res.teamId);
+        if (teamIdTemp >= 0) {
+          teamId = teamIdTemp;
         } else {
           teamId = -1;
         }
         if (teamId >= 0) {
-          console.log('TeamStore team-save teamId:', teamId);
+          // console.log('TeamStore team-save teamId:', teamId);
           allCachedTeamsDict[teamId] = action.res;
           if (action.res.teamMemberList) {
             // If missing teamMemberList do not alter data in the store

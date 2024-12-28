@@ -3,6 +3,7 @@
 module.exports = {
   // weconnect React server for the "weconnect" web app
   NAME_FOR_BROWSER_TAB_TITLE: 'WeConnect',
+  ORGANIZATION_NAME: 'WeVote',
   PROTOCOL: 'http://', // 'http://' for local dev (if not using SSL), or 'https://' for live server
   HOSTNAME: 'localhost:4000', // Don't add 'http...' here.  Live server: 'WeVote.US', Quality: 'quality.WeVote.US', developers: 'localhost:4000'
   PORT: 'localhost:4000', // Don't add 'http...' here.  Live server: 'WeVote.US', Quality: 'quality.WeVote.US', developers: 'localhost:4000'

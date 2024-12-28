@@ -31,7 +31,10 @@ const FAQ = React.lazy(() => import(/* webpackChunkName: 'FAQ' */ './js/pages/FA
 const Footer = React.lazy(() => import(/* webpackChunkName: 'Footer' */ './js/components/Navigation/Footer'));
 const Header = React.lazy(() => import(/* webpackChunkName: 'Header' */ './js/components/Navigation/Header'));
 const PageNotFound = React.lazy(() => import(/* webpackChunkName: 'PageNotFound' */ './js/pages/PageNotFound'));
-const TeamMembers = React.lazy(() => import(/* webpackChunkName: 'TeamMembers' */ './js/pages/TeamMembers'));
+const AnswerQuestionsForm = React.lazy(() => import(/* webpackChunkName: 'AnswerQuestionsForm' */ './js/pages/AnswerQuestionsForm'));
+const QuestionnaireQuestionList = React.lazy(() => import(/* webpackChunkName: 'QuestionnaireQuestionList' */ './js/pages/SystemSettings/Questionnaire'));
+const SystemSettings = React.lazy(() => import(/* webpackChunkName: 'SystemSettings' */ './js/pages/SystemSettings/SystemSettings'));
+const TeamMembers = React.lazy(() => import(/* webpackChunkName: 'TeamMembers' */ './js/pages/TeamHome'));
 const Teams = React.lazy(() => import(/* webpackChunkName: 'Teams' */ './js/pages/Teams'));
 
 // There are just too many "prop spreadings" in the use of Route, if someone can figure out an alternative...
@@ -276,8 +279,11 @@ class App extends Component {
                 <Switch>
                   <PrivateRoute path="/faq" component={FAQ} isAuthenticated={localStorage.getItem('isAuthenticated')} />
                   <Route path="/login" exact><Login /></Route>
+                  <Route path="/q/:questionnaireId/:personId" exact component={AnswerQuestionsForm} />
+                  <Route path="/questionnaire/:questionnaireId" exact component={QuestionnaireQuestionList} />
+                  <Route path="/system-settings" exact component={SystemSettings} />
                   <Route path="/teams" exact component={Teams} />
-                  <Route path="/team-members/:teamId" exact component={TeamMembers} />
+                  <Route path="/team-home/:teamId" exact component={TeamMembers} />
                   <Route path="/" exact component={Teams} />
 
                   <Route path="*" component={PageNotFound} />

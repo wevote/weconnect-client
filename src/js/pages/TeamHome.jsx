@@ -10,56 +10,58 @@ import PersonStore from '../stores/PersonStore';
 import TeamActions from '../actions/TeamActions';
 import TeamStore from '../stores/TeamStore';
 import { PageContentContainer } from '../components/Style/pageLayoutStyles';
+import TeamHeader from '../components/Team/TeamHeader';
+import TeamMemberList from '../components/Team/TeamMemberList';
 import webAppConfig from '../config';
 import apiCalming from '../common/utils/apiCalming';
-import arrayContains from '../common/utils/arrayContains';
-import DesignTokenColors from '../common/components/Style/DesignTokenColors';
+import convertToInteger from '../common/utils/convertToInteger';
 import { renderLog } from '../common/utils/logging';
 
 
-const TeamMembers = ({ classes, match }) => {  //  classes, teamId
-  renderLog('TeamMembers');  // Set LOG_RENDER_EVENTS to log all renders
+const TeamHome = ({ classes, match }) => {  //  classes, teamId
+  renderLog('TeamHome');  // Set LOG_RENDER_EVENTS to log all renders
   const [team, setTeam] = React.useState({});
   const [teamId, setTeamId] = React.useState(-1);
-  const [teamMemberCount, setTeamMemberCount] = React.useState(0);
-  const [teamMemberList, setTeamMemberList] = React.useState([]);
-  const [teamMemberPersonIdList, setTeamMemberPersonIdList] = React.useState([]);
 
   const onAppObservableStoreChange = () => {
   };
 
-  const onRetrieveTeamChange = () => {
-    const { params } = match;
-    setTeamId(params.teamId);
-    const teamTemp = TeamStore.getTeamById(params.teamId);
+  const onRetrieveTeamChange = (teamIdIncoming) => {
+    // console.log('TeamHome onRetrieveTeamChange, teamIdIncoming:', teamIdIncoming);
+    const teamTemp = TeamStore.getTeamById(teamIdIncoming);
     setTeam(teamTemp);
-    const teamMemberListTemp = TeamStore.getTeamMemberList(params.teamId);
-    // console.log('TeamMembers onRetrieveTeamChange, params.teamId:', params.teamId, ', TeamStore.getTeamMemberList:', teamMemberListTemp);
-    setTeamMemberCount(teamMemberListTemp.length);
-    setTeamMemberList(teamMemberListTemp);
-    setTeamMemberPersonIdList(TeamStore.getTeamMemberPersonIdList(params.teamId));
   };
 
   const onPersonStoreChange = () => {
     const { params } = match;
-    onRetrieveTeamChange();
-    if (apiCalming(`teamRetrieve-${params.teamId}`, 1000)) {
-      TeamActions.teamRetrieve(params.teamId);
+    const teamIdTemp = convertToInteger(params.teamId);
+    if (teamIdTemp >= 0) {
+      setTeamId(teamIdTemp);
+    }
+    onRetrieveTeamChange(teamIdTemp);
+    if (apiCalming(`teamRetrieve-${teamIdTemp}`, 1000)) {
+      TeamActions.teamRetrieve(teamIdTemp);
     }
   };
 
   const onTeamStoreChange = () => {
-    onRetrieveTeamChange();
+    const { params } = match;
+    const teamIdTemp = convertToInteger(params.teamId);
+    if (teamIdTemp >= 0) {
+      setTeamId(teamIdTemp);
+    }
+    onRetrieveTeamChange(teamIdTemp);
   };
 
   const addTeamMemberClick = () => {
-    const { params } = match;
+    // console.log('TeamHome addTeamMemberClick, teamId:', teamId);
     AppObservableStore.setGlobalVariableState('addPersonDrawerOpen', true);
-    AppObservableStore.setGlobalVariableState('addPersonDrawerTeamId', params.teamId);
+    AppObservableStore.setGlobalVariableState('addPersonDrawerTeamId', teamId);
   };
 
   React.useEffect(() => {
     const { params } = match;
+    const teamIdTemp = convertToInteger(params.teamId);
 
     const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
     onAppObservableStoreChange();
@@ -68,8 +70,10 @@ const TeamMembers = ({ classes, match }) => {  //  classes, teamId
     const teamStoreListener = TeamStore.addListener(onTeamStoreChange);
     onTeamStoreChange();
 
-    if (apiCalming(`teamRetrieve-${params.teamId}`, 1000)) {
-      TeamActions.teamRetrieve(params.teamId);
+    if (teamIdTemp >= 0) {
+      if (apiCalming(`teamRetrieve-${teamIdTemp}`, 1000)) {
+        TeamActions.teamRetrieve(teamIdTemp);
+      }
     }
 
     return () => {
@@ -83,23 +87,21 @@ const TeamMembers = ({ classes, match }) => {  //  classes, teamId
     <div>
       <Helmet>
         <title>
-          Team Members -
+          Team Home -
           {' '}
           {webAppConfig.NAME_FOR_BROWSER_TAB_TITLE}
         </title>
-        <link rel="canonical" href={`${webAppConfig.WECONNECT_URL_FOR_SEO}/team-members`} />
+        <link rel="canonical" href={`${webAppConfig.WECONNECT_URL_FOR_SEO}/team-home`} />
       </Helmet>
       <PageContentContainer>
         <div>
-          Team Members for
+          Team Home for
           {' '}
           {team.teamName}
           {' '}
-          (
-          {teamMemberCount}
-          ) -
+          -
           {' '}
-          <Link to="/teams">home</Link>
+          <Link to="/teams">team list</Link>
         </div>
         <Button
           classes={{ root: classes.addTeamMemberButtonRoot }}
@@ -109,24 +111,13 @@ const TeamMembers = ({ classes, match }) => {  //  classes, teamId
         >
           Add Team Member
         </Button>
-        {teamMemberList.map((teamMember) => (
-          <TeamMember key={`personId-${teamMember.personId}`}>
-            {teamMember.firstName}
-            {' '}
-            {teamMember.lastName}
-            {arrayContains(teamMember.personId, teamMemberPersonIdList) && (
-              <>
-                {' '}
-                <SpanWithLinkStyle onClick={() => TeamActions.removePersonFromTeam(teamMember.personId, teamId)}>remove</SpanWithLinkStyle>
-              </>
-            )}
-          </TeamMember>
-        ))}
+        <TeamHeader showHeaderLabels={(team.teamMemberList && team.teamMemberList.length > 0)} />
+        <TeamMemberList teamId={teamId} />
       </PageContentContainer>
     </div>
   );
 };
-TeamMembers.propTypes = {
+TeamHome.propTypes = {
   classes: PropTypes.object.isRequired,
   // teamId: PropTypes.number.isRequired,
   match: PropTypes.object.isRequired,
@@ -144,13 +135,7 @@ const styles = (theme) => ({
   },
 });
 
-const SpanWithLinkStyle = styled('span')`
-  text-decoration: underline;
-  color: ${DesignTokenColors.primary500};
-  cursor: pointer;
-`;
-
 const TeamMember = styled('div')`
 `;
 
-export default withStyles(styles)(TeamMembers);
+export default withStyles(styles)(TeamHome);

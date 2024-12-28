@@ -7,7 +7,7 @@ import AppObservableStore, { messageService } from '../../stores/AppObservableSt
 import PersonStore from '../../stores/PersonStore';
 import TeamStore from '../../stores/TeamStore';
 import { renderLog } from '../../common/utils/logging';
-import AddPersonDrawerMainContent from './AddPersonDrawerMainContent';
+import AddPersonDrawerMainContent from '../Person/AddPersonDrawerMainContent';
 
 
 const AddPersonDrawer = ({ classes }) => {  //  classes, teamId

@@ -1,23 +1,22 @@
 import React from 'react';
 import styled from 'styled-components';
-import PropTypes from 'prop-types';
 import { withStyles } from '@mui/styles';
 import DrawerTemplateA from './DrawerTemplateA';
-import AppObservableStore, { messageService } from '../../stores/AppObservableStore';
+import { messageService } from '../../stores/AppObservableStore';
 import PersonStore from '../../stores/PersonStore';
 import TeamStore from '../../stores/TeamStore';
 import { renderLog } from '../../common/utils/logging';
-import EditPersonDrawerMainContent from '../Person/EditPersonDrawerMainContent';
+import PersonProfileDrawerMainContent from '../Person/PersonProfileDrawerMainContent';
 
 
-const EditPersonDrawer = ({ classes }) => {  //  classes, teamId
-  renderLog('EditPersonDrawer');  // Set LOG_RENDER_EVENTS to log all renders
+const PersonProfileDrawer = () => {
+  renderLog('PersonProfileDrawer');  // Set LOG_RENDER_EVENTS to log all renders
   const [headerTitleJsx, setHeaderTitleJsx] = React.useState(<></>);
   const [headerFixedJsx, setHeaderFixedJsx] = React.useState(<></>);
-  const [teamId, setTeamId] = React.useState(-1);
+  // const [teamId, setTeamId] = React.useState(-1);
 
   const onAppObservableStoreChange = () => {
-    setTeamId(AppObservableStore.getGlobalVariableState('editPersonDrawerTeamId'));
+    // setTeamId(AppObservableStore.getGlobalVariableState('personProfileDrawerTeamId'));
   };
 
   const onRetrieveTeamChange = () => {
@@ -39,7 +38,7 @@ const EditPersonDrawer = ({ classes }) => {  //  classes, teamId
     const teamStoreListener = TeamStore.addListener(onTeamStoreChange);
     onTeamStoreChange();
 
-    setHeaderTitleJsx(<>Edit Person</>);
+    // setHeaderTitleJsx(<>Person Profile</>);
 
     return () => {
       appStateSubscription.unsubscribe();
@@ -50,22 +49,19 @@ const EditPersonDrawer = ({ classes }) => {  //  classes, teamId
 
   return (
     <DrawerTemplateA
-      drawerId="editPersonDrawer"
-      drawerOpenGlobalVariableName="editPersonDrawerOpen"
-      mainContentJsx={<EditPersonDrawerMainContent />}
+      drawerId="personProfileDrawer"
+      drawerOpenGlobalVariableName="personProfileDrawerOpen"
+      mainContentJsx={<PersonProfileDrawerMainContent />}
       headerTitleJsx={headerTitleJsx}
       headerFixedJsx={headerFixedJsx}
     />
   );
 };
-EditPersonDrawer.propTypes = {
-  classes: PropTypes.object.isRequired,
-};
 
 const styles = () => ({
 });
 
-const EditPersonDrawerWrapper = styled('div')`
+const PersonProfileDrawerWrapper = styled('div')`
 `;
 
-export default withStyles(styles)(EditPersonDrawer);
+export default withStyles(styles)(PersonProfileDrawer);

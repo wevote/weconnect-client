@@ -20,6 +20,8 @@ import HeaderBarSuspense from './js/components/Navigation/HeaderBarSuspense';
 import webAppConfig from './js/config';
 import VoterStore from './js/stores/VoterStore';
 import Login from './js/pages/Login';
+import { PrivateRoute } from './js/auth';
+
 // importRemoveCordovaListenersToken1  -- Do not remove this line!
 
 // Root URL pages
@@ -44,6 +46,7 @@ class App extends Component {
       hideFooter: false,
       showReadyLight: true,
       enableFullStory: false,
+      isJqueryInitialized: false,
     };
     this.setShowHeader = this.setShowHeader.bind(this);
     this.setShowFooter = this.setShowFooter.bind(this);
@@ -51,6 +54,8 @@ class App extends Component {
     this.setShowReadyHeavy = this.setShowReadyHeavy.bind(this);
     this.bypass2FA = this.bypass2FA.bind(this);
     this.localIsCordova();
+    console.log('--------- initializejQuery() -----------------------------');
+    initializejQuery(() => {});
   }
 
   // See https://reactjs.org/docs/error-boundaries.html
@@ -63,14 +68,6 @@ class App extends Component {
   componentDidMount () {
     this.appStateSubscription = messageService.getMessage().subscribe(() => this.onAppObservableStoreChange());
     this.voterStoreListener = VoterStore.addListener(this.onVoterStoreChange.bind(this));
-
-    // let { hostname } = window.location;
-    // hostname = hostname || '';
-    initializejQuery(() => {
-      // AppObservableStore.siteConfigurationRetrieve(hostname);
-    });
-    // console.log('href in App.js componentDidMount: ', window.location.href);
-    // console.log('normalizedHrefPage in App.js componentDidMount: ', normalizedHref());
 
     if (isCordova()) {
       const size = isIOS() ?  getIOSSizeString() : getAndroidSize();
@@ -259,6 +256,9 @@ class App extends Component {
       window.location.href = destinationHref;
     }
 
+
+    console.log('======================================== ', localStorage.getItem('isAuthenticated'), ' =============================');
+
     return (
       <>
         <StyledEngineProvider injectFirst>
@@ -274,7 +274,7 @@ class App extends Component {
               </Suspense>
               <Suspense fallback={<LoadingWheelComp />}>
                 <Switch>
-                  <Route path="/faq" exact><FAQ /></Route>
+                  <PrivateRoute path="/faq" component={FAQ} isAuthenticated={localStorage.getItem('isAuthenticated')} />
                   <Route path="/login" exact><Login /></Route>
                   <Route path="/teams" exact component={Teams} />
                   <Route path="/team-members/:teamId" exact component={TeamMembers} />

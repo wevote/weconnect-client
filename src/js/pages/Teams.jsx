@@ -119,10 +119,14 @@ const Teams = ({ classes, match }) => {  //  classes, teamId
           </OneTeamWrapper>
         ))}
         <div style={{ padding: '100px 0 25px 0', fontWeight: '700' }}>
-          <Link to={`/login`}>
+          <Link to="/login">
             Sign in
           </Link>
-
+        </div>
+        <div style={{ padding: '10px 0 25px 0', fontWeight: '700' }}>
+          <Link to="/test-auth">
+            Example protected page
+          </Link>
         </div>
 
       </PageContentContainer>

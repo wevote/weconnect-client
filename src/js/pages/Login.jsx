@@ -8,6 +8,7 @@ import styled from 'styled-components';
 import { PageContentContainer } from '../components/Style/pageLayoutStyles';
 import webAppConfig from '../config';
 import { renderLog } from '../common/utils/logging';
+import historyPush from '../common/utils/historyPush';
 
 /* global $  */
 
@@ -23,7 +24,9 @@ const Login = ({ classes }) => {
   const confirmPasswordFldRef = useRef('');
   const [showCreateStuff, setShowCreateStuff] = React.useState(false);
   const [warningLine, setWarningLine] = React.useState('');
-  const [successLine, setSuccessLine] = React.useState('');
+  const isAuthenticated = localStorage.getItem('isAuthenticated');
+  const initialSuccess = isAuthenticated ? `Signed in as ${isAuthenticated}` : 'Please sign in';
+  const [successLine, setSuccessLine] = React.useState(initialSuccess);
 
   renderLog('Login');  // Set LOG_RENDER_EVENTS to log all renders
 
@@ -38,12 +41,6 @@ const Login = ({ classes }) => {
     }
 
     console.log(`${webAppConfig.STAFF_API_SERVER_API_ROOT_URL}login`);
-    $.ajaxSetup({
-      crossDomain: true,
-      xhrFields: {
-        withCredentials: true,
-      },
-    });
     $.post(`${webAppConfig.STAFF_API_SERVER_API_ROOT_URL}login/`,
       { email, password },
       (data, status) => {
@@ -51,9 +48,27 @@ const Login = ({ classes }) => {
         if (data.userId > 0) {
           setWarningLine('');
           setSuccessLine(`Cheers person #${data.userId}!  You are signed in!`);
+          localStorage.setItem('isAuthenticated', data.userId);
         } else {
           setWarningLine(data.errors.msg);
           setSuccessLine('');
+        }
+      });
+  };
+
+  const logoutApi = () => {
+    console.log(`${webAppConfig.STAFF_API_SERVER_API_ROOT_URL}logout`);
+    $.post(`${webAppConfig.STAFF_API_SERVER_API_ROOT_URL}logout/`,
+      {},
+      (data, status) => {
+        console.log(`/logout response -- status: '${status}',  data: ${JSON.stringify(data)}`);
+        if (data.authenticated) {
+          setWarningLine(data.errors.msg);
+          setSuccessLine('');
+        } else {
+          setWarningLine('');
+          setSuccessLine('You are signed out');
+          localStorage.removeItem('isAuthenticated');
         }
       });
   };
@@ -62,12 +77,6 @@ const Login = ({ classes }) => {
     const postURL = `${webAppConfig.STAFF_API_SERVER_API_ROOT_URL}signup`;
     console.log('postURL: ', postURL);
     try {
-      $.ajaxSetup({
-        crossDomain: true,
-        xhrFields: {
-          withCredentials: true,
-        },
-      });
       $.post(postURL,
         {
           firstName,
@@ -87,35 +96,13 @@ const Login = ({ classes }) => {
           setWarningLine(errStr);
           if (data.personCreated) {
             setSuccessLine(`user # ${data.userId} created, and signedIn is ${data.signedIn}`);
+            localStorage.setItem('isAuthenticated', data.userId);
           }
         });
     } catch (e) {
       console.log('signup error', e);
     }
   };
-
-  const testAuthApi = () => {
-    $.ajaxSetup({
-      crossDomain: true,
-      xhrFields: {
-        withCredentials: true,
-      },
-    });
-    $.post(`${webAppConfig.STAFF_API_SERVER_API_ROOT_URL}auth-test`,
-      {},
-      (data, status) => {
-        console.log(`/test-auth response -- status: '${status}',  data: ${JSON.stringify(data)}`);
-        let errStr = '';
-        for (let i = 0; i < data.errors.length; i++) {
-          errStr += data.errors[i].msg;
-        }
-        setWarningLine(errStr);
-        if (data.personCreated) {
-          setSuccessLine(`user # ${data.userId} auth checked, and signedIn is ${data.signedIn}`);
-        }
-      });
-  };
-
 
   const loginPressed = () => {
     const email =  emailPersonalFldRef.current.value;
@@ -128,6 +115,10 @@ const Login = ({ classes }) => {
       setWarningLine('');
       loginApi(email, password);
     }
+  };
+
+  const signOutPressed = () => {
+    logoutApi();
   };
 
   const createPressed = () => {
@@ -160,10 +151,6 @@ const Login = ({ classes }) => {
     }
   };
 
-  const testPressed = () => {
-    testAuthApi();
-  };
-
 
   return (
     <div>
@@ -175,100 +162,118 @@ const Login = ({ classes }) => {
         </title>
       </Helmet>
       <PageContentContainer>
-        <h1>
-          Sign in
-        </h1>
-
-        <div id="warningLine" style={{ color: 'red', paddingTop: '10px', paddingBottom: '20px' }}>{warningLine}</div>
-        <div id="successLine" style={{ color: 'green', paddingTop: '10px', paddingBottom: '20px' }}>{successLine}</div>
-        <span style={{ display: 'flex' }}>
+        <div style={{ marginLeft: '40px' }}>
+          <h1 style={{ display: 'inline-block' }}>
+            <span style={{ float: 'left', height: '100%' }}>
+              <img
+                alt="we vote logo"
+                width="96px"
+                src="../../img/global/icons/we-vote-icon-square-color-dark.svg"
+              />
+            </span>
+            <span style={{ float: 'right', height: '100%', paddingTop: '31px' }}>
+              Sign in
+            </span>
+          </h1>
+        </div>
+        <div style={{ marginLeft: '80px' }}>
+          <div id="warningLine" style={{ color: 'red', paddingTop: '10px', paddingBottom: '20px' }}>{warningLine}</div>
+          <div id="successLine" style={{ color: 'green', paddingTop: '10px', paddingBottom: '20px' }}>{successLine}</div>
+          <span style={{ display: 'flex' }}>
+            <TextField id="outlined-basic"
+                       label="First Name"
+                       variant="outlined"
+                       inputRef={firstNameFldRef}
+                       sx={{ paddingBottom: '15px',
+                         paddingRight: '10px',
+                         display: showCreateStuff ? 'block' : 'none'  }}
+            />
+            <TextField id="outlined-basic"
+                       label="Last Name"
+                       variant="outlined"
+                       inputRef={lastNameFldRef}
+                       sx={{ paddingBottom: '15px',
+                         display: showCreateStuff ? 'block' : 'none'  }}
+            />
+          </span>
           <TextField id="outlined-basic"
-                     label="First Name"
+                     label={showCreateStuff ? 'Your personal email' : 'Your email address'}
+                     helperText={showCreateStuff ? 'Required' : ''}
                      variant="outlined"
-                     inputRef={firstNameFldRef}
-                     sx={{ paddingBottom: '15px',
-                       paddingRight: '10px',
-                       display: showCreateStuff ? 'block' : 'none'  }}
-          />
-          <TextField id="outlined-basic"
-                     label="Last Name"
-                     variant="outlined"
-                     inputRef={lastNameFldRef}
-                     sx={{ paddingBottom: '15px',
-                       display: showCreateStuff ? 'block' : 'none'  }}
-          />
-        </span>
-        <TextField id="outlined-basic"
-                   label={showCreateStuff ? 'Your personal email' : 'Your email address'}
-                   helperText={showCreateStuff ? 'Required' : ''}
-                   variant="outlined"
-                   inputRef={emailPersonalFldRef}
-                   sx={{ display: 'block', paddingBottom: '15px' }}
-        />
-        <TextField id="outlined-basic"
-                   label="Second Email"
-                   helperText="Optional, possibly your wevote.us email"
-                   variant="outlined"
-                   inputRef={emailOfficialFldRef}
-                   sx={{ paddingBottom: '15px',
-                     display: showCreateStuff ? 'block' : 'none' }}
-        />
-        <TextField id="outlined-basic"
-                   label="Location"
-                   variant="outlined"
-                   inputRef={locationFldRef}
-                   helperText="City, State (2 chars)"
-                   sx={{ paddingBottom: '15px',
-                     display: showCreateStuff ? 'block' : 'none'  }}
-        />
-        <span style={{ display: 'flex' }}>
-          <TextField id="outlined-basic"
-                     label="Password"
-                     variant="outlined"
-                     inputRef={passwordFldRef}
-                     defaultValue="12345678"
+                     inputRef={emailPersonalFldRef}
                      sx={{ display: 'block', paddingBottom: '15px' }}
           />
           <TextField id="outlined-basic"
-                     label="Confirm Password"
+                     label="Second Email"
+                     helperText="Optional, possibly your wevote.us email"
                      variant="outlined"
-                     inputRef={confirmPasswordFldRef}
-                     defaultValue="12345678"
-                     sx={{ padding: '0 0 15px 10px', display: showCreateStuff ? 'block' : 'none'  }}
+                     inputRef={emailOfficialFldRef}
+                     sx={{ paddingBottom: '15px',
+                       display: showCreateStuff ? 'block' : 'none' }}
           />
-        </span>
-        <span style={{ display: 'flex' }}>
+          <TextField id="outlined-basic"
+                     label="Location"
+                     variant="outlined"
+                     inputRef={locationFldRef}
+                     helperText="City, State (2 chars)"
+                     sx={{ paddingBottom: '15px',
+                       display: showCreateStuff ? 'block' : 'none'  }}
+          />
+          <span style={{ display: 'flex' }}>
+            <TextField id="outlined-basic"
+                       label="Password"
+                       variant="outlined"
+                       inputRef={passwordFldRef}
+                       defaultValue="12345678"
+                       sx={{ display: 'block', paddingBottom: '15px' }}
+            />
+            <TextField id="outlined-basic"
+                       label="Confirm Password"
+                       variant="outlined"
+                       inputRef={confirmPasswordFldRef}
+                       defaultValue="12345678"
+                       sx={{ padding: '0 0 15px 10px', display: showCreateStuff ? 'block' : 'none'  }}
+            />
+          </span>
+          <span style={{ display: 'flex' }}>
+            <Button
+              classes={{ root: classes.loginButtonRoot }}
+              color="primary"
+              variant="contained"
+              onClick={showCreateStuff ? createPressed : loginPressed}
+              sx={{ paddingBottom: '15px', display: showCreateStuff ? 'none' : 'flex'  }}
+            >
+              Sign In
+            </Button>
+            <A style={{ display: showCreateStuff ? 'none' : 'flex'  }}>Forgot your password?</A>
+          </span>
+          <div style={{ paddingTop: '35px' }} />
           <Button
-            classes={{ root: classes.loginButtonRoot }}
+            classes={{ root: classes.buttonDesktop }}
             color="primary"
             variant="contained"
-            onClick={showCreateStuff ? createPressed : loginPressed}
-            sx={{ paddingBottom: '15px', display: showCreateStuff ? 'none' : 'flex'  }}
+            onClick={createPressed}
           >
-            Sign In
+            {showCreateStuff ? 'Save New Account' : 'Create Account'}
           </Button>
-          <A style={{ display: showCreateStuff ? 'none' : 'flex'  }}>Forgot your password?</A>
-        </span>
-        <div style={{ paddingTop: '35px' }} />
-        <Button
-          classes={{ root: classes.buttonDesktop }}
-          color="primary"
-          variant="contained"
-          onClick={createPressed}
-        >
-          {showCreateStuff ? 'Save New Account' : 'Create Account'}
-        </Button>
-        <Button
-          classes={{ root: classes.buttonDesktop }}
-          color="primary"
-          variant="contained"
-          onClick={testPressed}
-        >
-          Test Auth
-        </Button>
-
-        <div style={{ paddingTop: '80px' }}>
-          This page&apos;s purpose is to test and exercise the API.  Feel free to replace me.
+          <div style={{ paddingTop: '35px' }} />
+          <Button
+            classes={{ root: classes.buttonDesktop }}
+            color="primary"
+            variant="contained"
+            onClick={() => historyPush('/faq')}
+          >
+            FAQ (Requires Authentication)
+          </Button>
+          <div style={{ paddingTop: '35px' }} />
+          <Button
+            classes={{ root: classes.buttonDesktop }}
+            color="primary"
+            variant="contained"
+            onClick={signOutPressed}
+          >
+            Sign Out
+          </Button>
         </div>
       </PageContentContainer>
     </div>

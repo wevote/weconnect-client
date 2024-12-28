@@ -14,6 +14,12 @@ const initializejQuery = (afterFunction) => {
       window.jQuery = jquery;
       window.$ = jquery;
       // console.log('jquery loaded');
+      window.$.ajaxSetup({
+        crossDomain: true,
+        xhrFields: {
+          withCredentials: true,
+        },
+      });
       if (afterFunction) {
         afterFunction();
       }

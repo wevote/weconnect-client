@@ -8,7 +8,7 @@ import PersonStore from '../../stores/PersonStore';
 import TeamStore from '../../stores/TeamStore';
 import apiCalming from '../../common/utils/apiCalming';
 import { renderLog } from '../../common/utils/logging';
-import EditPersonForm from '../Person/EditPersonForm';
+import EditPersonForm from './EditPersonForm';
 
 
 const EditPersonDrawerMainContent = ({ classes }) => {  //  classes, teamId

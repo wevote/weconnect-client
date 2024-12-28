@@ -6,8 +6,7 @@ export default function prepareDataPackageFromAppObservableStore (acceptedVariab
   for (let i = 0; i < acceptedVariables.length; i++) {
     // Ex/ emailPersonalToBeSaved and emailPersonalChanged
     // console.log(`prepareData: ${acceptedVariables[i]}ToBeSaved:`, AppObservableStore.getGlobalVariableState(`${acceptedVariables[i]}ToBeSaved`));
-    if (AppObservableStore.getGlobalVariableState(`${acceptedVariables[i]}ToBeSaved`) &&
-        AppObservableStore.getGlobalVariableState(`${acceptedVariables[i]}Changed`)) {
+    if (AppObservableStore.getGlobalVariableState(`${acceptedVariables[i]}Changed`)) {
       // If the value has changed, add it to the data dictionary
       if (AppObservableStore.getGlobalVariableState(`${acceptedVariables[i]}Changed`) === true) {
         data[`${acceptedVariables[i]}Changed`] = true;

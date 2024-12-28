@@ -45,8 +45,7 @@ const AddPersonForm = ({ classes }) => {  //  classes, teamId
   };
 
   const saveNewPerson = () => {
-    const acceptedVariables = FIELDS_IN_FORM;
-    const data = prepareDataPackageFromAppObservableStore(acceptedVariables);
+    const data = prepareDataPackageFromAppObservableStore(FIELDS_IN_FORM);
     if (teamId >= 0) {
       data.teamId = teamId;
       data.teamName = TeamStore.getTeamById(teamId).teamName;
@@ -111,6 +110,7 @@ const AddPersonForm = ({ classes }) => {  //  classes, teamId
     <AddPersonFormWrapper>
       <FormControl classes={{ root: classes.formControl }}>
         <TextField
+          autoFocus
           // classes={{ root: classes.textField }} // Not working yet
           id="firstNameToBeSaved"
           label="First Name"

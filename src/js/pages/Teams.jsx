@@ -9,12 +9,13 @@ import AppObservableStore, { messageService } from '../stores/AppObservableStore
 import PersonStore from '../stores/PersonStore';
 import TeamActions from '../actions/TeamActions';
 import TeamStore from '../stores/TeamStore';
+import { SpanWithLinkStyle } from '../components/Style/linkStyles';
 import { PageContentContainer } from '../components/Style/pageLayoutStyles';
+import TeamHeader from '../components/Team/TeamHeader';
 import TeamMemberList from '../components/Team/TeamMemberList';
 import webAppConfig from '../config';
 import apiCalming from '../common/utils/apiCalming';
 import { renderLog } from '../common/utils/logging';
-import DesignTokenColors from '../common/components/Style/DesignTokenColors';
 
 
 const Teams = ({ classes, match }) => {  //  classes, teamId
@@ -77,7 +78,7 @@ const Teams = ({ classes, match }) => {  //  classes, teamId
           {' '}
           {webAppConfig.NAME_FOR_BROWSER_TAB_TITLE}
         </title>
-        <link rel="canonical" href={`${webAppConfig.WECONNECT_URL_FOR_SEO}/team-members`} />
+        <link rel="canonical" href={`${webAppConfig.WECONNECT_URL_FOR_SEO}/team-home`} />
       </Helmet>
       <PageContentContainer>
         <div>
@@ -90,6 +91,10 @@ const Teams = ({ classes, match }) => {  //  classes, teamId
           ) : (
             <SpanWithLinkStyle onClick={() => setShowAllTeamMembers(true)}>show people</SpanWithLinkStyle>
           )}
+          {' '}
+          -
+          {' '}
+          <Link to="/system-settings">settings</Link>
         </div>
         <Button
           classes={{ root: classes.addTeamButtonRoot }}
@@ -99,20 +104,9 @@ const Teams = ({ classes, match }) => {  //  classes, teamId
         >
           Add Team
         </Button>
-        {teamList.map((team) => (
+        {teamList.map((team, index) => (
           <OneTeamWrapper key={`team-${team.id}`}>
-            <OneTeamHeader>
-              <TeamHeaderCell largeFont titleCell width={275}>
-                <Link to={`/team-members/${team.id}`}>
-                  {team.teamName}
-                </Link>
-              </TeamHeaderCell>
-              {showAllTeamMembers && (
-                <TeamHeaderCell width={190}>
-                  Title / Volunteering Love
-                </TeamHeaderCell>
-              )}
-            </OneTeamHeader>
+            <TeamHeader team={team} showHeaderLabels={(index === 0) && showAllTeamMembers && (team.teamMemberList && team.teamMemberList.length > 0)} />
             {showAllTeamMembers && (
               <TeamMemberList teamId={team.id} />
             )}
@@ -150,35 +144,7 @@ const styles = (theme) => ({
   },
 });
 
-const OneTeamHeader = styled('div')`
-  align-items: center;
-  display: flex;
-  justify-content: flex-start;
-  margin-top: 10px;
-`;
-
 const OneTeamWrapper = styled('div')`
 `;
-
-const SpanWithLinkStyle = styled('span')`
-  text-decoration: underline;
-  color: ${DesignTokenColors.primary500};
-  cursor: pointer;
-`;
-
-const TeamHeaderCell = styled('div', {
-  shouldForwardProp: (prop) => !['largeFont', 'titleCell', 'width'].includes(prop),
-})(({ largeFont, titleCell, width }) => (`
-  align-content: center;
-  ${(titleCell) ? '' : 'border-bottom: 1px solid #ccc;'}
-  ${(largeFont) ? 'font-size: 1.1em;' : 'font-size: .8em;'};
-  ${(titleCell) ? '' : 'font-weight: 550;'}
-  height: 22px;
-  ${width ? `max-width: ${width}px;` : ''};
-  ${width ? `min-width: ${width}px;` : ''};
-  overflow: hidden;
-  white-space: nowrap;
-  ${width ? `width: ${width}px;` : ''};
-`));
 
 export default withStyles(styles)(Teams);

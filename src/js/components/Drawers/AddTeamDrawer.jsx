@@ -4,19 +4,16 @@ import PropTypes from 'prop-types';
 import { withStyles } from '@mui/styles';
 import DrawerTemplateA from './DrawerTemplateA';
 import { messageService } from '../../stores/AppObservableStore';
-// import TeamActions from '../actions/TeamActions';
+import PersonStore from '../../stores/PersonStore';
 import TeamStore from '../../stores/TeamStore';
-import SearchBar2024 from '../../common/components/Search/SearchBar2024';
 import { renderLog } from '../../common/utils/logging';
-import AddTeamForm from '../Team/AddTeamForm';
+import AddTeamDrawerMainContent from '../Team/AddTeamDrawerMainContent';
 
 
 const AddTeamDrawer = ({ classes }) => {  //  classes, teamId
   renderLog('AddTeamDrawer');  // Set LOG_RENDER_EVENTS to log all renders
-  const [mainContentJsx, setMainContentJsx] = React.useState(<></>);
   const [headerTitleJsx, setHeaderTitleJsx] = React.useState(<></>);
   const [headerFixedJsx, setHeaderFixedJsx] = React.useState(<></>);
-  const [searchText, setSearchText] = React.useState('');
 
   const onAppObservableStoreChange = () => {
   };
@@ -24,41 +21,23 @@ const AddTeamDrawer = ({ classes }) => {  //  classes, teamId
   const onRetrieveTeamChange = () => {
   };
 
-  const onTeamStoreChange = () => {
+  const onPersonStoreChange = () => {
     onRetrieveTeamChange();
   };
 
-  const searchFunction = (incomingSearchText) => {
-    setSearchText(incomingSearchText);
-  };
-
-  const clearFunction = () => {
-    setSearchText('');
+  const onTeamStoreChange = () => {
+    onRetrieveTeamChange();
   };
 
   React.useEffect(() => {
     const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
     onAppObservableStoreChange();
-    const personStoreListener = TeamStore.addListener(onTeamStoreChange);
-    onTeamStoreChange();
+    const personStoreListener = PersonStore.addListener(onPersonStoreChange);
+    onPersonStoreChange();
     const teamStoreListener = TeamStore.addListener(onTeamStoreChange);
     onTeamStoreChange();
 
     setHeaderTitleJsx(<>Add Team</>);
-    const mainContentJsxTemp = (
-      <AddTeamDrawerWrapper>
-        <SearchBarWrapper>
-          <SearchBar2024
-            placeholder="Search by team name"
-            searchFunction={searchFunction}
-            clearFunction={clearFunction}
-            searchUpdateDelayTime={250}
-          />
-        </SearchBarWrapper>
-        <AddTeamForm />
-      </AddTeamDrawerWrapper>
-    );
-    setMainContentJsx(mainContentJsxTemp);
 
     return () => {
       appStateSubscription.unsubscribe();
@@ -71,7 +50,7 @@ const AddTeamDrawer = ({ classes }) => {  //  classes, teamId
     <DrawerTemplateA
       drawerId="addTeamDrawer"
       drawerOpenGlobalVariableName="addTeamDrawerOpen"
-      mainContentJsx={mainContentJsx}
+      mainContentJsx={<AddTeamDrawerMainContent />}
       headerTitleJsx={headerTitleJsx}
       headerFixedJsx={headerFixedJsx}
     />

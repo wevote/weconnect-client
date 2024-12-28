@@ -10,13 +10,15 @@ import { renderLog } from '../../common/utils/logging';
 import prepareDataPackageFromAppObservableStore from '../../common/utils/prepareDataPackageFromAppObservableStore';
 import webAppConfig from '../../config';
 
-const PERSON_FIELDS_IN_FORM = ['emailPersonal', 'firstName', 'firstNamePreferred', 'jobTitle', 'lastName', 'location'];
+const PERSON_FIELDS_IN_FORM = [
+  'emailPersonal', 'firstName', 'firstNamePreferred', 'jobTitle', 'lastName',
+  'location'];
 
 const EditPersonForm = ({ classes }) => {  //  classes, teamId
   renderLog('EditPersonForm');  // Set LOG_RENDER_EVENTS to log all renders
   const [firstPersonDataReceived, setFirstPersonDataReceived] = React.useState(false);
   const [inputValues, setInputValues] = React.useState({});
-  const [personId, setPersonId] = React.useState(-1);
+  // const [personId, setPersonId] = React.useState(-1);
   // const [personDictAlreadySaved, setPersonDictAlreadySaved] = React.useState({});
   const [saveButtonActive, setSaveButtonActive] = React.useState(false);
 
@@ -33,21 +35,13 @@ const EditPersonForm = ({ classes }) => {  //  classes, teamId
     AppObservableStore.setGlobalVariableStateInBulk(globalVariableStates);
   };
 
-  const onAppObservableStoreChange = () => {
-    const editPersonDrawerOpenTemp = AppObservableStore.getGlobalVariableState('editPersonDrawerOpen');
-    const personIdTemp = AppObservableStore.getGlobalVariableState('editPersonDrawerPersonId');
-    if (personIdTemp >= 0 && !editPersonDrawerOpenTemp) {
-      clearEditFormValuesInAppObservableStore();
-      setFirstPersonDataReceived(false);
-    }
-    setPersonId(personIdTemp);
+  const clearEditedValues = () => {
+    setInputValues({});
+    setFirstPersonDataReceived(false);
+    // setPersonId(-1);
+    clearEditFormValuesInAppObservableStore();
+    AppObservableStore.setGlobalVariableState('editPersonDrawerOpen', false);
   };
-
-  // const savePersonSuccessful = () => {
-  //   AppObservableStore.setGlobalVariableState('editPersonDrawerOpen', false);
-  //   setFirstPersonDataReceived(false);
-  //   clearEditFormValuesInAppObservableStore();
-  // };
 
   const updateInputValuesFromPersonStore = (inputValuesIncoming) => {
     const revisedInputValues = { ...inputValuesIncoming };
@@ -64,6 +58,14 @@ const EditPersonForm = ({ classes }) => {  //  classes, teamId
     return revisedInputValues;
   };
 
+  const onAppObservableStoreChange = () => {
+    const editPersonDrawerOpenTemp = AppObservableStore.getGlobalVariableState('editPersonDrawerOpen');
+    const personIdTemp = AppObservableStore.getGlobalVariableState('editPersonDrawerPersonId');
+    if (personIdTemp >= 0 && !editPersonDrawerOpenTemp) {
+      clearEditedValues();
+    }
+  };
+
   const onPersonStoreChange = () => {
     const personIdTemp = AppObservableStore.getGlobalVariableState('editPersonDrawerPersonId');
     const personDict = PersonStore.getPersonById(personIdTemp) || {};
@@ -77,17 +79,20 @@ const EditPersonForm = ({ classes }) => {  //  classes, teamId
   };
 
   const savePerson = () => {
-    const acceptedVariables = PERSON_FIELDS_IN_FORM;
-    const data = prepareDataPackageFromAppObservableStore(acceptedVariables);
+    const personIdTemp = AppObservableStore.getGlobalVariableState('editPersonDrawerPersonId');
+    const data = prepareDataPackageFromAppObservableStore(PERSON_FIELDS_IN_FORM);
     // console.log('savePerson data:', data);
-    PersonActions.personSave(personId, data);
+    PersonActions.personSave(personIdTemp, data);
     setSaveButtonActive(false);
+    setTimeout(() => {
+      clearEditedValues();
+    }, 250);
   };
 
   const updatePersonField = (event) => {
     // The input name must match the person field being updated
-    if (event.target.name && event.target.value) {
-      const newValue = event.target.value;
+    if (event.target.name) {
+      const newValue = event.target.value || '';
       AppObservableStore.setGlobalVariableState(`${event.target.name}Changed`, true);
       AppObservableStore.setGlobalVariableState(`${event.target.name}ToBeSaved`, newValue);
       // console.log('updatePersonField:', event.target.name, ', newValue:', newValue);
@@ -104,13 +109,9 @@ const EditPersonForm = ({ classes }) => {  //  classes, teamId
     const personStoreListener = PersonStore.addListener(onPersonStoreChange);
     onPersonStoreChange();
 
-    // const personId = AppObservableStore.getGlobalVariableState('editPersonDrawerPersonId');
-    // console.log('Initial load emailPersonalToBeSaved:', AppObservableStore.getGlobalVariableState('emailPersonalToBeSaved'));
-
     return () => {
       appStateSubscription.unsubscribe();
       personStoreListener.remove();
-      setFirstPersonDataReceived(false);
     };
   }, []);
 
@@ -118,14 +119,15 @@ const EditPersonForm = ({ classes }) => {  //  classes, teamId
     <EditPersonFormWrapper>
       <FormControl classes={{ root: classes.formControl }}>
         <TextField
+          autoFocus
           id="firstNameToBeSaved"
           label="First (Legal) Name"
-          name="firstName"
           margin="dense"
-          variant="outlined"
+          name="firstName"
+          onChange={updatePersonField}
           placeholder="First Name (legal name)"
           value={inputValues.firstName || ''}
-          onChange={updatePersonField}
+          variant="outlined"
         />
         <TextField
           id="firstNamePreferredToBeSaved"

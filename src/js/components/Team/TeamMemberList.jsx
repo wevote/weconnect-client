@@ -1,40 +1,53 @@
 import React from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
+import { Edit, Delete } from '@mui/icons-material';
 import { withStyles } from '@mui/styles';
+import TeamActions from '../../actions/TeamActions';
 import AppObservableStore, { messageService } from '../../stores/AppObservableStore';
 import PersonStore from '../../stores/PersonStore';
 import TeamStore from '../../stores/TeamStore';
+import DesignTokenColors from '../../common/components/Style/DesignTokenColors';
 import { renderLog } from '../../common/utils/logging';
 
 
-const TeamMemberList = ({ classes, teamId }) => {
+const TeamMemberList = ({ teamId }) => {
   renderLog('TeamMemberList');  // Set LOG_RENDER_EVENTS to log all renders
-  const [teamMemberList, setTeamMemberList] = React.useState([]);
+  // const [teamMemberList, setTeamMemberList] = React.useState([]);
 
   const onAppObservableStoreChange = () => {
   };
 
   const onRetrieveTeamListChange = () => {
+    // TODO: Why is this 'teamId' value changing to -1 after team-retrieve API returns?
     // console.log('TeamMemberList onRetrieveTeamListChange, teamId:', teamId, ', TeamStore.getTeamMemberList:', TeamStore.getTeamMemberList(teamId));
-    setTeamMemberList(TeamStore.getTeamMemberList(teamId));
+    // console.log('TeamStore state:', TeamStore.getState());
+    // console.log('TeamMemberList:', TeamStore.getTeamMemberList(teamId));
+    // setTeamMemberList();
   };
 
   const onPersonStoreChange = () => {
-    onRetrieveTeamListChange();
+    // onRetrieveTeamListChange();
   };
 
   const onTeamStoreChange = () => {
-    onRetrieveTeamListChange();
+    // onRetrieveTeamListChange();
   };
 
-  const editPersonClick = (personId) => {
-    AppObservableStore.setGlobalVariableState('editPersonDrawerOpen', true);
-    AppObservableStore.setGlobalVariableState('editPersonDrawerPersonId', personId);
+  const editPersonClick = (personId, hasEditRights = true) => {
+    if (hasEditRights) {
+      AppObservableStore.setGlobalVariableState('editPersonDrawerOpen', true);
+      AppObservableStore.setGlobalVariableState('editPersonDrawerPersonId', personId);
+    }
+  };
+
+  const personProfileClick = (personId) => {
+    AppObservableStore.setGlobalVariableState('personProfileDrawerOpen', true);
+    AppObservableStore.setGlobalVariableState('personProfileDrawerPersonId', personId);
   };
 
   React.useEffect(() => {
-    setTeamMemberList([]);
+    // setTeamMemberList([]);
     const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
     onAppObservableStoreChange();
     const personStoreListener = PersonStore.addListener(onPersonStoreChange);
@@ -49,14 +62,30 @@ const TeamMemberList = ({ classes, teamId }) => {
     };
   }, []);
 
+  React.useEffect(() => {
+    // console.log('useEffect teamId changed:', teamId);
+    onRetrieveTeamListChange();
+  }, [teamId]);
+
+  const teamMemberList = TeamStore.getTeamMemberList(teamId);
+  const hasEditRights = true;
   return (
     <TeamMembersWrapper>
-      {teamMemberList.map((person) => (
+      {teamMemberList.map((person, index) => (
         <OnePersonWrapper key={`teamMember-${person.personId}`}>
+          <PersonCell id={`index-personId-${person.personId}`} width={15}>
+            <GraySpan>
+              {index + 1}
+            </GraySpan>
+          </PersonCell>
           <PersonCell
             id={`fullNamePreferred-personId-${person.personId}`}
-            onClick={() => editPersonClick(person.personId)}
-            style={{ cursor: 'pointer' }}
+            onClick={() => personProfileClick(person.personId)}
+            style={{
+              cursor: 'pointer',
+              textDecoration: 'underline',
+              color: DesignTokenColors.primary500,
+            }}
             width={150}
           >
             {PersonStore.getFullNamePreferred(person.personId)}
@@ -67,13 +96,46 @@ const TeamMemberList = ({ classes, teamId }) => {
           <PersonCell id={`jobTitle-personId-${person.personId}`} smallestFont width={190}>
             {PersonStore.getPersonById(person.personId).jobTitle}
           </PersonCell>
+          {hasEditRights ? (
+            <PersonCell
+              id={`editPerson-personId-${person.personId}`}
+              onClick={() => editPersonClick(person.personId, hasEditRights)}
+              style={{ cursor: 'pointer' }}
+              width={20}
+            >
+              <EditStyled />
+            </PersonCell>
+          ) : (
+            <PersonCell
+              id={`editPerson-personId-${person.personId}`}
+              width={20}
+            >
+              &nbsp;
+            </PersonCell>
+          )}
+          {hasEditRights ? (
+            <PersonCell
+              id={`removeMember-personId-${person.personId}`}
+              onClick={() => TeamActions.removePersonFromTeam(person.personId, teamId)}
+              style={{ cursor: 'pointer' }}
+              width={20}
+            >
+              <DeleteStyled />
+            </PersonCell>
+          ) : (
+            <PersonCell
+              id={`removeMember-personId-${person.personId}`}
+              width={20}
+            >
+              &nbsp;
+            </PersonCell>
+          )}
         </OnePersonWrapper>
       ))}
     </TeamMembersWrapper>
   );
 };
 TeamMemberList.propTypes = {
-  classes: PropTypes.object.isRequired,
   teamId: PropTypes.number.isRequired,
 };
 
@@ -88,6 +150,23 @@ const styles = (theme) => ({
     },
   },
 });
+
+const DeleteStyled = styled(Delete)`
+  color: ${DesignTokenColors.neutral200};
+  width: 20px;
+  height: 20px;
+`;
+
+const EditStyled = styled(Edit)`
+  color: ${DesignTokenColors.neutral100};
+  height: 16px;
+  margin-left: 2px;
+  width: 16px;
+`;
+
+const GraySpan = styled('span')`
+  color: ${DesignTokenColors.neutral400};
+`;
 
 const OnePersonWrapper = styled('div')`
   display: flex;

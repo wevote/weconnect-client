@@ -69,8 +69,10 @@ const QuestionnaireResponsesList = ({ personId }) => {
                   target="_blank"
                   body={(
                     <Tooltip title="View answers">
-                      view
-                      <LaunchStyled />
+                      <div>
+                        view
+                        <LaunchStyled />
+                      </div>
                     </Tooltip>
                   )}
                 />

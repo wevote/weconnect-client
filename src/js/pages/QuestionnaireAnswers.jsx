@@ -14,6 +14,7 @@ import DesignTokenColors from '../common/components/Style/DesignTokenColors';
 import apiCalming from '../common/utils/apiCalming';
 import { renderLog } from '../common/utils/logging';
 import convertToInteger from '../common/utils/convertToInteger';
+import getAnswerValueFromAnswerDict from '../utils/getAnswerValueFromAnswerDict';
 
 
 const QuestionnaireAnswers = ({ classes, match }) => {
@@ -47,14 +48,7 @@ const QuestionnaireAnswers = ({ classes, match }) => {
   const getAnswerValue = (questionId) => {
     if (allCachedAnswersDict && allCachedAnswersDict[questionId]) {
       const questionAnswer = allCachedAnswersDict[questionId];
-      if (questionAnswer.answerType === 'BOOLEAN') {
-        return questionAnswer.answerBoolean;
-      } else if (questionAnswer.answerType === 'INTEGER') {
-        return questionAnswer.answerInteger || 0;
-      } else if (questionAnswer.answerType === 'STRING') {
-        return questionAnswer.answerString || '';
-      }
-      return '';
+      return getAnswerValueFromAnswerDict(questionAnswer);
     }
     return '';
   };

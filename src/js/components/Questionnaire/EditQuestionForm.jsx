@@ -1,6 +1,8 @@
-import { Button, Checkbox, FormControl, FormControlLabel, TextField } from '@mui/material';
+import { ContentCopy } from '@mui/icons-material';
+import { Button, Checkbox, FormControl, FormControlLabel, TextField } from '@mui/material'; // FormLabel, Radio, RadioGroup,
 import { withStyles } from '@mui/styles';
 import React from 'react';
+import CopyToClipboard from 'react-copy-to-clipboard';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import AppObservableStore, { messageService } from '../../stores/AppObservableStore';
@@ -8,24 +10,42 @@ import QuestionnaireActions from '../../actions/QuestionnaireActions';
 import QuestionnaireStore from '../../stores/QuestionnaireStore';
 import { renderLog } from '../../common/utils/logging';
 import prepareDataPackageFromAppObservableStore from '../../common/utils/prepareDataPackageFromAppObservableStore';
+import DesignTokenColors from '../../common/components/Style/DesignTokenColors';
+import { SpanWithLinkStyle } from '../Style/linkStyles';
+
+const PERSON_FIELDS_ACCEPTED = [
+  'firstName',
+  'firstNamePreferred',
+  'emailPersonal',
+  'hoursPerWeekEstimate',
+  'jobTitle',
+  'lastName',
+  'location',
+  'stateCode',
+  'zipCode',
+];
 
 const QUESTION_FIELDS_IN_FORM = [
-  'answerType', 'fieldMappingRule', 'questionInstructions', 'questionText',
+  'answerType', 'fieldMappingRule',
+  'questionInstructions', 'questionText',
   'requireAnswer', 'statusActive'];
 
 const EditQuestionForm = ({ classes }) => {  //  classes, teamId
   renderLog('EditQuestionForm');  // Set LOG_RENDER_EVENTS to log all renders
+  const [fieldMappingRuleCopied, setFieldMappingRuleCopied] = React.useState('');
   const [firstQuestionDataReceived, setFirstQuestionDataReceived] = React.useState(false);
   const [inputValues, setInputValues] = React.useState({
     answerType: '',
+    fieldMappingRule: '',
+    fieldMappingField: '',
+    fieldMappingTable: '',
     questionInstructions: '',
     questionText: '',
     requireAnswer: false,
     statusActive: true,
   });
-  // const [questionId, setQuestionId] = React.useState(-1);
-  // const [questionDictAlreadySaved, setQuestionDictAlreadySaved] = React.useState({});
   const [saveButtonActive, setSaveButtonActive] = React.useState(false);
+  const [showFieldMappingOptions, setShowFieldMappingOptions] = React.useState(false);
 
   // const noNotch = {
   //   '& .MuiOutlinedInput-notchedOutline legend': {
@@ -51,6 +71,19 @@ const EditQuestionForm = ({ classes }) => {  //  classes, teamId
     // setQuestionId(-1);
     clearEditFormValuesInAppObservableStore();
     AppObservableStore.setGlobalVariableState('editQuestionDrawerOpen', false);
+  };
+
+  const copyFieldMappingRule = (fieldMappingRule) => {
+    // console.log('EditQuestionForm copyFieldMappingRule');
+    // openSnackbar({ message: 'Copied!' });
+    setFieldMappingRuleCopied(fieldMappingRule);
+    setInputValues({ ...inputValues, ['fieldMappingRule']: fieldMappingRule });
+    AppObservableStore.setGlobalVariableState('fieldMappingRuleChanged', true);
+    AppObservableStore.setGlobalVariableState('fieldMappingRuleToBeSaved', fieldMappingRule);
+    setSaveButtonActive(true);
+    setTimeout(() => {
+      setFieldMappingRuleCopied('');
+    }, 1500);
   };
 
   const updateInputValuesFromQuestionnaireStore = (inputValuesIncoming) => {
@@ -168,7 +201,7 @@ const EditQuestionForm = ({ classes }) => {  //  classes, teamId
           name="answerType"
           margin="dense"
           variant="outlined"
-          placeholder="Text answer? Number answer? Checkboxes?"
+          placeholder="BOOLEAN / INTEGER / STRING"
           value={inputValues.answerType || ''}
           onChange={updateQuestionField}
         />
@@ -178,7 +211,7 @@ const EditQuestionForm = ({ classes }) => {  //  classes, teamId
             <Checkbox
               id="requireAnswerToBeSaved"
               checked={Boolean(inputValues.requireAnswer)}
-              classes={{ root: classes.checkboxRoot }}
+              className={classes.checkboxRoot}
               color="primary"
               name="requireAnswer"
               onChange={updateQuestionField}
@@ -192,7 +225,7 @@ const EditQuestionForm = ({ classes }) => {  //  classes, teamId
             <Checkbox
               id="statusActiveToBeSaved"
               checked={Boolean(inputValues.statusActive)}
-              classes={{ root: classes.checkboxRoot }}
+              className={classes.checkboxRoot}
               color="primary"
               name="statusActive"
               onChange={updateQuestionField}
@@ -200,6 +233,43 @@ const EditQuestionForm = ({ classes }) => {  //  classes, teamId
           )}
           label="Question is active"
         />
+        <ShowMappingOptions>
+          <div>
+            {showFieldMappingOptions ? (
+              <SpanWithLinkStyle onClick={() => setShowFieldMappingOptions(false)}>hide field mapping options</SpanWithLinkStyle>
+            ) : (
+              <SpanWithLinkStyle onClick={() => setShowFieldMappingOptions(true)}>show field mapping options</SpanWithLinkStyle>
+            )}
+          </div>
+        </ShowMappingOptions>
+        {showFieldMappingOptions && (
+          <TextField
+            id="fieldMappingRuleToBeSaved"
+            label="Save answer to this database field"
+            name="fieldMappingRule"
+            margin="dense"
+            variant="outlined"
+            placeholder="ex/ Person.firstName"
+            value={inputValues.fieldMappingRule || ''}
+            onChange={updateQuestionField}
+          />
+        )}
+        {showFieldMappingOptions && (
+          <FieldMappingOptions>
+            {PERSON_FIELDS_ACCEPTED.map((fieldName) => (
+              <OneFieldMappingOption key={`option-${fieldName}`}>
+                <CopyToClipboard text={`Person.${fieldName}`} onCopy={() => copyFieldMappingRule(`Person.${fieldName}`)}>
+                  <OneFieldMappingOption>
+                    Person.
+                    {fieldName}
+                    <ContentCopyStyled />
+                  </OneFieldMappingOption>
+                </CopyToClipboard>
+                {fieldMappingRuleCopied === `Person.${fieldName}` && <>&nbsp;Copied!</>}
+              </OneFieldMappingOption>
+            ))}
+          </FieldMappingOptions>
+        )}
         <Button
           classes={{ root: classes.saveQuestionButton }}
           color="primary"
@@ -237,11 +307,33 @@ const styles = (theme) => ({
   },
 });
 
+const ShowMappingOptions = styled('div')`
+  margin-bottom: 10px;
+  margin-top: 5px;
+`;
+
 const CheckboxLabel = styled(FormControlLabel)`
   margin-bottom: 0 !important;
 `;
 
+const ContentCopyStyled = styled(ContentCopy)`
+  color: ${DesignTokenColors.neutral300};
+  height: 16px;
+  margin-left: 4px;
+  width: 16px;
+`;
+
 const EditQuestionFormWrapper = styled('div')`
+`;
+
+const FieldMappingOptions = styled('div')`
+  margin-bottom: 16px;
+`;
+
+const OneFieldMappingOption = styled('div')`
+  align-items: center;
+  color: ${DesignTokenColors.neutral300};
+  display: flex;
 `;
 
 export default withStyles(styles)(EditQuestionForm);

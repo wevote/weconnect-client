@@ -9,6 +9,7 @@ import TeamStore from '../../stores/TeamStore';
 import apiCalming from '../../common/utils/apiCalming';
 import { renderLog } from '../../common/utils/logging';
 import PersonProfile from './PersonProfile';
+import QuestionnaireResponsesList from '../Questionnaire/QuestionnaireResponsesList';
 
 
 const PersonProfileDrawerMainContent = ({ classes }) => {  //  classes, teamId
@@ -58,6 +59,7 @@ const PersonProfileDrawerMainContent = ({ classes }) => {  //  classes, teamId
   return (
     <PersonProfileDrawerMainContentWrapper>
       <PersonProfile personId={personIdTemp} />
+      <QuestionnaireResponsesList personId={personIdTemp} />
     </PersonProfileDrawerMainContentWrapper>
   );
 };

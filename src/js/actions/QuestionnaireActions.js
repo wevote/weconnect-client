@@ -26,6 +26,17 @@ export default {
     }
   },
 
+  questionnaireResponsesListRetrieve (personIdList = []) {
+    // console.log('QuestionnaireActions, questionnaireRetrieve personIdList:', personIdList);
+    if (personIdList) {
+      Dispatcher.loadEndpoint('questionnaire-responses-list-retrieve', {
+        personIdList,
+      });
+    } else {
+      Dispatcher.loadEndpoint('questionnaire-responses-list-retrieve');
+    }
+  },
+
   questionnaireRetrieve (questionnaireId = '') {
     // console.log('QuestionnaireActions, questionnaireRetrieve questionnaireId:', questionnaireId);
     if (questionnaireId) {

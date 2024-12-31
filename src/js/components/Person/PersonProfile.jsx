@@ -23,7 +23,7 @@ const PersonProfile = ({ personId }) => {
 
   const onPersonStoreChange = () => {
     const personTemp = PersonStore.getPersonById(personId);
-    console.log('PersonProfile personId:', personId, ', personTemp:', personTemp);
+    // console.log('PersonProfile personId:', personId, ', personTemp:', personTemp);
     setPerson(personTemp);
     const fullNamePreferredTemp = PersonStore.getFullNamePreferred(personId);
     setFullNamePreferred(fullNamePreferredTemp);

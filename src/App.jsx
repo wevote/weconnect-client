@@ -26,12 +26,13 @@ import { PrivateRoute } from './js/auth';
 
 // Root URL pages
 
+const AnswerQuestionsForm = React.lazy(() => import(/* webpackChunkName: 'AnswerQuestionsForm' */ './js/pages/AnswerQuestionsForm'));
 const Drawers = React.lazy(() => import(/* webpackChunkName: 'Drawers' */ './js/components/Drawers/Drawers'));
 const FAQ = React.lazy(() => import(/* webpackChunkName: 'FAQ' */ './js/pages/FAQ'));
 const Footer = React.lazy(() => import(/* webpackChunkName: 'Footer' */ './js/components/Navigation/Footer'));
 const Header = React.lazy(() => import(/* webpackChunkName: 'Header' */ './js/components/Navigation/Header'));
 const PageNotFound = React.lazy(() => import(/* webpackChunkName: 'PageNotFound' */ './js/pages/PageNotFound'));
-const AnswerQuestionsForm = React.lazy(() => import(/* webpackChunkName: 'AnswerQuestionsForm' */ './js/pages/AnswerQuestionsForm'));
+const QuestionnaireAnswers = React.lazy(() => import(/* webpackChunkName: 'QuestionnaireAnswers' */ './js/pages/QuestionnaireAnswers'));
 const QuestionnaireQuestionList = React.lazy(() => import(/* webpackChunkName: 'QuestionnaireQuestionList' */ './js/pages/SystemSettings/Questionnaire'));
 const SystemSettings = React.lazy(() => import(/* webpackChunkName: 'SystemSettings' */ './js/pages/SystemSettings/SystemSettings'));
 const TeamMembers = React.lazy(() => import(/* webpackChunkName: 'TeamMembers' */ './js/pages/TeamHome'));
@@ -277,6 +278,7 @@ class App extends Component {
               </Suspense>
               <Suspense fallback={<LoadingWheelComp />}>
                 <Switch>
+                  <Route path="/answers/:questionnaireId/:personId" exact component={QuestionnaireAnswers} />
                   <PrivateRoute path="/faq" component={FAQ} isAuthenticated={localStorage.getItem('isAuthenticated')} />
                   <Route path="/login" exact><Login /></Route>
                   <Route path="/q/:questionnaireId/:personId" exact component={AnswerQuestionsForm} />

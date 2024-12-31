@@ -177,6 +177,30 @@ class PersonStore extends ReduceStore {
         // console.log('PersonStore revisedState:', revisedState);
         return revisedState;
 
+      case 'person-retrieve':
+        if (!action.res.success) {
+          console.log('PersonStore ', action.type, ' FAILED action.res:', action.res);
+          return state;
+        }
+        revisedState = state;
+        if (action.res.personId >= 0) {
+          personId = action.res.personId;
+        } else {
+          personId = -1;
+        }
+
+        if (personId >= 0) {
+          // console.log('PersonStore person-save personId:', personId);
+          allCachedPeopleDict[personId] = action.res;
+          revisedState = {
+            ...revisedState,
+            allCachedPeopleDict,
+          };
+        } else {
+          console.log('PersonStore person-retrieve MISSING personId:', personId);
+        }
+        return revisedState;
+
       case 'person-save':
         if (!action.res.success) {
           console.log('PersonStore ', action.type, ' FAILED action.res:', action.res);

@@ -1,13 +1,14 @@
 import { Button, Checkbox, FormControl, FormControlLabel, TextField } from '@mui/material';
 import { withStyles } from '@mui/styles';
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
-import AppObservableStore, { messageService } from '../../stores/AppObservableStore';
+import { useWeAppContext } from '../../contexts/WeAppContext';
 import QuestionnaireActions from '../../actions/QuestionnaireActions';
 import QuestionnaireStore from '../../stores/QuestionnaireStore';
 import { renderLog } from '../../common/utils/logging';
-import prepareDataPackageFromAppObservableStore from '../../common/utils/prepareDataPackageFromAppObservableStore';
+import PrepareDataPackageFromAppObservableStore from '../../common/utils/PrepareDataPackageFromAppObservableStore';
+// import AppObservableStore, { messageService } from '../../stores/AppObservableStore';
 
 const QUESTION_FIELDS_IN_FORM = [
   'answerType', 'fieldMappingRule', 'questionInstructions', 'questionText',
@@ -23,9 +24,11 @@ const EditQuestionForm = ({ classes }) => {  //  classes, teamId
     requireAnswer: false,
     statusActive: true,
   });
+  const [saveButtonActive, setSaveButtonActive] = React.useState(false);
+  const { setAppContextValue, getAppContextValue, setAppContextValuesInBulk } = useWeAppContext();  // This component will re-render whenever the value of WeAppContext changes
+
   // const [questionId, setQuestionId] = React.useState(-1);
   // const [questionDictAlreadySaved, setQuestionDictAlreadySaved] = React.useState({});
-  const [saveButtonActive, setSaveButtonActive] = React.useState(false);
 
   // const noNotch = {
   //   '& .MuiOutlinedInput-notchedOutline legend': {
@@ -42,7 +45,7 @@ const EditQuestionForm = ({ classes }) => {  //  classes, teamId
     }
     globalVariableStates.editQuestionDrawerQuestionId = -1;
     // console.log('clearEditFormValuesInAppObservableStore globalVariableStates:', globalVariableStates);
-    AppObservableStore.setGlobalVariableStateInBulk(globalVariableStates);
+    setAppContextValuesInBulk(globalVariableStates);
   };
 
   const clearEditedValues = () => {
@@ -50,12 +53,12 @@ const EditQuestionForm = ({ classes }) => {  //  classes, teamId
     setFirstQuestionDataReceived(false);
     // setQuestionId(-1);
     clearEditFormValuesInAppObservableStore();
-    AppObservableStore.setGlobalVariableState('editQuestionDrawerOpen', false);
+    setAppContextValue('editQuestionDrawerOpen', false);
   };
 
   const updateInputValuesFromQuestionnaireStore = (inputValuesIncoming) => {
     const revisedInputValues = { ...inputValuesIncoming };
-    const questionIdTemp = AppObservableStore.getGlobalVariableState('editQuestionDrawerQuestionId');
+    const questionIdTemp = getAppContextValue('editQuestionDrawerQuestionId');
     const questionDict = QuestionnaireStore.getQuestionById(questionIdTemp) || {};
     // console.log('=== updateInputValuesFromQuestionnaireStore questionIdTemp:', questionIdTemp, ', questionDict:', questionDict);
     if (questionIdTemp && questionDict.questionId) {
@@ -69,16 +72,25 @@ const EditQuestionForm = ({ classes }) => {  //  classes, teamId
     return revisedInputValues;
   };
 
-  const onAppObservableStoreChange = () => {
-    const editQuestionDrawerOpenTemp = AppObservableStore.getGlobalVariableState('editQuestionDrawerOpen');
-    const questionIdTemp = AppObservableStore.getGlobalVariableState('editQuestionDrawerQuestionId');
+  useEffect(() => {  // Replaces onAppObservableStoreChange and will be called whenever the context value changes
+    console.log('EditQuestionForm: Context value changed:', true);
+    const editQuestionDrawerOpenTemp = getAppContextValue('editQuestionDrawerOpen');
+    const questionIdTemp = getAppContextValue('editQuestionDrawerQuestionId');
     if (questionIdTemp >= 0 && !editQuestionDrawerOpenTemp) {
       clearEditedValues();
     }
-  };
+  }, [getAppContextValue]);
+
+  // const onAppObservableStoreChange = () => {
+  //   const editQuestionDrawerOpenTemp = getAppContextValue('editQuestionDrawerOpen');
+  //   const questionIdTemp = getAppContextValue('editQuestionDrawerQuestionId');
+  //   if (questionIdTemp >= 0 && !editQuestionDrawerOpenTemp) {
+  //     clearEditedValues();
+  //   }
+  // };
 
   const onQuestionnaireStoreChange = () => {
-    const questionIdTemp = AppObservableStore.getGlobalVariableState('editQuestionDrawerQuestionId');
+    const questionIdTemp = getAppContextValue('editQuestionDrawerQuestionId');
     const questionDict = QuestionnaireStore.getQuestionById(questionIdTemp) || {};
     // console.log('EditQuestionForm onQuestionnaireStoreChange questionIdTemp:', questionIdTemp, ', questionDict:', questionDict);
     if (!firstQuestionDataReceived) {
@@ -92,9 +104,9 @@ const EditQuestionForm = ({ classes }) => {  //  classes, teamId
   };
 
   const saveQuestion = () => {
-    const questionIdTemp = AppObservableStore.getGlobalVariableState('editQuestionDrawerQuestionId');
-    const questionnaireIdTemp = AppObservableStore.getGlobalVariableState('editQuestionDrawerQuestionnaireId');
-    const data = prepareDataPackageFromAppObservableStore(QUESTION_FIELDS_IN_FORM);
+    const questionIdTemp = getAppContextValue('editQuestionDrawerQuestionId');
+    const questionnaireIdTemp = getAppContextValue('editQuestionDrawerQuestionnaireId');
+    const data = PrepareDataPackageFromAppObservableStore(QUESTION_FIELDS_IN_FORM);
     // console.log('saveQuestion questionId: ', questionIdTemp, ', data:', data);
     QuestionnaireActions.questionSave(questionnaireIdTemp, questionIdTemp, data);
     setSaveButtonActive(false);
@@ -111,8 +123,8 @@ const EditQuestionForm = ({ classes }) => {  //  classes, teamId
       } else {
         newValue = event.target.value || '';
       }
-      AppObservableStore.setGlobalVariableState(`${event.target.name}Changed`, true);
-      AppObservableStore.setGlobalVariableState(`${event.target.name}ToBeSaved`, newValue);
+      setAppContextValue(`${event.target.name}Changed`, true);
+      setAppContextValue(`${event.target.name}ToBeSaved`, newValue);
       // console.log('updateQuestionField:', event.target.name, ', newValue:', newValue);
       setInputValues({ ...inputValues, [event.target.name]: newValue });
       setSaveButtonActive(true);
@@ -122,13 +134,13 @@ const EditQuestionForm = ({ classes }) => {  //  classes, teamId
   };
 
   React.useEffect(() => {
-    const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
-    onAppObservableStoreChange();
+    // const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
+    // onAppObservableStoreChange();
     const personStoreListener = QuestionnaireStore.addListener(onQuestionnaireStoreChange);
     onQuestionnaireStoreChange();
 
     return () => {
-      appStateSubscription.unsubscribe();
+      // appStateSubscription.unsubscribe();
       personStoreListener.remove();
     };
   }, []);

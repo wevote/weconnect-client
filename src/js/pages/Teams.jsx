@@ -1,11 +1,10 @@
 import { Button } from '@mui/material';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { withStyles } from '@mui/styles';
-import AppObservableStore, { messageService } from '../stores/AppObservableStore';
 import PersonStore from '../stores/PersonStore';
 import TeamActions from '../actions/TeamActions';
 import TeamStore from '../stores/TeamStore';
@@ -16,6 +15,8 @@ import TeamMemberList from '../components/Team/TeamMemberList';
 import webAppConfig from '../config';
 import apiCalming from '../common/utils/apiCalming';
 import { renderLog } from '../common/utils/logging';
+import { useWeAppContext } from '../contexts/WeAppContext';
+// import AppObservableStore, { messageService } from '../stores/AppObservableStore';
 
 
 const Teams = ({ classes, match }) => {  //  classes, teamId
@@ -23,17 +24,18 @@ const Teams = ({ classes, match }) => {  //  classes, teamId
   const [showAllTeamMembers, setShowAllTeamMembers] = React.useState(false);
   const [teamList, setTeamList] = React.useState([]);
   const [teamCount, setTeamCount] = React.useState(0);
+  const { setAppContextValue, getAppContextValue, getAppContextData } = useWeAppContext();  // This component will re-render whenever the value of WeAppContext changes
 
-  const onAppObservableStoreChange = () => {
-  };
 
   const onRetrieveTeamListChange = () => {
-    const { params } = match;
-    setShowAllTeamMembers(true);
-    const teamListTemp = TeamStore.getTeamList(params.teamId);
-    // console.log('Teams onRetrieveTeamListChange, params.teamId:', params.teamId, ', TeamStore.getTeamList:', teamListTemp);
-    setTeamList(teamListTemp);
-    setTeamCount(teamListTemp.length);
+    if (match) {
+      const { params } = match;
+      setShowAllTeamMembers(true);
+      const teamListTemp = TeamStore.getTeamList(params.teamId);
+      // console.log('Teams onRetrieveTeamListChange, params.teamId:', params.teamId, ', TeamStore.getTeamList:', teamListTemp);
+      setTeamList(teamListTemp);
+      setTeamCount(teamListTemp.length);
+    }
   };
 
   const onPersonStoreChange = () => {
@@ -47,13 +49,19 @@ const Teams = ({ classes, match }) => {  //  classes, teamId
     }
   };
 
+
   const addTeamClick = () => {
-    AppObservableStore.setGlobalVariableState('addTeamDrawerOpen', true);
+    setAppContextValue('addTeamDrawerOpen', true);
   };
 
+  useEffect(() => {  // Replaces onAppObservableStoreChange and will be called whenever the context value changes
+    console.log('Teams: Context value changed:', true);
+    if (!getAppContextValue('addTeamDrawerOpen')) {
+      setAppContextValue('addTeamDrawerOpen', true);
+    }
+  }, [getAppContextData()]);
+
   React.useEffect(() => {
-    const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
-    onAppObservableStoreChange();
     const personStoreListener = PersonStore.addListener(onPersonStoreChange);
     onPersonStoreChange();
     const teamStoreListener = TeamStore.addListener(onTeamStoreChange);
@@ -64,7 +72,7 @@ const Teams = ({ classes, match }) => {  //  classes, teamId
     }
 
     return () => {
-      appStateSubscription.unsubscribe();
+      // appStateSubscription.unsubscribe();
       personStoreListener.remove();
       teamStoreListener.remove();
     };

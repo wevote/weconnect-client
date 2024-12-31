@@ -5,10 +5,11 @@ import PropTypes from 'prop-types';
 import validator from 'validator';
 import { withStyles } from '@mui/styles';
 import styled from 'styled-components';
+import { useNavigate } from 'react-router';
+import { renderLog } from '../common/utils/logging';
 import { PageContentContainer } from '../components/Style/pageLayoutStyles';
 import webAppConfig from '../config';
-import { renderLog } from '../common/utils/logging';
-import historyPush from '../common/utils/historyPush';
+// import historyPush from '../common/utils/historyPush';
 
 /* global $  */
 
@@ -27,6 +28,7 @@ const Login = ({ classes }) => {
   const isAuthenticated = localStorage.getItem('isAuthenticated');
   const initialSuccess = isAuthenticated ? `Signed in as ${isAuthenticated}` : 'Please sign in';
   const [successLine, setSuccessLine] = React.useState(initialSuccess);
+  const navigate = useNavigate();
 
   renderLog('Login');  // Set LOG_RENDER_EVENTS to log all renders
 
@@ -261,7 +263,8 @@ const Login = ({ classes }) => {
             classes={{ root: classes.buttonDesktop }}
             color="primary"
             variant="contained"
-            onClick={() => historyPush('/faq')}
+            // onClick={() => historyPush('/faq')}
+            onClick={() => navigate('/faq')}
           >
             FAQ (Requires Authentication)
           </Button>

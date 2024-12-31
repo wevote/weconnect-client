@@ -8,10 +8,10 @@ import { isAndroid, isCordova, isWebApp } from '../../common/utils/isCordovaOrWe
 import isMobileScreenSize, { isTablet } from '../../common/utils/isMobileScreenSize';
 import { cordovaOffsetLog } from '../../common/utils/logging';
 import CordovaPageConstants from '../../constants/CordovaPageConstants';
-import VoterStore from '../../stores/VoterStore';
-import { cordovaComplexHeaderPageContainerTopOffset, cordovaSimplePageContainerTopOffset } from '../../utils/cordovaCalculatedOffsets';
+// import VoterStore from '../../stores/VoterStore';
+// import { cordovaComplexHeaderPageContainerTopOffset, cordovaSimplePageContainerTopOffset } from '../../utils/cordovaCalculatedOffsets';
 import { cordovaBallotFilterTopMargin } from '../../utils/cordovaOffsets';
-import cordovaScrollablePaneTopPadding from '../../utils/cordovaScrollablePaneTopPadding';
+// import cordovaScrollablePaneTopPadding from '../../utils/cordovaScrollablePaneTopPadding';
 import { pageEnumeration } from '../../utils/cordovaUtilsPageEnumeration';
 
 
@@ -44,6 +44,8 @@ export const IOSNoNotchSpacer = styled('div')`
 `;
 
 function getPaddingTop () {
+  /* removed until this can become a functional component 12/29/24
+
   if (isCordova()) {
     if ((normalizedHrefPage() === 'ballot') ||
         (normalizedHrefPage() === 'friends' && VoterStore.getVoterIsSignedIn())) {
@@ -55,6 +57,8 @@ function getPaddingTop () {
     }
   }
   return cordovaScrollablePaneTopPadding();  // 5/14/22 TODO: Refactor this...  Funny that this is no longer used for Cordova, only for the WebApp
+  */
+  return '';
 }
 
 function getPaddingBottom () {
@@ -290,7 +294,7 @@ export const OfficeShareWrapper = styled('div')`
 `;
 
 export const FirstRowPhoneOrEmail = styled('div')`
-  margin: 5px 0px 2px 0px;
+  margin: 5px 0 2px 0;
   text-align: center;
 `;
 

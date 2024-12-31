@@ -1,5 +1,5 @@
 import ReactGA from 'react-ga4';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter } from 'react-router';
 import webAppConfig from '../../../config';
 import AppObservableStore from '../../../stores/AppObservableStore';
 import { normalizedHrefPage } from '../../utils/hrefUtils';

@@ -1,11 +1,12 @@
 import { Button } from '@mui/material';
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Link } from 'react-router-dom';
-import styled from 'styled-components';
+import { Link } from 'react-router';
+// import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { withStyles } from '@mui/styles';
-import AppObservableStore, { messageService } from '../stores/AppObservableStore';
+import { useWeAppContext } from '../contexts/WeAppContext';
+// import AppObservableStore, { messageService } from '../stores/AppObservableStore';
 import PersonStore from '../stores/PersonStore';
 import TeamActions from '../actions/TeamActions';
 import TeamStore from '../stores/TeamStore';
@@ -22,9 +23,7 @@ const TeamHome = ({ classes, match }) => {  //  classes, teamId
   renderLog('TeamHome');  // Set LOG_RENDER_EVENTS to log all renders
   const [team, setTeam] = React.useState({});
   const [teamId, setTeamId] = React.useState(-1);
-
-  const onAppObservableStoreChange = () => {
-  };
+  const { setAppContextValue } = useWeAppContext();  // This component will re-render whenever the value of WeAppContext changes
 
   const onRetrieveTeamChange = (teamIdIncoming) => {
     // console.log('TeamHome onRetrieveTeamChange, teamIdIncoming:', teamIdIncoming);
@@ -55,16 +54,16 @@ const TeamHome = ({ classes, match }) => {  //  classes, teamId
 
   const addTeamMemberClick = () => {
     // console.log('TeamHome addTeamMemberClick, teamId:', teamId);
-    AppObservableStore.setGlobalVariableState('addPersonDrawerOpen', true);
-    AppObservableStore.setGlobalVariableState('addPersonDrawerTeamId', teamId);
+    setAppContextValue('addPersonDrawerOpen', true);
+    setAppContextValue('addPersonDrawerTeamId', teamId);
   };
 
   React.useEffect(() => {
     const { params } = match;
     const teamIdTemp = convertToInteger(params.teamId);
 
-    const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
-    onAppObservableStoreChange();
+    // const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
+    // onAppObservableStoreChange();
     const personStoreListener = PersonStore.addListener(onPersonStoreChange);
     onPersonStoreChange();
     const teamStoreListener = TeamStore.addListener(onTeamStoreChange);
@@ -77,7 +76,7 @@ const TeamHome = ({ classes, match }) => {  //  classes, teamId
     }
 
     return () => {
-      appStateSubscription.unsubscribe();
+      // appStateSubscription.unsubscribe();
       personStoreListener.remove();
       teamStoreListener.remove();
     };
@@ -135,7 +134,7 @@ const styles = (theme) => ({
   },
 });
 
-const TeamMember = styled('div')`
-`;
+// const TeamMember = styled('div')`
+// `;
 
 export default withStyles(styles)(TeamHome);

@@ -1,24 +1,33 @@
-import React from 'react';
-import styled from 'styled-components';
+import React, { useEffect } from 'react';
+// import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { withStyles } from '@mui/styles';
 import DrawerTemplateA from './DrawerTemplateA';
-import AppObservableStore, { messageService } from '../../stores/AppObservableStore';
+// import AppObservableStore, { messageService } from '../../stores/AppObservableStore';
 import PersonStore from '../../stores/PersonStore';
 import TeamStore from '../../stores/TeamStore';
 import { renderLog } from '../../common/utils/logging';
 import EditPersonDrawerMainContent from '../Person/EditPersonDrawerMainContent';
+import { useWeAppContext } from '../../contexts/WeAppContext';
 
-
+// eslint-disable-next-line no-unused-vars
 const EditPersonDrawer = ({ classes }) => {  //  classes, teamId
   renderLog('EditPersonDrawer');  // Set LOG_RENDER_EVENTS to log all renders
   const [headerTitleJsx, setHeaderTitleJsx] = React.useState(<></>);
+  // eslint-disable-next-line no-unused-vars
   const [headerFixedJsx, setHeaderFixedJsx] = React.useState(<></>);
+  // eslint-disable-next-line no-unused-vars
   const [teamId, setTeamId] = React.useState(-1);
+  const { getAppContextValue } = useWeAppContext();  // This component will re-render whenever the value of WeAppContext changes
 
-  const onAppObservableStoreChange = () => {
-    setTeamId(AppObservableStore.getGlobalVariableState('editPersonDrawerTeamId'));
-  };
+  useEffect(() => {  // Replaces onAppObservableStoreChange and will be called whenever the context value changes
+    console.log('EditPersonDrawer: Context value changed:', true);
+    setTeamId(getAppContextValue('editPersonDrawerTeamId'));
+  }, [getAppContextValue]);
+
+  // const onAppObservableStoreChange = () => {
+  //   setTeamId(getAppContextValue('editPersonDrawerTeamId'));
+  // };
 
   const onRetrieveTeamChange = () => {
   };
@@ -32,8 +41,8 @@ const EditPersonDrawer = ({ classes }) => {  //  classes, teamId
   };
 
   React.useEffect(() => {
-    const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
-    onAppObservableStoreChange();
+    // const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
+    // onAppObservableStoreChange();
     const personStoreListener = PersonStore.addListener(onPersonStoreChange);
     onPersonStoreChange();
     const teamStoreListener = TeamStore.addListener(onTeamStoreChange);
@@ -42,7 +51,7 @@ const EditPersonDrawer = ({ classes }) => {  //  classes, teamId
     setHeaderTitleJsx(<>Edit Person</>);
 
     return () => {
-      appStateSubscription.unsubscribe();
+      // appStateSubscription.unsubscribe();
       personStoreListener.remove();
       teamStoreListener.remove();
     };
@@ -65,7 +74,7 @@ EditPersonDrawer.propTypes = {
 const styles = () => ({
 });
 
-const EditPersonDrawerWrapper = styled('div')`
-`;
+// const EditPersonDrawerWrapper = styled('div')`
+// `;
 
 export default withStyles(styles)(EditPersonDrawer);

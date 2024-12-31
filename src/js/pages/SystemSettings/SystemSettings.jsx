@@ -1,28 +1,31 @@
 import { Button } from '@mui/material';
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { withStyles } from '@mui/styles';
-import AppObservableStore, { messageService } from '../../stores/AppObservableStore';
+import { Edit } from '@mui/icons-material';
 import QuestionnaireActions from '../../actions/QuestionnaireActions';
+import { useWeAppContext } from '../../contexts/WeAppContext';
 import QuestionnaireStore from '../../stores/QuestionnaireStore';
 import { PageContentContainer } from '../../components/Style/pageLayoutStyles';
 import webAppConfig from '../../config';
 import apiCalming from '../../common/utils/apiCalming';
 import { renderLog } from '../../common/utils/logging';
-import { Edit } from "@mui/icons-material";
-import DesignTokenColors from "../../common/components/Style/DesignTokenColors";
+import DesignTokenColors from '../../common/components/Style/DesignTokenColors';
+// import AppObservableStore, { messageService } from '../../stores/AppObservableStore';
 
 
 const SystemSettings = ({ classes }) => {
   renderLog('SystemSettings');  // Set LOG_RENDER_EVENTS to log all renders
   const [questionnaireList, setQuestionnaireList] = React.useState([]);
+  // eslint-disable-next-line no-unused-vars
   const [questionnaireCount, setQuestionnaireCount] = React.useState(0);
+  const { setAppContextValue } = useWeAppContext();  // This component will re-render whenever the value of WeAppContext changes
 
-  const onAppObservableStoreChange = () => {
-  };
+  // const onAppObservableStoreChange = () => {
+  // };
 
   const onQuestionnaireStoreChange = () => {
     const questionnaireListTemp = QuestionnaireStore.getAllCachedQuestionnairesList();
@@ -35,18 +38,18 @@ const SystemSettings = ({ classes }) => {
   };
 
   const addQuestionnaireClick = () => {
-    AppObservableStore.setGlobalVariableState('editQuestionnaireDrawerOpen', true);
-    AppObservableStore.setGlobalVariableState('editQuestionnaireDrawerQuestionnaireId', -1);
+    setAppContextValue('editQuestionnaireDrawerOpen', true);
+    setAppContextValue('editQuestionnaireDrawerQuestionnaireId', -1);
   };
 
   const editQuestionnaireClick = (questionnaireId) => {
-    AppObservableStore.setGlobalVariableState('editQuestionnaireDrawerOpen', true);
-    AppObservableStore.setGlobalVariableState('editQuestionnaireDrawerQuestionnaireId', questionnaireId);
+    setAppContextValue('editQuestionnaireDrawerOpen', true);
+    setAppContextValue('editQuestionnaireDrawerQuestionnaireId', questionnaireId);
   };
 
   React.useEffect(() => {
-    const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
-    onAppObservableStoreChange();
+    // const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
+    // onAppObservableStoreChange();
     const personStoreListener = QuestionnaireStore.addListener(onQuestionnaireStoreChange);
     onQuestionnaireStoreChange();
 
@@ -55,7 +58,7 @@ const SystemSettings = ({ classes }) => {
     }
 
     return () => {
-      appStateSubscription.unsubscribe();
+      // appStateSubscription.unsubscribe();
       personStoreListener.remove();
     };
   }, []);

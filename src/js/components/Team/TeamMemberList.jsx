@@ -4,19 +4,22 @@ import PropTypes from 'prop-types';
 import { Edit, Delete } from '@mui/icons-material';
 import { withStyles } from '@mui/styles';
 import TeamActions from '../../actions/TeamActions';
-import AppObservableStore, { messageService } from '../../stores/AppObservableStore';
+// import AppObservableStore, { messageService } from '../../stores/AppObservableStore';
 import PersonStore from '../../stores/PersonStore';
 import TeamStore from '../../stores/TeamStore';
 import DesignTokenColors from '../../common/components/Style/DesignTokenColors';
 import { renderLog } from '../../common/utils/logging';
+import { useWeAppContext } from '../../contexts/WeAppContext';
 
 
 const TeamMemberList = ({ teamId }) => {
   renderLog('TeamMemberList');  // Set LOG_RENDER_EVENTS to log all renders
+  const { setAppContextValue } = useWeAppContext();  // This component will re-render whenever the value of WeAppContext changes
+
   // const [teamMemberList, setTeamMemberList] = React.useState([]);
 
-  const onAppObservableStoreChange = () => {
-  };
+  // const onAppObservableStoreChange = () => {
+  // };
 
   const onRetrieveTeamListChange = () => {
     // TODO: Why is this 'teamId' value changing to -1 after team-retrieve API returns?
@@ -36,27 +39,27 @@ const TeamMemberList = ({ teamId }) => {
 
   const editPersonClick = (personId, hasEditRights = true) => {
     if (hasEditRights) {
-      AppObservableStore.setGlobalVariableState('editPersonDrawerOpen', true);
-      AppObservableStore.setGlobalVariableState('editPersonDrawerPersonId', personId);
+      setAppContextValue('editPersonDrawerOpen', true);
+      setAppContextValue('editPersonDrawerPersonId', personId);
     }
   };
 
   const personProfileClick = (personId) => {
-    AppObservableStore.setGlobalVariableState('personProfileDrawerOpen', true);
-    AppObservableStore.setGlobalVariableState('personProfileDrawerPersonId', personId);
+    setAppContextValue('personProfileDrawerOpen', true);
+    setAppContextValue('personProfileDrawerPersonId', personId);
   };
 
   React.useEffect(() => {
     // setTeamMemberList([]);
-    const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
-    onAppObservableStoreChange();
+    // const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
+    // onAppObservableStoreChange();
     const personStoreListener = PersonStore.addListener(onPersonStoreChange);
     onPersonStoreChange();
     const teamStoreListener = TeamStore.addListener(onTeamStoreChange);
     onTeamStoreChange();
 
     return () => {
-      appStateSubscription.unsubscribe();
+      // appStateSubscription.unsubscribe();
       personStoreListener.remove();
       teamStoreListener.remove();
     };

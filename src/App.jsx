@@ -1,28 +1,16 @@
 import { StyledEngineProvider, ThemeProvider } from '@mui/material/styles';
-import OpenReplay from '@openreplay/tracker';
-import PropTypes from 'prop-types';
-import React, { Component, Suspense } from 'react';
-import ReactGA from 'react-ga4';
-import TagManager from 'react-gtm-module';
-import { Route, Switch, withRouter } from 'react-router-dom';
+import React, { Suspense, useEffect, useState } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router';
 import styled from 'styled-components';
-import VoterSessionActions from './js/actions/VoterSessionActions';
 import muiTheme from './js/common/components/Style/muiTheme';
 import LoadingWheelComp from './js/common/components/Widgets/LoadingWheelComp';
-import AppObservableStore, { messageService } from './js/stores/AppObservableStore';
-import { getAndroidSize, getIOSSizeString, hasDynamicIsland, isIOS } from './js/common/utils/cordovaUtils';
-import historyPush from './js/common/utils/historyPush';
 import { normalizedHref } from './js/common/utils/hrefUtils';
 import initializejQuery from './js/common/utils/initializejQuery';
-import { isCordova, isWebApp } from './js/common/utils/isCordovaOrWebApp';
 import { renderLog } from './js/common/utils/logging';
-import HeaderBarSuspense from './js/components/Navigation/HeaderBarSuspense';
-import webAppConfig from './js/config';
-import VoterStore from './js/stores/VoterStore';
 import Login from './js/pages/Login';
 import { PrivateRoute } from './js/auth';
+import WeAppContext from './js/contexts/WeAppContext';
 
-// importRemoveCordovaListenersToken1  -- Do not remove this line!
 
 // Root URL pages
 
@@ -37,267 +25,80 @@ const SystemSettings = React.lazy(() => import(/* webpackChunkName: 'SystemSetti
 const TeamMembers = React.lazy(() => import(/* webpackChunkName: 'TeamMembers' */ './js/pages/TeamHome'));
 const Teams = React.lazy(() => import(/* webpackChunkName: 'Teams' */ './js/pages/Teams'));
 
-// There are just too many "prop spreadings" in the use of Route, if someone can figure out an alternative...
-/* eslint-disable react/jsx-props-no-spreading */
-/* eslint-disable react/no-unused-state */
 
-class App extends Component {
-  constructor (props) {
-    super(props);
-    this.state = {
-      hideHeader: false,
-      hideFooter: false,
-      showReadyLight: true,
-      enableFullStory: false,
-      isJqueryInitialized: false,
-    };
-    this.setShowHeader = this.setShowHeader.bind(this);
-    this.setShowFooter = this.setShowFooter.bind(this);
-    this.setShowHeaderFooter = this.setShowHeaderFooter.bind(this);  // Look more closely at this
-    this.setShowReadyHeavy = this.setShowReadyHeavy.bind(this);
-    this.bypass2FA = this.bypass2FA.bind(this);
-    this.localIsCordova();
-    console.log('--------- initializejQuery() -----------------------------');
-    initializejQuery(() => {});
-  }
+function App () {
+  // eslint-disable-next-line no-unused-vars
+  const [hideHeader, setHideHeader] = useState(false);
 
-  // See https://reactjs.org/docs/error-boundaries.html
-  static getDerivedStateFromError (error) { // eslint-disable-line no-unused-vars
-    // Update state so the next render will show the fallback UI, We should have an "Oh snap" page
-    console.log('App caught error ', error);
-    return { hasError: true };
-  }
+  useEffect(() => {
+    console.log('--------- initializejQuery() ---------');
+    initializejQuery(() => {
+      console.log('--------- jQuery has been initialized ---------');
+    });
 
-  componentDidMount () {
-    this.appStateSubscription = messageService.getMessage().subscribe(() => this.onAppObservableStoreChange());
-    this.voterStoreListener = VoterStore.addListener(this.onVoterStoreChange.bind(this));
+    // Anything in here is fired on component mount, equiv to componentDidMount()
+    // const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
+    // const voterStoreListener = VoterStore.addListener(onVoterStoreChange());
 
-    if (isCordova()) {
-      const size = isIOS() ?  getIOSSizeString() : getAndroidSize();
-      console.log('Cordova:   device model', window.device.model, '  size: ', size);
-      console.log('Cordova:   Header, hasDynamicIsland', hasDynamicIsland());
-    }
+    // if (isCordova()) {
+    //   const size = isIOS() ?  getIOSSizeString() : getAndroidSize();
+    //   console.log('Cordova:   device model', window.device.model, '  size: ', size);
+    //   console.log('Cordova:   Header, hasDynamicIsland', hasDynamicIsland());
+    // }
 
     // this.bypass2FA();
-  }
 
-  componentDidUpdate (prevProps) {
-    if (prevProps.location.search !== this.props.location.search) {
-      // this.bypass2FA();
-    }
-  }
-
-  componentDidCatch (error, info) {
-    // We should get this information to Amazon Cloud Watch
-    console.error('App caught error: ', `${error} with info: `, info);
-  }
-
-  componentWillUnmount () {
-    this.appStateSubscription.unsubscribe();
-    this.voterStoreListener.remove();
-    // removeCordovaListenersToken -- Do not remove this line!
-  }
-
-  onAppObservableStoreChange () {
-    if (!AppObservableStore.getGoogleAnalyticsEnabled() && !AppObservableStore.getGoogleAnalyticsPending()) {
-      AppObservableStore.setGoogleAnalyticsPending(true);
-      setTimeout(() => {
-        const chosenTrackingId = AppObservableStore.getChosenGoogleAnalyticsTrackingID();
-        const weVoteTrackingId = webAppConfig.GOOGLE_ANALYTICS_TRACKING_ID || '';
-
-        if (chosenTrackingId && weVoteTrackingId) {
-          console.log('Google Analytics (2) ENABLED');
-          ReactGA.initialize([
-            {
-              trackingId: chosenTrackingId,
-            },
-            {
-              trackingId: weVoteTrackingId,
-            },
-          ]);
-        } else if (chosenTrackingId) {
-          console.log('Google Analytics Chosen ENABLED');
-          ReactGA.initialize(chosenTrackingId);
-          AppObservableStore.setGoogleAnalyticsEnabled(true);
-          AppObservableStore.setGoogleAnalyticsPending(false);
-        } else if (weVoteTrackingId) {
-          console.log('Google Analytics ENABLED');
-          ReactGA.initialize(weVoteTrackingId);
-          AppObservableStore.setGoogleAnalyticsEnabled(true);
-          AppObservableStore.setGoogleAnalyticsPending(false);
-        } else {
-          console.log('Google Analytics did not receive a trackingID, NOT ENABLED');
-        }
-
-        const voterWeVoteId = VoterStore.getVoterWeVoteId();
-        const weVoteGTMId = webAppConfig.GOOGLE_TAG_MANAGER_ID || '';
-
-        if (weVoteGTMId) {
-          const tagManagerArgs = {
-            gtmId: weVoteGTMId,
-            dataLayer: {
-              weVoteId: voterWeVoteId,
-            },
-          };
-
-          console.log('Initializing Google Tag Manager with GTM ID:', weVoteGTMId);
-          TagManager.initialize(tagManagerArgs);
-        } else {
-          console.log('Google Tag Manager did not receive a valid GTM ID, NOT ENABLED');
-        }
-      }, 3000);
-    }
-    if (!AppObservableStore.getOpenReplayEnabled() && !AppObservableStore.getOpenReplayPending()) {
-      AppObservableStore.setOpenReplayPending(true);
-      setTimeout(() => {
-        // const chosenProjectKey = AppObservableStore.getChosenOpenReplayTrackingID();
-        const weVoteOpenReplayProjectKey = webAppConfig.OPEN_REPLAY_PROJECT_KEY;
-        const weVoteOpenReplayIngestPoint = webAppConfig.OPEN_REPLAY_INGEST_POINT;
-        // const openReplayProjectKey = chosenProjectKey || weVoteOpenReplayProjectKey;
-        const openReplayProjectKey = weVoteOpenReplayProjectKey || '';
-        const openReplayIngestPoint = weVoteOpenReplayIngestPoint || false;
-        let tracker;
-        if (openReplayProjectKey) {
-          console.log('OpenReplay ENABLED');
-          if (openReplayIngestPoint) {
-            tracker = new OpenReplay({
-              projectKey: openReplayProjectKey,
-              ingestPoint: openReplayIngestPoint,
-              resourceBaseHref: 'https://wevote.us/',
-            });
-          } else {
-            tracker = new OpenReplay({
-              projectKey: openReplayProjectKey,
-              resourceBaseHref: 'https://wevote.us/',
-            });
-          }
-          const voterWeVoteId = VoterStore.getVoterWeVoteId();
-          tracker.start({
-            userID: voterWeVoteId,
-          });
-          AppObservableStore.setOpenReplayTracker(tracker);
-          AppObservableStore.setOpenReplayEnabled(true);
-          AppObservableStore.setOpenReplayPending(false);
-          if (voterWeVoteId) {
-            AppObservableStore.setOpenReplayVoterWeVoteId(voterWeVoteId);
-          }
-        } else {
-          console.log('OpenReplay did not receive a projectKey, NOT ENABLED');
-        }
-      }, 3000);
-    }
-  }
-
-  onVoterStoreChange () {
-    historyPush(this.props.location.pathname);
-  }
-
-  setShowHeader (doShowHeader) {
-    this.setState({ hideHeader: !doShowHeader });
-  }
-
-  setShowFooter (doShowFooter) {
-    this.setState({ hideFooter: !doShowFooter });
-  }
-
-  setShowHeaderFooter (doShow) {
-    // console.log('setShowHeaderFooter -------------- doShow:', doShow);
-    this.setState({
-      hideHeader: !doShow,
-      hideFooter: !doShow,
-    });
-  }
-
-  setShowReadyHeavy () {
-    this.setState({ showReadyLight: false });
-  }
-
-  bypass2FA () {
-    const queryString = this.props.location.search;
-    const query = new URLSearchParams(queryString);
-    const cid = query.get('cid');
-    const voterDeviceId = VoterStore.voterDeviceId();
-    if (cid && cid !== voterDeviceId) {
-      VoterSessionActions.setVoterDeviceIdCookie(cid);
-      // VoterActions.voterRetrieve();
-    }
-  }
-
-  localIsCordova () {
-    const { cordova } = window;
-    window.isCordovaGlobal = cordova !== undefined;    // So now we set a global
-    return cordova !== undefined;
-  }
-
-  render () {
-    renderLog('App');
-    const { hideHeader } = this.state;
-    // const firstVisit = !cookies.getItem('voter_device_id');
-    // const loadingPageHtml = (
-    //   <div id="loading-screen">
-    //     <div style={{ display: 'flex', position: 'fixed', height: '100vh', width: '100vw', top: 0, left: 0, backgroundColor: '#fff', justifyContent: 'center', alignItems: 'center', fontSize: '20px', color: '#2E3C5D', flexDirection: 'column', fontFamily: '\'Source Sans Pro\', sans-serif', textAlign: 'center' }}>
-    //       <h1 style={{ fontFamily: '\'Source Sans Pro\', sans-serif', fontSize: '32px', fontWeight: 'normal', color: '#2E3C5D' }}>Loading your ballot...</h1>
-    //       <div style={{ margin: '0 15px', textAlign: 'center' }}>Thank you for being a voter!</div>
-    //     </div>
-    //   </div>
-    // );
-
-    if (isWebApp()) {
-      // console.log('WebApp: href in App.js render: ', window.location.href);
-    } else {
-      console.log('Cordova:   href hash in App.js render: ', window.location.hash);
-    }
-
-    /*
-    Note: To debug routing, set a breakpoint in the class that routing takes you to -- then look at the received props.
-    The props.match.path shows exactly which route string from this file, was selected by the <Switch>
-    */
-
-    if (window.location.href.endsWith('/storybook')) {
-      const destinationHref = `${window.location.href}-static/index.html?path=/docs/design-system--docs`;
-      console.log('Storybook redirect from: ', window.location.href, ' to: ', destinationHref);
-      window.location.href = destinationHref;
-    }
+    return () => {
+      // Anything in here is fired on component unmount, equiv to componentDidUnmount()
+      // removeCordovaListenersToken -- Do not remove this line!
+    };
+  }, []);
 
 
-    console.log('======================================== ', localStorage.getItem('isAuthenticated'), ' =============================');
 
-    return (
-      <>
-        <StyledEngineProvider injectFirst>
+  renderLog('App');
+
+  const isAuth = localStorage.getItem('isAuthenticated');
+  console.log('======================================== isAuthenticated: "  ', isAuth, ' =============================');
+
+  return (
+    <>
+      <StyledEngineProvider injectFirst>
+        <WeAppContext>
           <ThemeProvider theme={muiTheme}>
             {/* March 2022: We used to have two themeproviders here, one for material-ui, and one for styled-components, but the two are combined in V5 MUI */}
             <WeVoteBody>
-              {/* DO NOT put SnackNotifier or anything else that is non-essential here (to keep it out of the main chunk). */}
-              <Suspense fallback={<HeaderBarSuspense />}>
-                <Header hideHeader={hideHeader} params={{ }} pathname={normalizedHref()} />
-              </Suspense>
+              <Header hideHeader={hideHeader} params={{ }} pathname={normalizedHref()} />
               <Suspense fallback={<></>}>
                 <Drawers />
               </Suspense>
               <Suspense fallback={<LoadingWheelComp />}>
-                <Switch>
-                  <PrivateRoute path="/faq" component={FAQ} isAuthenticated={localStorage.getItem('isAuthenticated')} />
-                  <Route path="/login" exact><Login /></Route>
-                  <Route path="/q/:questionnaireId/:personId" exact component={AnswerQuestionsForm} />
-                  <Route path="/questionnaire/:questionnaireId" exact component={QuestionnaireQuestionList} />
-                  <Route path="/system-settings" exact component={SystemSettings} />
-                  <Route path="/teams" exact component={Teams} />
-                  <Route path="/team-home/:teamId" exact component={TeamMembers} />
-                  <Route path="/" exact component={Teams} />
+                <Router>
+                  <Routes>
+                    <Route element={<PrivateRoute />}>
+                      <Route path="/faq" element={<FAQ />} />
+                    </Route>
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/q/:questionnaireId/:personId" element={<AnswerQuestionsForm />} />
+                    <Route path="/questionnaire/:questionnaireId" element={<QuestionnaireQuestionList />} />
+                    <Route path="/system-settings" element={<SystemSettings />} />
+                    <Route path="/teams" element={<Teams />} />
+                    <Route path="/team-home/:teamId" element={<TeamMembers />} />
+                    <Route path="/" element={<Teams />} />
 
-                  <Route path="*" component={PageNotFound} />
-                </Switch>
+                    <Route path="*" element={<PageNotFound />} />
+                  </Routes>
+                </Router>
               </Suspense>
               <Suspense fallback={<span>&nbsp;</span>}>
                 <Footer />
               </Suspense>
             </WeVoteBody>
           </ThemeProvider>
-        </StyledEngineProvider>
-      </>
-    );
-  }
+        </WeAppContext>
+      </StyledEngineProvider>
+    </>
+  );
 }
 
 const WeVoteBody = styled('div')`
@@ -314,8 +115,210 @@ const WeVoteBody = styled('div')`
   // this debug technique works!  ${() => console.log('-----------------------------')}
 `;
 
-App.propTypes = {
-  location: PropTypes.object,
-};
+// App.propTypes = {
+//   location: PropTypes.object,
+// };
 
-export default withRouter(App);
+// export default withRouter(App);
+export default App;
+
+
+// import HeaderBarSuspense from './js/components/Navigation/HeaderBarSuspense';
+// import PropTypes from 'prop-types';
+// import AppObservableStore, { messageService } from './js/stores/AppObservableStore';
+// import { getAndroidSize, getIOSSizeString, hasDynamicIsland, isIOS } from './js/common/utils/cordovaUtils';
+// import historyPush from './js/common/utils/historyPush';
+// import webAppConfig from './js/config';
+// import VoterStore from './js/stores/VoterStore';
+// import VoterSessionActions from './js/actions/VoterSessionActions';
+// import OpenReplay from '@openreplay/tracker';
+// import ReactGA from 'react-ga4';
+// import TagManager from 'react-gtm-module';
+
+// const [enableFullStory, setEnableFullStory] = useState(false);
+// const [showFooter, setShowFooter] = useState(false);
+
+// constructor (props) {
+//   super(props);
+//   this.state = {
+//     hideHeader: false,
+//     hideFooter: false,
+//     showReadyLight: true,
+//     enableFullStory: false,
+//     isJqueryInitialized: false,
+//   };
+//   this.setShowHeader = this.setShowHeader.bind(this);
+//   this.setShowFooter = this.setShowFooter.bind(this);
+//   this.setShowHeaderFooter = this.setShowHeaderFooter.bind(this);  // Look more closely at this
+//   this.setShowReadyHeavy = this.setShowReadyHeavy.bind(this);
+//   this.bypass2FA = this.bypass2FA.bind(this);
+//   this.localIsCordova();
+//   console.log('--------- initializejQuery() -----------------------------');
+//   initializejQuery(() => {});
+// }
+//
+// // See https://reactjs.org/docs/error-boundaries.html
+// static getDerivedStateFromError (error) { // eslint-disable-line no-unused-vars
+//   // Update state so the next render will show the fallback UI, We should have an "Oh snap" page
+//   console.log('App caught error ', error);
+//   return { hasError: true };
+// }
+
+// const setShowHeader = (doShowHeader) => {
+//   setHideHeader(!doShowHeader );
+// }
+
+// handled by useState at top
+// const setShowFooter (doShowFooter) {
+//   this.setState({ hideFooter: !doShowFooter });
+// }
+
+// setShowHeaderFooter (doShow) {
+//   // console.log('setShowHeaderFooter -------------- doShow:', doShow);
+//   this.setState({
+//     hideHeader: !doShow,
+//     hideFooter: !doShow,
+//   });
+// }
+//
+// setShowReadyHeavy () {
+//   this.setState({ showReadyLight: false });
+// }
+//
+// bypass2FA () {
+//   const queryString = this.props.location.search;
+//   const query = new URLSearchParams(queryString);
+//   const cid = query.get('cid');
+//   const voterDeviceId = VoterStore.voterDeviceId();
+//   if (cid && cid !== voterDeviceId) {
+//     VoterSessionActions.setVoterDeviceIdCookie(cid);
+//     // VoterActions.voterRetrieve();
+//   }
+// }
+//
+// localIsCordova () {
+//   const { cordova } = window;
+//   window.isCordovaGlobal = cordova !== undefined;    // So now we set a global
+//   return cordova !== undefined;
+// }
+// if (isWebApp()) {
+//   // console.log('WebApp: href in App.js render: ', window.location.href);
+// } else {
+//   console.log('Cordova:   href hash in App.js render: ', window.location.hash);
+// }
+
+
+// componentDidUpdate (prevProps) {
+//   if (prevProps.location.search !== this.props.location.search) {
+//     // this.bypass2FA();
+//   }
+// }
+//
+// componentDidCatch (error, info) {
+//   // We should get this information to Amazon Cloud Watch
+//   console.error('App caught error: ', `${error} with info: `, info);
+// }
+//
+
+// const onAppObservableStoreChange = () => {
+//   if (!AppObservableStore.getGoogleAnalyticsEnabled() && !AppObservableStore.getGoogleAnalyticsPending()) {
+//     AppObservableStore.setGoogleAnalyticsPending(true);
+//     setTimeout(() => {
+//       const chosenTrackingId = AppObservableStore.getChosenGoogleAnalyticsTrackingID();
+//       const weVoteTrackingId = webAppConfig.GOOGLE_ANALYTICS_TRACKING_ID || '';
+//
+//       if (chosenTrackingId && weVoteTrackingId) {
+//         console.log('Google Analytics (2) ENABLED');
+//         ReactGA.initialize([
+//           {
+//             trackingId: chosenTrackingId,
+//           },
+//           {
+//             trackingId: weVoteTrackingId,
+//           },
+//         ]);
+//       } else if (chosenTrackingId) {
+//         console.log('Google Analytics Chosen ENABLED');
+//         ReactGA.initialize(chosenTrackingId);
+//         AppObservableStore.setGoogleAnalyticsEnabled(true);
+//         AppObservableStore.setGoogleAnalyticsPending(false);
+//       } else if (weVoteTrackingId) {
+//         console.log('Google Analytics ENABLED');
+//         ReactGA.initialize(weVoteTrackingId);
+//         AppObservableStore.setGoogleAnalyticsEnabled(true);
+//         AppObservableStore.setGoogleAnalyticsPending(false);
+//       } else {
+//         console.log('Google Analytics did not receive a trackingID, NOT ENABLED');
+//       }
+//
+//       const voterWeVoteId = VoterStore.getVoterWeVoteId();
+//       const weVoteGTMId = webAppConfig.GOOGLE_TAG_MANAGER_ID || '';
+//
+//       if (weVoteGTMId) {
+//         const tagManagerArgs = {
+//           gtmId: weVoteGTMId,
+//           dataLayer: {
+//             weVoteId: voterWeVoteId,
+//           },
+//         };
+//
+//         console.log('Initializing Google Tag Manager with GTM ID:', weVoteGTMId);
+//         TagManager.initialize(tagManagerArgs);
+//       } else {
+//         console.log('Google Tag Manager did not receive a valid GTM ID, NOT ENABLED');
+//       }
+//     }, 3000);
+//   }
+//   if (!AppObservableStore.getOpenReplayEnabled() && !AppObservableStore.getOpenReplayPending()) {
+//     AppObservableStore.setOpenReplayPending(true);
+//     setTimeout(() => {
+//       // const chosenProjectKey = AppObservableStore.getChosenOpenReplayTrackingID();
+//       const weVoteOpenReplayProjectKey = webAppConfig.OPEN_REPLAY_PROJECT_KEY;
+//       const weVoteOpenReplayIngestPoint = webAppConfig.OPEN_REPLAY_INGEST_POINT;
+//       // const openReplayProjectKey = chosenProjectKey || weVoteOpenReplayProjectKey;
+//       const openReplayProjectKey = weVoteOpenReplayProjectKey || '';
+//       const openReplayIngestPoint = weVoteOpenReplayIngestPoint || false;
+//       let tracker;
+//       if (openReplayProjectKey) {
+//         console.log('OpenReplay ENABLED');
+//         if (openReplayIngestPoint) {
+//           tracker = new OpenReplay({
+//             projectKey: openReplayProjectKey,
+//             ingestPoint: openReplayIngestPoint,
+//             resourceBaseHref: 'https://wevote.us/',
+//           });
+//         } else {
+//           tracker = new OpenReplay({
+//             projectKey: openReplayProjectKey,
+//             resourceBaseHref: 'https://wevote.us/',
+//           });
+//         }
+//         const voterWeVoteId = VoterStore.getVoterWeVoteId();
+//         tracker.start({
+//           userID: voterWeVoteId,
+//         });
+//         AppObservableStore.setOpenReplayTracker(tracker);
+//         AppObservableStore.setOpenReplayEnabled(true);
+//         AppObservableStore.setOpenReplayPending(false);
+//         if (voterWeVoteId) {
+//           AppObservableStore.setOpenReplayVoterWeVoteId(voterWeVoteId);
+//         }
+//       } else {
+//         console.log('OpenReplay did not receive a projectKey, NOT ENABLED');
+//       }
+//     }, 3000);
+//   }
+// };
+//
+// const onVoterStoreChange = () => {
+//   const { pathname } = useLocation();
+//   console.log('---- diagnose app.jsx pathname: ', pathname); // 'this.props.location.pathname: ', this.props.locationpathname);
+//   navigate(pathname);
+// };
+
+
+// if (window.location.href.endsWith('/storybook')) {
+//   const destinationHref = `${window.location.href}-static/index.html?path=/docs/design-system--docs`;
+//   console.log('Storybook redirect from: ', window.location.href, ' to: ', destinationHref);
+//   window.location.href = destinationHref;
+// }

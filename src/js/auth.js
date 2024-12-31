@@ -1,6 +1,7 @@
 import React from 'react';
-import { Redirect, Route } from 'react-router-dom';
+import { Navigate, Outlet, useLocation } from 'react-router';
 import webAppConfig from './config';
+
 
 /* global $  */
 
@@ -20,18 +21,9 @@ export async function getAuthentication () {
   }
 }
 
-/* eslint-disable react/jsx-props-no-spreading */
-// eslint-disable-next-line react/prop-types
-export const PrivateRoute = ({ component: Component, isAuthenticated, ...rest }) => (
-  <Route
-    {...rest}
-    render={(props) => (isAuthenticated ? (
-      <Component {...props} />
-    ) : (
-      // eslint-disable-next-line react/prop-types
-      <Redirect to={{ pathname: '/login', state: { from: props.location } }} />
-    ))}
-  />
-);
-
-
+export const PrivateRoute = () => {
+  console.log('========= PrivateRoute =========== isAuth: ', localStorage.getItem('isAuthenticated'));
+  const location = useLocation();
+  const isAuthenticated = localStorage.getItem('isAuthenticated');
+  return isAuthenticated ? <Outlet /> : <Navigate to="/login" state={{ from: location }} replace />;
+};

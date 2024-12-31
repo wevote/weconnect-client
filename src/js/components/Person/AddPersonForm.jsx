@@ -1,14 +1,15 @@
 import { Button, FormControl, TextField } from '@mui/material';
 import { withStyles } from '@mui/styles';
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
-import AppObservableStore, { messageService } from '../../stores/AppObservableStore';
+// import AppObservableStore, { messageService } from '../../stores/AppObservableStore';
 import PersonActions from '../../actions/PersonActions';
 import PersonStore from '../../stores/PersonStore';
 import TeamStore from '../../stores/TeamStore';
 import { renderLog } from '../../common/utils/logging';
-import prepareDataPackageFromAppObservableStore from '../../common/utils/prepareDataPackageFromAppObservableStore';
+import PrepareDataPackageFromAppObservableStore from '../../common/utils/PrepareDataPackageFromAppObservableStore';
+import { useWeAppContext } from '../../contexts/WeAppContext';
 
 const FIELDS_IN_FORM = ['emailPersonal', 'firstName', 'lastName'];
 
@@ -18,18 +19,25 @@ const AddPersonForm = ({ classes }) => {  //  classes, teamId
   const [firstName, setFirstName] = React.useState('');
   const [lastName, setLastName] = React.useState('');
   const [teamId, setTeamId] = React.useState(-1);
+  const { setAppContextValue, getAppContextValue } = useWeAppContext();  // This component will re-render whenever the value of WeAppContext changes
 
-  const onAppObservableStoreChange = () => {
-    setTeamId(AppObservableStore.getGlobalVariableState('addPersonDrawerTeamId'));
-  };
+
+  useEffect(() => {  // Replaces onAppObservableStoreChange and will be called whenever the context value changes
+    console.log('AddPersonForm: Context value changed:', true);
+    setTeamId(getAppContextValue('addPersonDrawerTeamId'));
+  }, [getAppContextValue]);
+
+  // const onAppObservableStoreChange = () => {
+  //   setTeamId(AppObservableStore.getGlobalVariableState('addPersonDrawerTeamId'));
+  // };
 
   const saveNewPersonSuccessful = () => {
-    AppObservableStore.setGlobalVariableState('addPersonDrawerOpen', false);
-    AppObservableStore.setGlobalVariableState('addPersonDrawerTeamId', -1);
-    for (let i = 0; i < FIELDS_IN_FORM.length; i++){
+    setAppContextValue('addPersonDrawerOpen', false);
+    setAppContextValue('addPersonDrawerTeamId', -1);
+    for (let i = 0; i < FIELDS_IN_FORM.length; i++) {
       const fieldName = FIELDS_IN_FORM[i];
-      AppObservableStore.setGlobalVariableState(`${fieldName}Changed`, false);
-      AppObservableStore.setGlobalVariableState(`${fieldName}ToBeSaved`, '');
+      setAppContextValue(`${fieldName}Changed`, false);
+      setAppContextValue(`${fieldName}ToBeSaved`, '');
     }
   };
 
@@ -38,14 +46,14 @@ const AddPersonForm = ({ classes }) => {  //  classes, teamId
     // console.log('AddPersonForm onPersonStoreChange mostRecentPersonChanged:', mostRecentPersonChanged);
     // TODO: Figure out why firstName, lastName, and emailPersonal are not being updated
     // console.log('firstName:', firstName, ', lastName:', lastName, ', emailPersonal:', emailPersonal);
-    // console.log('emailPersonalToBeSaved:', AppObservableStore.getGlobalVariableState('emailPersonalToBeSaved'));
-    if (mostRecentPersonChanged.emailPersonal === AppObservableStore.getGlobalVariableState('emailPersonalToBeSaved')) {
+    // console.log('emailPersonalToBeSaved:', getAppContextValue('emailPersonalToBeSaved'));
+    if (mostRecentPersonChanged.emailPersonal === getAppContextValue('emailPersonalToBeSaved')) {
       saveNewPersonSuccessful();
     }
   };
 
   const saveNewPerson = () => {
-    const data = prepareDataPackageFromAppObservableStore(FIELDS_IN_FORM);
+    const data = PrepareDataPackageFromAppObservableStore(FIELDS_IN_FORM);
     if (teamId >= 0) {
       data.teamId = teamId;
       data.teamName = TeamStore.getTeamById(teamId).teamName;
@@ -57,8 +65,8 @@ const AddPersonForm = ({ classes }) => {  //  classes, teamId
   const updateEmailPersonal = (event) => {
     if (event.target.name === 'emailPersonalToBeSaved') {
       const newEmailPersonal = event.target.value;
-      AppObservableStore.setGlobalVariableState('emailPersonalChanged', true);
-      AppObservableStore.setGlobalVariableState('emailPersonalToBeSaved', newEmailPersonal);
+      setAppContextValue('emailPersonalChanged', true);
+      setAppContextValue('emailPersonalToBeSaved', newEmailPersonal);
       // console.log('updateEmailPersonal:', newEmailPersonal);
       setEmailPersonal(newEmailPersonal);
     }
@@ -67,8 +75,8 @@ const AddPersonForm = ({ classes }) => {  //  classes, teamId
   const updateFirstName = (event) => {
     if (event.target.name === 'firstNameToBeSaved') {
       const newFirstName = event.target.value;
-      AppObservableStore.setGlobalVariableState('firstNameChanged', true);
-      AppObservableStore.setGlobalVariableState('firstNameToBeSaved', newFirstName);
+      setAppContextValue('firstNameChanged', true);
+      setAppContextValue('firstNameToBeSaved', newFirstName);
       // console.log('updateFirstName:', newFirstName);
       setFirstName(newFirstName);
     }
@@ -77,31 +85,31 @@ const AddPersonForm = ({ classes }) => {  //  classes, teamId
   const updateLastName = (event) => {
     if (event.target.name === 'lastNameToBeSaved') {
       const newLastName = event.target.value;
-      AppObservableStore.setGlobalVariableState('lastNameChanged', true);
-      AppObservableStore.setGlobalVariableState('lastNameToBeSaved', newLastName);
+      setAppContextValue('lastNameChanged', true);
+      setAppContextValue('lastNameToBeSaved', newLastName);
       // console.log('updateLastName:', newLastName);
       setLastName(newLastName);
     }
   };
 
   React.useEffect(() => {
-    const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
-    onAppObservableStoreChange();
+    // const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
+    // onAppObservableStoreChange();
     const personStoreListener = PersonStore.addListener(onPersonStoreChange);
     onPersonStoreChange();
-    // console.log('Initial load emailPersonalToBeSaved:', AppObservableStore.getGlobalVariableState('emailPersonalToBeSaved'));
-    if (AppObservableStore.getGlobalVariableState('emailPersonalToBeSaved')) {
-      setEmailPersonal(AppObservableStore.getGlobalVariableState('emailPersonalToBeSaved'));
+    // console.log('Initial load emailPersonalToBeSaved:', getAppContextValue('emailPersonalToBeSaved'));
+    if (getAppContextValue('emailPersonalToBeSaved')) {
+      setEmailPersonal(getAppContextValue('emailPersonalToBeSaved'));
     }
-    if (AppObservableStore.getGlobalVariableState('firstNameToBeSaved')) {
-      setFirstName(AppObservableStore.getGlobalVariableState('firstNameToBeSaved'));
+    if (getAppContextValue('firstNameToBeSaved')) {
+      setFirstName(getAppContextValue('firstNameToBeSaved'));
     }
-    if (AppObservableStore.getGlobalVariableState('lastNameToBeSaved')) {
-      setLastName(AppObservableStore.getGlobalVariableState('lastNameToBeSaved'));
+    if (getAppContextValue('lastNameToBeSaved')) {
+      setLastName(getAppContextValue('lastNameToBeSaved'));
     }
 
     return () => {
-      appStateSubscription.unsubscribe();
+      // appStateSubscription.unsubscribe();
       personStoreListener.remove();
     };
   }, []);

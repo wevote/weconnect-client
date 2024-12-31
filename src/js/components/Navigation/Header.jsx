@@ -16,7 +16,7 @@ import cordovaTopHeaderTopMargin from '../../utils/cordovaTopHeaderTopMargin';
 import { HeadroomWrapper } from '../Style/pageLayoutStyles';
 import IPhoneSpacer from '../Widgets/IPhoneSpacer';
 
-
+// TODO: Convert to a functional component, so it can use getContext()
 export default class Header extends Component {
   constructor (props) {
     super(props);

@@ -21,6 +21,7 @@ export async function getAuthentication () {
   }
 }
 
+// Routes in App.jsx wrapped with PrivateRoute require authentication to access
 export const PrivateRoute = () => {
   console.log('========= PrivateRoute =========== isAuth: ', localStorage.getItem('isAuthenticated'));
   const location = useLocation();

@@ -37,8 +37,6 @@ const EditQuestionForm = ({ classes }) => {  //  classes, teamId
   const [inputValues, setInputValues] = React.useState({
     answerType: '',
     fieldMappingRule: '',
-    fieldMappingField: '',
-    fieldMappingTable: '',
     questionInstructions: '',
     questionText: '',
     requireAnswer: false,

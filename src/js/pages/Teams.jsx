@@ -5,49 +5,67 @@ import { Link } from 'react-router';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { withStyles } from '@mui/styles';
-import PersonStore from '../stores/PersonStore';
-import TeamActions from '../actions/TeamActions';
-import TeamStore from '../stores/TeamStore';
+// import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { useQuery } from '@tanstack/react-query';
 import { SpanWithLinkStyle } from '../components/Style/linkStyles';
 import { PageContentContainer } from '../components/Style/pageLayoutStyles';
 import TeamHeader from '../components/Team/TeamHeader';
 import TeamMemberList from '../components/Team/TeamMemberList';
 import webAppConfig from '../config';
-import apiCalming from '../common/utils/apiCalming';
 import { renderLog } from '../common/utils/logging';
 import { useWeAppContext } from '../contexts/WeAppContext';
+import { getTeamList, teamsQueryFn } from '../react-query/TeamsQuery';
 // import AppObservableStore, { messageService } from '../stores/AppObservableStore';
+
 
 
 const Teams = ({ classes, match }) => {  //  classes, teamId
   renderLog('Teams');  // Set LOG_RENDER_EVENTS to log all renders
   const [showAllTeamMembers, setShowAllTeamMembers] = React.useState(false);
   const [teamList, setTeamList] = React.useState([]);
-  const [teamCount, setTeamCount] = React.useState(0);
+  const [teamCount, setTeamCount] = React.useState(-1);
   const { setAppContextValue, getAppContextValue, getAppContextData } = useWeAppContext();  // This component will re-render whenever the value of WeAppContext changes
+  console.log('match: ', match);
 
+  const { data, error, isLoading, isSuccess } = useQuery({
+    queryKey: ['team-list-retrieve'],
+    queryFn: ({ queryKey }) => teamsQueryFn(queryKey[0], {}),
+  });
 
-  const onRetrieveTeamListChange = () => {
-    if (match) {
-      const { params } = match;
-      setShowAllTeamMembers(true);
-      const teamListTemp = TeamStore.getTeamList(params.teamId);
-      // console.log('Teams onRetrieveTeamListChange, params.teamId:', params.teamId, ', TeamStore.getTeamList:', teamListTemp);
-      setTeamList(teamListTemp);
-      setTeamCount(teamListTemp.length);
-    }
-  };
+  if (isLoading) {
+    console.log('Fetching teams...');
+  } else if (error) {
+    console.log(`An error occurred: ${error.message}`);
+  } else if (isSuccess && teamCount < 0) {
+    console.log('Successfully retrieved teams...');
+    const teamListTemp = getTeamList(data);
+    setShowAllTeamMembers(true);
+    console.log('Teams onRetrieveTeamListChange, params.teamId:  HACKED nope', ', TeamStore.getTeamList:', teamListTemp);
+    setTeamList(teamListTemp);
+    setTeamCount(teamListTemp.length);
+  }
 
-  const onPersonStoreChange = () => {
-    onRetrieveTeamListChange();
-  };
+  // const onRetrieveTeamListChange = () => {
+  //   if (match) {
+  //     const { params } = match;
+  //     setShowAllTeamMembers(true);
+  //     const teamListTemp = TeamStore.getTeamList(params.teamId);
+  //     // console.log('Teams onRetrieveTeamListChange, params.teamId:', params.teamId, ', TeamStore.getTeamList:', teamListTemp);
+  //     setTeamList(teamListTemp);
+  //     setTeamCount(teamListTemp.length);
+  //   }
+  // };
 
-  const onTeamStoreChange = () => {
-    onRetrieveTeamListChange();
-    if (apiCalming('teamListRetrieve', 1000)) {
-      TeamActions.teamListRetrieve();
-    }
-  };
+  // const onPersonStoreChange = () => {
+  //   onRetrieveTeamListChange();
+  // };
+  //
+  // const onTeamStoreChange = () => {
+  //   onRetrieveTeamListChange();
+  //   if (apiCalming('teamListRetrieve', 1000)) {
+  //     TeamActions.teamListRetrieve();
+  //   }
+  // };
 
 
   const addTeamClick = () => {
@@ -61,22 +79,22 @@ const Teams = ({ classes, match }) => {  //  classes, teamId
     }
   }, [getAppContextData()]);
 
-  React.useEffect(() => {
-    const personStoreListener = PersonStore.addListener(onPersonStoreChange);
-    onPersonStoreChange();
-    const teamStoreListener = TeamStore.addListener(onTeamStoreChange);
-    onTeamStoreChange();
-
-    if (apiCalming('teamListRetrieve', 1000)) {
-      TeamActions.teamListRetrieve();
-    }
-
-    return () => {
-      // appStateSubscription.unsubscribe();
-      personStoreListener.remove();
-      teamStoreListener.remove();
-    };
-  }, []);
+  // React.useEffect(() => {
+  //   const personStoreListener = PersonStore.addListener(onPersonStoreChange);
+  //   onPersonStoreChange();
+  //   const teamStoreListener = TeamStore.addListener(onTeamStoreChange);
+  //   onTeamStoreChange();
+  //
+  //   if (apiCalming('teamListRetrieve', 1000)) {
+  //     TeamActions.teamListRetrieve();
+  //   }
+  //
+  //   return () => {
+  //     // appStateSubscription.unsubscribe();
+  //     personStoreListener.remove();
+  //     teamStoreListener.remove();
+  //   };
+  // }, []);
 
   return (
     <div>
@@ -125,19 +143,14 @@ const Teams = ({ classes, match }) => {  //  classes, teamId
             Sign in
           </Link>
         </div>
-        <div style={{ padding: '10px 0 25px 0', fontWeight: '700' }}>
-          <Link to="/test-auth">
-            Example protected page
-          </Link>
-        </div>
-
+        {/* <ReactQueryDevtools initialIsOpen /> */}
       </PageContentContainer>
     </div>
   );
 };
 Teams.propTypes = {
   classes: PropTypes.object.isRequired,
-  match: PropTypes.object.isRequired,
+  match: PropTypes.object,
 };
 
 const styles = (theme) => ({

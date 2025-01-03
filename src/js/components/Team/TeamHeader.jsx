@@ -13,7 +13,7 @@ const TeamHeader = ({ classes, showHeaderLabels, team }) => {
   return (
     <OneTeamHeader>
       {/* Width (below) of this TeamHeaderCell comes from the combined widths of the first x columns in TeamMemberList */}
-      <TeamHeaderCell largeFont titleCell width={15 + 150 + 125}>
+      <TeamHeaderCell $largeFont $titleCell width={15 + 150 + 125}>
         {team && (
           <Link to={`/team-home/${team.id}`}>
             {team.teamName}

@@ -1,41 +1,58 @@
 import React from 'react';
 import styled from 'styled-components';
+import { useQuery } from '@tanstack/react-query';
 import PropTypes from 'prop-types';
-import { Edit, Delete } from '@mui/icons-material';
+import { Delete, Edit } from '@mui/icons-material';
 import { withStyles } from '@mui/styles';
 import TeamActions from '../../actions/TeamActions';
-// import AppObservableStore, { messageService } from '../../stores/AppObservableStore';
-import PersonStore from '../../stores/PersonStore';
-import TeamStore from '../../stores/TeamStore';
+// import PersonStore from '../../stores/PersonStore';
 import DesignTokenColors from '../../common/components/Style/DesignTokenColors';
 import { renderLog } from '../../common/utils/logging';
 import { useWeAppContext } from '../../contexts/WeAppContext';
+import { personListRetrieve, personQueryFn, getFullNamePreferred } from '../../react-query/PersonQuery';
 
 
 const TeamMemberList = ({ teamId }) => {
   renderLog('TeamMemberList');  // Set LOG_RENDER_EVENTS to log all renders
   const { setAppContextValue } = useWeAppContext();  // This component will re-render whenever the value of WeAppContext changes
-
-  // const [teamMemberList, setTeamMemberList] = React.useState([]);
+  const [teamListLoaded, setTeamListLoaded] = React.useState(false);
+  const [PersonOnTeamList, setPersonOnTeamList] = React.useState([]);
 
   // const onAppObservableStoreChange = () => {
   // };
 
-  const onRetrieveTeamListChange = () => {
-    // TODO: Why is this 'teamId' value changing to -1 after team-retrieve API returns?
-    // console.log('TeamMemberList onRetrieveTeamListChange, teamId:', teamId, ', TeamStore.getTeamMemberList:', TeamStore.getTeamMemberList(teamId));
-    // console.log('TeamStore state:', TeamStore.getState());
-    // console.log('TeamMemberList:', TeamStore.getTeamMemberList(teamId));
-    // setTeamMemberList();
-  };
+  const { data, error, isLoading, isSuccess } = useQuery({
+    queryKey: ['person-list-retrieve'],
+    queryFn: ({ queryKey }) => personQueryFn(queryKey[0], { teamId }),
+  });
 
-  const onPersonStoreChange = () => {
-    // onRetrieveTeamListChange();
-  };
+  if (isLoading) {
+    console.log('Fetching team person members...');
+  } else if (error) {
+    console.log(`An error occurred with person-list-retrieve: ${error.message}`);
+  } else if (isSuccess && !teamListLoaded) {
+    setTeamListLoaded(true);
+    const personOnTeamListTemp = personListRetrieve(data, teamId);
+    setPersonOnTeamList(personOnTeamListTemp);
+    console.log('Successfully team person list...');
+  }
 
-  const onTeamStoreChange = () => {
-    // onRetrieveTeamListChange();
-  };
+
+  // const onRetrieveTeamListChange = () => {
+  // TODO: Why is this 'teamId' value changing to -1 after team-retrieve API returns?
+  // console.log('TeamMemberList onRetrieveTeamListChange, teamId:', teamId, ', TeamStore.getTeamMemberList:', TeamStore.getTeamMemberList(teamId));
+  // console.log('TeamStore state:', TeamStore.getState());
+  // console.log('TeamMemberList:', TeamStore.getTeamMemberList(teamId));
+  // setTeamMemberList();
+  // };
+
+  // const onPersonStoreChange = () => {
+  //   // onRetrieveTeamListChange();
+  // };
+  //
+  // const onTeamStoreChange = () => {
+  //   // onRetrieveTeamListChange();
+  // };
 
   const editPersonClick = (personId, hasEditRights = true) => {
     if (hasEditRights) {
@@ -49,32 +66,31 @@ const TeamMemberList = ({ teamId }) => {
     setAppContextValue('personProfileDrawerPersonId', personId);
   };
 
-  React.useEffect(() => {
-    // setTeamMemberList([]);
-    // const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
-    // onAppObservableStoreChange();
-    const personStoreListener = PersonStore.addListener(onPersonStoreChange);
-    onPersonStoreChange();
-    const teamStoreListener = TeamStore.addListener(onTeamStoreChange);
-    onTeamStoreChange();
+  // React.useEffect(() => {
+  //   // setTeamMemberList([]);
+  //   // const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
+  //   // onAppObservableStoreChange();
+  //   const personStoreListener = PersonStore.addListener(onPersonStoreChange);
+  //   onPersonStoreChange();
+  //   const teamStoreListener = TeamStore.addListener(onTeamStoreChange);
+  //   onTeamStoreChange();
+  //
+  //   return () => {
+  //     // appStateSubscription.unsubscribe();
+  //     personStoreListener.remove();
+  //     teamStoreListener.remove();
+  //   };
+  // }, []);
 
-    return () => {
-      // appStateSubscription.unsubscribe();
-      personStoreListener.remove();
-      teamStoreListener.remove();
-    };
-  }, []);
+  // React.useEffect(() => {
+  //   // console.log('useEffect teamId changed:', teamId);
+  //   onRetrieveTeamListChange();
+  // }, [teamId]);
 
-  React.useEffect(() => {
-    // console.log('useEffect teamId changed:', teamId);
-    onRetrieveTeamListChange();
-  }, [teamId]);
-
-  const teamMemberList = TeamStore.getTeamMemberList(teamId);
   const hasEditRights = true;
   return (
     <TeamMembersWrapper>
-      {teamMemberList.map((person, index) => (
+      {PersonOnTeamList.map((person, index) => (
         <OnePersonWrapper key={`teamMember-${person.personId}`}>
           <PersonCell id={`index-personId-${person.personId}`} width={15}>
             <GraySpan>
@@ -91,13 +107,13 @@ const TeamMemberList = ({ teamId }) => {
             }}
             width={150}
           >
-            {PersonStore.getFullNamePreferred(person.personId)}
+            {getFullNamePreferred(person)}
           </PersonCell>
-          <PersonCell id={`location-personId-${person.personId}`} smallFont width={125}>
-            {PersonStore.getPersonById(person.personId).location}
+          <PersonCell id={`location-personId-${person.personId}`} $smallFont width={125}>
+            {person.location}
           </PersonCell>
-          <PersonCell id={`jobTitle-personId-${person.personId}`} smallestFont width={190}>
-            {PersonStore.getPersonById(person.personId).jobTitle}
+          <PersonCell id={`jobTitle-personId-${person.personId}`} $smallestFont width={190}>
+            {person.jobTitle}
           </PersonCell>
           {hasEditRights ? (
             <PersonCell

@@ -8,13 +8,13 @@ import TeamActions from '../../actions/TeamActions';
 // import PersonStore from '../../stores/PersonStore';
 import DesignTokenColors from '../../common/components/Style/DesignTokenColors';
 import { renderLog } from '../../common/utils/logging';
-import { useWeAppContext } from '../../contexts/WeAppContext';
+import { useConnectAppContext } from '../../contexts/ConnectAppContext';
 import { personListRetrieve, personQueryFn, getFullNamePreferred } from '../../react-query/PersonQuery';
 
 
 const TeamMemberList = ({ teamId }) => {
   renderLog('TeamMemberList');  // Set LOG_RENDER_EVENTS to log all renders
-  const { setAppContextValue } = useWeAppContext();  // This component will re-render whenever the value of WeAppContext changes
+  const { setAppContextValue } = useConnectAppContext();  // This component will re-render whenever the value of WeAppContext changes
   const [teamListLoaded, setTeamListLoaded] = React.useState(false);
   const [PersonOnTeamList, setPersonOnTeamList] = React.useState([]);
 

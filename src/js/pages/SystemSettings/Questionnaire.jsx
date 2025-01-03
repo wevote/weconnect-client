@@ -16,7 +16,7 @@ import webAppConfig from '../../config';
 import apiCalming from '../../common/utils/apiCalming';
 import { renderLog } from '../../common/utils/logging';
 import convertToInteger from '../../common/utils/convertToInteger';
-import { useWeAppContext } from '../../contexts/WeAppContext';
+import { useConnectAppContext } from '../../contexts/ConnectAppContext';
 
 
 const Questionnaire = ({ classes, match }) => {
@@ -25,7 +25,7 @@ const Questionnaire = ({ classes, match }) => {
   const [questionnaire, setQuestionnaire] = React.useState({});
   // eslint-disable-next-line no-unused-vars
   const [questionnaireCount, setQuestionnaireCount] = React.useState(0);
-  const { setAppContextValue } = useWeAppContext();  // This component will re-render whenever the value of WeAppContext changes
+  const { setAppContextValue } = useConnectAppContext();  // This component will re-render whenever the value of WeAppContext changes
 
   // const onAppObservableStoreChange = () => {
   // };

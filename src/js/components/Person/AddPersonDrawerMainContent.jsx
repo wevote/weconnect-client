@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { withStyles } from '@mui/styles';
 import { SpanWithLinkStyle } from '../Style/linkStyles';
 // import AppObservableStore, { messageService } from '../../stores/AppObservableStore';
-import { useWeAppContext } from '../../contexts/WeAppContext';
+import { useConnectAppContext } from '../../contexts/ConnectAppContext';
 import PersonActions from '../../actions/PersonActions';
 import TeamActions from '../../actions/TeamActions';
 import PersonStore from '../../stores/PersonStore';
@@ -25,7 +25,7 @@ const AddPersonDrawerMainContent = ({ classes }) => {  //  classes, teamId
   const [personSearchResultsList, setPersonSearchResultsList] = React.useState([]);
   const [teamId, setTeamId] = React.useState(-1);
   const [teamMemberPersonIdList, setTeamMemberPersonIdList] = React.useState([]);
-  const { getAppContextValue } = useWeAppContext();  // This component will re-render whenever the value of WeAppContext changes
+  const { getAppContextValue } = useConnectAppContext();  // This component will re-render whenever the value of WeAppContext changes
 
   useEffect(() => {  // Replaces onAppObservableStoreChange and will be called whenever the context value changes
     console.log('EditQuestionnaireDrawer: Context value changed:', true);

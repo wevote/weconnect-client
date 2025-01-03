@@ -10,7 +10,7 @@ import initializejQuery from './js/common/utils/initializejQuery';
 import { renderLog } from './js/common/utils/logging';
 import Login from './js/pages/Login';
 import { PrivateRoute } from './js/auth';
-import WeAppContext from './js/contexts/WeAppContext';
+import WeAppContext from './js/contexts/ConnectAppContext';
 
 
 // Root URL pages

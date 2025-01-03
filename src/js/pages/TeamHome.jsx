@@ -5,7 +5,7 @@ import { Link } from 'react-router';
 // import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { withStyles } from '@mui/styles';
-import { useWeAppContext } from '../contexts/WeAppContext';
+import { useConnectAppContext } from '../contexts/ConnectAppContext';
 // import AppObservableStore, { messageService } from '../stores/AppObservableStore';
 import PersonStore from '../stores/PersonStore';
 import TeamActions from '../actions/TeamActions';
@@ -23,7 +23,7 @@ const TeamHome = ({ classes, match }) => {  //  classes, teamId
   renderLog('TeamHome');  // Set LOG_RENDER_EVENTS to log all renders
   const [team, setTeam] = React.useState({});
   const [teamId, setTeamId] = React.useState(-1);
-  const { setAppContextValue } = useWeAppContext();  // This component will re-render whenever the value of WeAppContext changes
+  const { setAppContextValue } = useConnectAppContext();  // This component will re-render whenever the value of WeAppContext changes
 
   const onRetrieveTeamChange = (teamIdIncoming) => {
     // console.log('TeamHome onRetrieveTeamChange, teamIdIncoming:', teamIdIncoming);

@@ -8,12 +8,12 @@ import TeamActions from '../../actions/TeamActions';
 import TeamStore from '../../stores/TeamStore';
 import { renderLog } from '../../common/utils/logging';
 import PrepareDataPackageFromAppObservableStore from '../../common/utils/PrepareDataPackageFromAppObservableStore';
-import { useWeAppContext } from '../../contexts/WeAppContext';
+import { useConnectAppContext } from '../../contexts/ConnectAppContext';
 
 const AddTeamForm = ({ classes }) => {  //  classes, teamId
   renderLog('AddTeamForm');  // Set LOG_RENDER_EVENTS to log all renders
   const [teamName, setTeamName] = React.useState('');
-  const { setAppContextValue, getAppContextValue } = useWeAppContext();  // This component will re-render whenever the value of WeAppContext changes
+  const { setAppContextValue, getAppContextValue } = useConnectAppContext();  // This component will re-render whenever the value of WeAppContext changes
 
 
   const saveNewTeamSuccessful = () => {

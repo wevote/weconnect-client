@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
 import { withStyles } from '@mui/styles';
 import { Edit } from '@mui/icons-material';
 import QuestionnaireActions from '../../actions/QuestionnaireActions';
-import { useWeAppContext } from '../../contexts/WeAppContext';
+import { useConnectAppContext } from '../../contexts/ConnectAppContext';
 import QuestionnaireStore from '../../stores/QuestionnaireStore';
 import { PageContentContainer } from '../../components/Style/pageLayoutStyles';
 import webAppConfig from '../../config';
@@ -22,7 +22,7 @@ const SystemSettings = ({ classes }) => {
   const [questionnaireList, setQuestionnaireList] = React.useState([]);
   // eslint-disable-next-line no-unused-vars
   const [questionnaireCount, setQuestionnaireCount] = React.useState(0);
-  const { setAppContextValue } = useWeAppContext();  // This component will re-render whenever the value of WeAppContext changes
+  const { setAppContextValue } = useConnectAppContext();  // This component will re-render whenever the value of WeAppContext changes
 
   // const onAppObservableStoreChange = () => {
   // };

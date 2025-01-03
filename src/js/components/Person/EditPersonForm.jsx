@@ -8,7 +8,7 @@ import PersonStore from '../../stores/PersonStore';
 import { renderLog } from '../../common/utils/logging';
 import PrepareDataPackageFromAppObservableStore from '../../common/utils/PrepareDataPackageFromAppObservableStore';
 import webAppConfig from '../../config';
-import { useWeAppContext } from '../../contexts/WeAppContext';
+import { useConnectAppContext } from '../../contexts/ConnectAppContext';
 // import AppObservableStore, { messageService } from '../../stores/AppObservableStore';
 
 const PERSON_FIELDS_IN_FORM = [
@@ -20,7 +20,7 @@ const EditPersonForm = ({ classes }) => {  //  classes, teamId
   const [firstPersonDataReceived, setFirstPersonDataReceived] = React.useState(false);
   const [inputValues, setInputValues] = React.useState({});
   const [saveButtonActive, setSaveButtonActive] = React.useState(false);
-  const { setAppContextValue, getAppContextValue, setAppContextValuesInBulk } = useWeAppContext();  // This component will re-render whenever the value of WeAppContext changes
+  const { setAppContextValue, getAppContextValue, setAppContextValuesInBulk } = useConnectAppContext();  // This component will re-render whenever the value of WeAppContext changes
 
   // const [personId, setPersonId] = React.useState(-1);
   // const [personDictAlreadySaved, setPersonDictAlreadySaved] = React.useState({});

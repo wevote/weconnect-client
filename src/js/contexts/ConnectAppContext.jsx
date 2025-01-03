@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 
 // Replaces AppObservableStore.js
 // Create the context
-const WeAppContext = createContext({});
+const ConnectAppContext = createContext({});
 
 // Create the provider component
 // eslint-disable-next-line no-unused-vars
@@ -29,9 +29,9 @@ export const WeAppContextProvider = ({ children }) => {
   };
 
   return (
-    <WeAppContext.Provider value={{ getAppContextData, setAppContextValue, getAppContextValue, setAppContextValuesInBulk }}>
+    <ConnectAppContext.Provider value={{ getAppContextData, setAppContextValue, getAppContextValue, setAppContextValuesInBulk }}>
       {children}
-    </WeAppContext.Provider>
+    </ConnectAppContext.Provider>
   );
 };
 WeAppContextProvider.propTypes = {
@@ -39,8 +39,8 @@ WeAppContextProvider.propTypes = {
 };
 
 export default WeAppContextProvider;
-export function useWeAppContext () {
-  return useContext(WeAppContext);
+export function useConnectAppContext () {
+  return useContext(ConnectAppContext);
 }
 
 
@@ -52,7 +52,7 @@ export function useWeAppContext () {
 
 
 // Replaces AppObservableStore.js
-// export const WeAppContext = createContext({ value: undefined, loadValue: () => console.log('Default function') });
+// export const ConnectAppContext = createContext({ value: undefined, loadValue: () => console.log('Default function') });
 //
 //
 // // https://stackoverflow.com/questions/57819211/how-to-set-a-value-with-usecontext
@@ -61,7 +61,7 @@ export function useWeAppContext () {
 //   const [value, setAppContextValue] = useState(undefined);
 //
 //   return (
-//     <WeAppContext.Provider
+//     <ConnectAppContext.Provider
 //       value={{
 //         value,
 //         loadAppContextValue: (currentValue) => {
@@ -70,7 +70,7 @@ export function useWeAppContext () {
 //       }}
 //     >
 //       {children}
-//     </WeAppContext.Provider>
+//     </ConnectAppContext.Provider>
 //   );
 // };
 //

@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { withStyles } from '@mui/styles';
-import { useWeAppContext } from '../../contexts/WeAppContext';
+import { useConnectAppContext } from '../../contexts/ConnectAppContext';
 import PersonActions from '../../actions/PersonActions';
 import PersonStore from '../../stores/PersonStore';
 import TeamStore from '../../stores/TeamStore';
@@ -17,7 +17,7 @@ const PersonProfile = ({ personId }) => {
   // eslint-disable-next-line no-unused-vars
   const [person, setPerson] = React.useState({});
   const [fullNamePreferred, setFullNamePreferred] = React.useState('');
-  const { getAppContextValue } = useWeAppContext();  // This component will re-render whenever the value of WeAppContext changes
+  const { getAppContextValue } = useConnectAppContext();  // This component will re-render whenever the value of WeAppContext changes
 
   // const onAppObservableStoreChange = () => {
   //   // const teamIdTemp = AppObservableStore.getGlobalVariableState('personProfileDrawerTeamId');

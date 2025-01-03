@@ -3,7 +3,7 @@ import { withStyles } from '@mui/styles';
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
-import { useWeAppContext } from '../../contexts/WeAppContext';
+import { useConnectAppContext } from '../../contexts/ConnectAppContext';
 import QuestionnaireActions from '../../actions/QuestionnaireActions';
 import QuestionnaireStore from '../../stores/QuestionnaireStore';
 import { renderLog } from '../../common/utils/logging';
@@ -19,7 +19,7 @@ const EditQuestionnaireForm = ({ classes }) => {
   const [firstQuestionnaireDataReceived, setFirstQuestionnaireDataReceived] = React.useState(false);
   const [inputValues, setInputValues] = React.useState({});
   const [saveButtonActive, setSaveButtonActive] = React.useState(false);
-  const { setAppContextValue, getAppContextValue, setAppContextValuesInBulk } = useWeAppContext();  // This component will re-render whenever the value of WeAppContext changes
+  const { setAppContextValue, getAppContextValue, setAppContextValuesInBulk } = useConnectAppContext();  // This component will re-render whenever the value of WeAppContext changes
 
   // const [questionnaireId, setQuestionnaireId] = React.useState(-1);
   // const [questionnaireDictAlreadySaved, setQuestionnaireDictAlreadySaved] = React.useState({});

@@ -9,7 +9,7 @@ import TeamStore from '../../stores/TeamStore';
 import apiCalming from '../../common/utils/apiCalming';
 import { renderLog } from '../../common/utils/logging';
 import PersonProfile from './PersonProfile';
-import { useWeAppContext } from '../../contexts/WeAppContext';
+import { useConnectAppContext } from '../../contexts/ConnectAppContext';
 
 
 // eslint-disable-next-line no-unused-vars
@@ -17,7 +17,7 @@ const PersonProfileDrawerMainContent = ({ classes }) => {  //  classes, teamId
   renderLog('PersonProfileDrawerMainContent');  // Set LOG_RENDER_EVENTS to log all renders
   // eslint-disable-next-line no-unused-vars
   const [personId, setPersonId] = React.useState(-1);
-  const { getAppContextValue } = useWeAppContext();  // This component will re-render whenever the value of WeAppContext changes
+  const { getAppContextValue } = useConnectAppContext();  // This component will re-render whenever the value of WeAppContext changes
 
   // const onAppObservableStoreChange = () => {
   //   // const teamIdTemp = AppObservableStore.getGlobalVariableState('personProfileDrawerTeamId');

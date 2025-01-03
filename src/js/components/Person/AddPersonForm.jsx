@@ -9,7 +9,7 @@ import PersonStore from '../../stores/PersonStore';
 import TeamStore from '../../stores/TeamStore';
 import { renderLog } from '../../common/utils/logging';
 import PrepareDataPackageFromAppObservableStore from '../../common/utils/PrepareDataPackageFromAppObservableStore';
-import { useWeAppContext } from '../../contexts/WeAppContext';
+import { useConnectAppContext } from '../../contexts/ConnectAppContext';
 
 const FIELDS_IN_FORM = ['emailPersonal', 'firstName', 'lastName'];
 
@@ -19,7 +19,7 @@ const AddPersonForm = ({ classes }) => {  //  classes, teamId
   const [firstName, setFirstName] = React.useState('');
   const [lastName, setLastName] = React.useState('');
   const [teamId, setTeamId] = React.useState(-1);
-  const { setAppContextValue, getAppContextValue } = useWeAppContext();  // This component will re-render whenever the value of WeAppContext changes
+  const { setAppContextValue, getAppContextValue } = useConnectAppContext();  // This component will re-render whenever the value of WeAppContext changes
 
 
   useEffect(() => {  // Replaces onAppObservableStoreChange and will be called whenever the context value changes

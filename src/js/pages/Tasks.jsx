@@ -1,4 +1,3 @@
-import { Button } from '@mui/material';
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
@@ -7,44 +6,49 @@ import PropTypes from 'prop-types';
 import { withStyles } from '@mui/styles';
 import AppObservableStore, { messageService } from '../stores/AppObservableStore';
 import PersonStore from '../stores/PersonStore';
+import TaskActions from '../actions/TaskActions';
+import TaskStore from '../stores/TaskStore';
 import TeamActions from '../actions/TeamActions';
 import TeamStore from '../stores/TeamStore';
 import { SpanWithLinkStyle } from '../components/Style/linkStyles';
 import { PageContentContainer } from '../components/Style/pageLayoutStyles';
-import TeamHeader from '../components/Team/TeamHeader';
-import TeamMemberList from '../components/Team/TeamMemberList';
+import PersonHeader from '../components/Person/PersonHeader';
+// import TaskList from '../components/Task/TaskList';
 import webAppConfig from '../config';
 import apiCalming from '../common/utils/apiCalming';
 import { renderLog } from '../common/utils/logging';
 
 
-const Teams = ({ classes, match }) => {  //  classes, teamId
-  renderLog('Teams');  // Set LOG_RENDER_EVENTS to log all renders
-  const [showAllTeamMembers, setShowAllTeamMembers] = React.useState(false);
-  const [teamList, setTeamList] = React.useState([]);
+const Tasks = ({ classes, match }) => {  //  classes, teamId
+  renderLog('Tasks');  // Set LOG_RENDER_EVENTS to log all renders
+  const [showCompletedTasks, setShowCompletedTasks] = React.useState(true);
+  const [personList, setPersonList] = React.useState([]);
   const [teamCount, setTeamCount] = React.useState(0);
 
   const onAppObservableStoreChange = () => {
   };
 
-  const onRetrieveTeamListChange = () => {
-    const { params } = match;
-    setShowAllTeamMembers(true);
-    const teamListTemp = TeamStore.getTeamList(params.teamId);
-    // console.log('Teams onRetrieveTeamListChange, params.teamId:', params.teamId, ', TeamStore.getTeamList:', teamListTemp);
-    setTeamList(teamListTemp);
-    setTeamCount(teamListTemp.length);
+  const onRetrieveProcessStepListChange = () => {
+    // const { params } = match;
+    // setShowCompletedTasks(false);
+    // const processStepListTemp = TeamStore.getProcessStepList(params.teamId);
+    // // console.log('Tasks onRetrieveProcessStepListChange, params.teamId:', params.teamId, ', TeamStore.getProcessStepList:', processStepListTemp);
+    // setProcessStepList(processStepListTemp);
+    // setTeamCount(processStepListTemp.length);
   };
 
   const onPersonStoreChange = () => {
-    onRetrieveTeamListChange();
+    onRetrieveProcessStepListChange();
+    const personListTemp = PersonStore.getAllCachedPeopleList();
+    setPersonList(personListTemp);
+  };
+
+  const onTaskStoreChange = () => {
+    //
   };
 
   const onTeamStoreChange = () => {
-    onRetrieveTeamListChange();
-    if (apiCalming('teamListRetrieve', 1000)) {
-      TeamActions.teamListRetrieve();
-    }
+    onRetrieveProcessStepListChange();
   };
 
   const addTeamClick = () => {
@@ -58,6 +62,10 @@ const Teams = ({ classes, match }) => {  //  classes, teamId
     onPersonStoreChange();
     const teamStoreListener = TeamStore.addListener(onTeamStoreChange);
     onTeamStoreChange();
+
+    if (apiCalming('processStepListRetrieve', 1000)) {
+      // TeamActions.processStepListRetrieve();
+    }
 
     if (apiCalming('teamListRetrieve', 1000)) {
       TeamActions.teamListRetrieve();
@@ -74,55 +82,36 @@ const Teams = ({ classes, match }) => {  //  classes, teamId
     <div>
       <Helmet>
         <title>
-          Teams -
+          Tasks -
           {' '}
           {webAppConfig.NAME_FOR_BROWSER_TAB_TITLE}
         </title>
         <link rel="canonical" href={`${webAppConfig.WECONNECT_URL_FOR_SEO}/team-home`} />
       </Helmet>
       <PageContentContainer>
-        <h1>
-          Teams
-        </h1>
+        <h1>Dashboard</h1>
         <div>
-          {showAllTeamMembers ? (
-            <SpanWithLinkStyle onClick={() => setShowAllTeamMembers(false)}>hide people</SpanWithLinkStyle>
+          {showCompletedTasks ? (
+            <SpanWithLinkStyle onClick={() => setShowCompletedTasks(false)}>hide completed</SpanWithLinkStyle>
           ) : (
-            <SpanWithLinkStyle onClick={() => setShowAllTeamMembers(true)}>show people</SpanWithLinkStyle>
+            <SpanWithLinkStyle onClick={() => setShowCompletedTasks(true)}>show completed</SpanWithLinkStyle>
           )}
         </div>
-        <Button
-          classes={{ root: classes.addTeamButtonRoot }}
-          color="primary"
-          variant="outlined"
-          onClick={addTeamClick}
-        >
-          Add Team
-        </Button>
-        {teamList.map((team, index) => (
-          <OneTeamWrapper key={`team-${team.id}`}>
-            <TeamHeader team={team} showHeaderLabels={(index === 0) && showAllTeamMembers && (team.teamMemberList && team.teamMemberList.length > 0)} />
-            {showAllTeamMembers && (
+        {personList.map((person, index) => (
+          <OneTeamWrapper key={`team-${person.id}`}>
+            <PersonHeader person={person} showHeaderLabels={(index === 0) && showCompletedTasks} />
+            {/*
+            {showCompletedTasks && (
               <TeamMemberList teamId={team.id} />
             )}
+            */}
           </OneTeamWrapper>
         ))}
-        <div style={{ padding: '100px 0 25px 0', fontWeight: '700' }}>
-          <Link to="/login">
-            Sign in
-          </Link>
-        </div>
-        <div style={{ padding: '10px 0 25px 0', fontWeight: '700' }}>
-          <Link to="/test-auth">
-            Example protected page
-          </Link>
-        </div>
-
       </PageContentContainer>
     </div>
   );
 };
-Teams.propTypes = {
+Tasks.propTypes = {
   classes: PropTypes.object.isRequired,
   match: PropTypes.object.isRequired,
 };
@@ -142,4 +131,4 @@ const styles = (theme) => ({
 const OneTeamWrapper = styled('div')`
 `;
 
-export default withStyles(styles)(Teams);
+export default withStyles(styles)(Tasks);

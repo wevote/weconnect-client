@@ -72,7 +72,8 @@ export const PageContentContainer = styled('div')(({ theme }) => (`
   margin: 0 auto;
   max-width: 960px;
   min-height: 190px;
-  padding-top: ${getPaddingTop()};
+  padding-top: 55px; // Temp fix
+  // padding-top: ${getPaddingTop()};
   padding-bottom: ${getPaddingBottom()};
   position: relative;
   z-index: 0;

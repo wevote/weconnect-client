@@ -35,6 +35,8 @@ const PageNotFound = React.lazy(() => import(/* webpackChunkName: 'PageNotFound'
 const QuestionnaireAnswers = React.lazy(() => import(/* webpackChunkName: 'QuestionnaireAnswers' */ './js/pages/QuestionnaireAnswers'));
 const QuestionnaireQuestionList = React.lazy(() => import(/* webpackChunkName: 'QuestionnaireQuestionList' */ './js/pages/SystemSettings/Questionnaire'));
 const SystemSettings = React.lazy(() => import(/* webpackChunkName: 'SystemSettings' */ './js/pages/SystemSettings/SystemSettings'));
+const TaskGroup = React.lazy(() => import(/* webpackChunkName: 'TaskGroup' */ './js/pages/SystemSettings/TaskGroup'));
+const Tasks = React.lazy(() => import(/* webpackChunkName: 'Tasks' */ './js/pages/Tasks'));
 const TeamMembers = React.lazy(() => import(/* webpackChunkName: 'TeamMembers' */ './js/pages/TeamHome'));
 const Teams = React.lazy(() => import(/* webpackChunkName: 'Teams' */ './js/pages/Teams'));
 
@@ -284,9 +286,11 @@ class App extends Component {
                   <Route path="/q/:questionnaireId/:personId" exact component={AnswerQuestionsForm} />
                   <Route path="/questionnaire/:questionnaireId" exact component={QuestionnaireQuestionList} />
                   <Route path="/system-settings" exact component={SystemSettings} />
+                  <Route path="/tasks" exact component={Tasks} />
+                  <Route path="/task-group/:taskGroupId" exact component={TaskGroup} />
                   <Route path="/teams" exact component={Teams} />
                   <Route path="/team-home/:teamId" exact component={TeamMembers} />
-                  <Route path="/" exact component={Teams} />
+                  <Route path="/" exact component={Tasks} />
 
                   <Route path="*" component={PageNotFound} />
                 </Switch>

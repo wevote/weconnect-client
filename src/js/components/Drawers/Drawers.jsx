@@ -2,10 +2,12 @@ import React from 'react';
 import styled from 'styled-components';
 import { withStyles } from '@mui/styles';
 import AddPersonDrawer from './AddPersonDrawer';
-import EditQuestionnaireDrawer from './EditQuestionnaireDrawer';
 import AddTeamDrawer from './AddTeamDrawer';
 import EditPersonDrawer from './EditPersonDrawer';
 import EditQuestionDrawer from './EditQuestionDrawer';
+import EditQuestionnaireDrawer from './EditQuestionnaireDrawer';
+import EditTaskDefinitionDrawer from './EditTaskDefinitionDrawer';
+import EditTaskGroupDrawer from './EditTaskGroupDrawer';
 import PersonProfileDrawer from './PersonProfileDrawer';
 import { renderLog } from '../../common/utils/logging';
 
@@ -21,6 +23,8 @@ const Drawers = () => {  //  classes, teamId
       <EditPersonDrawer />
       <EditQuestionDrawer />
       <EditQuestionnaireDrawer />
+      <EditTaskDefinitionDrawer />
+      <EditTaskGroupDrawer />
     </DrawersWrapper>
   );
 };

@@ -94,14 +94,9 @@ const TeamHome = ({ classes, match }) => {  //  classes, teamId
         <link rel="canonical" href={`${webAppConfig.WECONNECT_URL_FOR_SEO}/team-home`} />
       </Helmet>
       <PageContentContainer>
+        <h1>{team.teamName}</h1>
         <div>
-          Team Home for
-          {' '}
-          {team.teamName}
-          {' '}
-          -
-          {' '}
-          <Link to="/teams">team list</Link>
+          <Link to="/teams">back to team list</Link>
         </div>
         <Button
           classes={{ root: classes.addTeamMemberButtonRoot }}

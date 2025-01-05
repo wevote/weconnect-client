@@ -168,7 +168,7 @@ const Login = ({ classes }) => {
               <img
                 alt="we vote logo"
                 width="96px"
-                src="../../img/global/icons/we-vote-icon-square-color-dark.svg"
+                src="../../img/global/svg-icons/we-vote-icon-square-color-dark.svg"
               />
             </span>
             <span style={{ float: 'right', height: '100%', paddingTop: '31px' }}>

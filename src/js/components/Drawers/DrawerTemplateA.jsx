@@ -18,7 +18,7 @@ const DrawerTemplateA = ({ classes, drawerId, drawerOpenGlobalVariableName, head
   renderLog(`DrawerTemplateA (${drawerId})`);  // Set LOG_RENDER_EVENTS to log all renders
   const [drawerOpen, setDrawerOpen] = React.useState(false);
   const [scrolledDown, setScrolledDown] = React.useState(false);
-  const { getAppContextData, setAppContextValue, getAppContextValue } = useConnectAppContext();  // This component will re-render whenever the value of WeAppContext changes
+  const { getAppContextData, setAppContextValue, getAppContextValue } = useConnectAppContext();  // This component will re-render whenever the value of ConnectAppContext changes
 
 
   const handleScrolledDownDrawer = (evt) => {

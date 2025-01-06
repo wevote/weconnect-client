@@ -10,7 +10,7 @@ import initializejQuery from './js/common/utils/initializejQuery';
 import { renderLog } from './js/common/utils/logging';
 import Login from './js/pages/Login';
 import { PrivateRoute } from './js/auth';
-import WeAppContext from './js/contexts/ConnectAppContext';
+import ConnectAppContext from './js/contexts/ConnectAppContext';
 
 
 // Root URL pages
@@ -23,7 +23,7 @@ const PageNotFound = React.lazy(() => import(/* webpackChunkName: 'PageNotFound'
 const AnswerQuestionsForm = React.lazy(() => import(/* webpackChunkName: 'AnswerQuestionsForm' */ './js/pages/AnswerQuestionsForm'));
 const QuestionnaireQuestionList = React.lazy(() => import(/* webpackChunkName: 'QuestionnaireQuestionList' */ './js/pages/SystemSettings/Questionnaire'));
 const SystemSettings = React.lazy(() => import(/* webpackChunkName: 'SystemSettings' */ './js/pages/SystemSettings/SystemSettings'));
-const TeamMembers = React.lazy(() => import(/* webpackChunkName: 'TeamMembers' */ './js/pages/TeamHome'));
+const TeamHome = React.lazy(() => import(/* webpackChunkName: 'TeamHome' */ './js/pages/TeamHome'));
 const Teams = React.lazy(() => import(/* webpackChunkName: 'Teams' */ './js/pages/Teams'));
 
 
@@ -77,7 +77,7 @@ function App () {
     <>
       <StyledEngineProvider injectFirst>
         <QueryClientProvider client={queryClient}>
-          <WeAppContext>
+          <ConnectAppContext>
             <ThemeProvider theme={muiTheme}>
               {/* March 2022: We used to have two themeproviders here, one for material-ui, and one for styled-components, but the two are combined in V5 MUI */}
               <WeVoteBody>
@@ -96,7 +96,7 @@ function App () {
                       <Route path="/questionnaire/:questionnaireId" element={<QuestionnaireQuestionList />} />
                       <Route path="/system-settings" element={<SystemSettings />} />
                       <Route path="/teams" element={<Teams />} />
-                      <Route path="/team-home/:teamId" element={<TeamMembers />} />
+                      <Route path="/team-home/:teamId" element={<TeamHome />} />
                       <Route path="/" element={<Teams />} />
 
                       <Route path="*" element={<PageNotFound />} />
@@ -108,7 +108,7 @@ function App () {
                 </Suspense>
               </WeVoteBody>
             </ThemeProvider>
-          </WeAppContext>
+          </ConnectAppContext>
         </QueryClientProvider>
       </StyledEngineProvider>
     </>

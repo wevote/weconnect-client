@@ -22,7 +22,7 @@ const SystemSettings = ({ classes }) => {
   const [questionnaireList, setQuestionnaireList] = React.useState([]);
   // eslint-disable-next-line no-unused-vars
   const [questionnaireCount, setQuestionnaireCount] = React.useState(0);
-  const { setAppContextValue } = useConnectAppContext();  // This component will re-render whenever the value of WeAppContext changes
+  const { setAppContextValue } = useConnectAppContext();  // This component will re-render whenever the value of ConnectAppContext changes
 
   // const onAppObservableStoreChange = () => {
   // };

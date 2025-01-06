@@ -23,7 +23,7 @@ const Teams = ({ classes, match }) => {  //  classes, teamId
   const [showAllTeamMembers, setShowAllTeamMembers] = React.useState(false);
   const [teamList, setTeamList] = React.useState([]);
   const [teamCount, setTeamCount] = React.useState(-1);
-  const { setAppContextValue, getAppContextValue, getAppContextData } = useConnectAppContext();  // This component will re-render whenever the value of WeAppContext changes
+  const { setAppContextValue, getAppContextValue, getAppContextData } = useConnectAppContext();  // This component will re-render whenever the value of ConnectAppContext changes
   console.log('match: ', match);
 
   const { data, error, isLoading, isSuccess } = useQuery({

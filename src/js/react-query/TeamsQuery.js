@@ -8,9 +8,10 @@ import webAppConfig from '../config';
 export const teamsQueryFn = async (queryKey, params) => {
   const url = new URL(`${queryKey}/`, webAppConfig.STAFF_API_SERVER_API_ROOT_URL);
   url.search = new URLSearchParams(params);
-  console.log(url.href);
+  console.log('teamsQueryFn url.href: ', url.href);
 
   const response = await axios.get(url.href);
+  // console.log('teamsQueryFn  response.data: ', JSON.stringify(response.data));
 
   return response.data;
 };
@@ -28,6 +29,28 @@ export const getTeamList = (teamListData) => {
   }
   return teamList;
 };
+
+export const getTeamPersonsList = (teamListData, teamId) => {
+  console.log('TeamsQuery, getTeamPersonsList teamId:', teamId);
+  const { teamMemberList } = teamListData;
+  return teamMemberList;
+
+  // const teamList = [];
+  // let teamFiltered;
+  // let teamRaw;
+  // for (let i = 0; i < teamListRaw.length; i++) {
+  //   teamRaw = teamListRaw[i];
+  //   teamFiltered = teamRaw;
+  //   teamList.push(teamFiltered);
+  // }
+  // return teamList;
+};
+
+export const teamRetrieve = (dataTeamPersons, teamId) => {
+  console.log('TeamsQuery, teamRetrieve teamId:', teamId);
+  return dataTeamPersons;
+};
+
 
 
 export const addPersonToTeam = (personId, teamId) => {

@@ -8,8 +8,8 @@ const ConnectAppContext = createContext({});
 
 // Create the provider component
 // eslint-disable-next-line no-unused-vars
-export const WeAppContextProvider = ({ children }) => {
-  // console.log('initialization of WeAppContextProvider ===============');
+export const ConnectAppContextProvider = ({ children }) => {
+  // console.log('initialization of ConnectAppContextProvider ===============');
   const [data, setData] = useState({});
 
   const setAppContextValue = (key, value) => {
@@ -34,11 +34,11 @@ export const WeAppContextProvider = ({ children }) => {
     </ConnectAppContext.Provider>
   );
 };
-WeAppContextProvider.propTypes = {
+ConnectAppContextProvider.propTypes = {
   children: PropTypes.object,
 };
 
-export default WeAppContextProvider;
+export default ConnectAppContextProvider;
 export function useConnectAppContext () {
   return useContext(ConnectAppContext);
 }

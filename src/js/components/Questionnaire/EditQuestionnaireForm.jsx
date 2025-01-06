@@ -19,7 +19,7 @@ const EditQuestionnaireForm = ({ classes }) => {
   const [firstQuestionnaireDataReceived, setFirstQuestionnaireDataReceived] = React.useState(false);
   const [inputValues, setInputValues] = React.useState({});
   const [saveButtonActive, setSaveButtonActive] = React.useState(false);
-  const { setAppContextValue, getAppContextValue, setAppContextValuesInBulk } = useConnectAppContext();  // This component will re-render whenever the value of WeAppContext changes
+  const { setAppContextValue, getAppContextValue, setAppContextValuesInBulk } = useConnectAppContext();  // This component will re-render whenever the value of ConnectAppContext changes
 
   // const [questionnaireId, setQuestionnaireId] = React.useState(-1);
   // const [questionnaireDictAlreadySaved, setQuestionnaireDictAlreadySaved] = React.useState({});

@@ -10,7 +10,7 @@ const EditQuestionDrawer = () => {
   const [headerTitleJsx, setHeaderTitleJsx] = React.useState(<></>);
   // eslint-disable-next-line no-unused-vars
   const [headerFixedJsx, setHeaderFixedJsx] = React.useState(<></>);
-  const { getAppContextValue } = useConnectAppContext();  // This component will re-render whenever the value of WeAppContext changes
+  const { getAppContextValue } = useConnectAppContext();  // This component will re-render whenever the value of ConnectAppContext changes
 
   useEffect(() => {  // Replaces onAppObservableStoreChange and will be called whenever the context value changes
     console.log('EditQuestionDrawer: Context value changed:', true);

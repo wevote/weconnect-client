@@ -20,7 +20,7 @@ const EditPersonForm = ({ classes }) => {  //  classes, teamId
   const [firstPersonDataReceived, setFirstPersonDataReceived] = React.useState(false);
   const [inputValues, setInputValues] = React.useState({});
   const [saveButtonActive, setSaveButtonActive] = React.useState(false);
-  const { setAppContextValue, getAppContextValue, setAppContextValuesInBulk } = useConnectAppContext();  // This component will re-render whenever the value of WeAppContext changes
+  const { setAppContextValue, getAppContextValue, setAppContextValuesInBulk } = useConnectAppContext();  // This component will re-render whenever the value of ConnectAppContext changes
 
   // const [personId, setPersonId] = React.useState(-1);
   // const [personDictAlreadySaved, setPersonDictAlreadySaved] = React.useState({});

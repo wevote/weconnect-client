@@ -8,7 +8,6 @@ import QuestionnaireActions from '../../actions/QuestionnaireActions';
 import QuestionnaireStore from '../../stores/QuestionnaireStore';
 import { renderLog } from '../../common/utils/logging';
 import PrepareDataPackageFromAppObservableStore from '../../common/utils/PrepareDataPackageFromAppObservableStore';
-// import AppObservableStore, { messageService } from '../../stores/AppObservableStore';
 
 const QUESTION_FIELDS_IN_FORM = [
   'answerType', 'fieldMappingRule', 'questionInstructions', 'questionText',
@@ -25,7 +24,7 @@ const EditQuestionForm = ({ classes }) => {  //  classes, teamId
     statusActive: true,
   });
   const [saveButtonActive, setSaveButtonActive] = React.useState(false);
-  const { setAppContextValue, getAppContextValue, setAppContextValuesInBulk } = useConnectAppContext();  // This component will re-render whenever the value of WeAppContext changes
+  const { setAppContextValue, getAppContextValue, setAppContextValuesInBulk } = useConnectAppContext();  // This component will re-render whenever the value of ConnectAppContext changes
 
   // const [questionId, setQuestionId] = React.useState(-1);
   // const [questionDictAlreadySaved, setQuestionDictAlreadySaved] = React.useState({});
@@ -36,7 +35,7 @@ const EditQuestionForm = ({ classes }) => {  //  classes, teamId
   //   },
   // };
 
-  const clearEditFormValuesInAppObservableStore = () => {
+  const clearEditFormValuesInAppContext = () => {
     const globalVariableStates = {};
     for (let i = 0; i < QUESTION_FIELDS_IN_FORM.length; i++) {
       const fieldName = QUESTION_FIELDS_IN_FORM[i];
@@ -44,7 +43,7 @@ const EditQuestionForm = ({ classes }) => {  //  classes, teamId
       globalVariableStates[`${fieldName}ToBeSaved`] = '';
     }
     globalVariableStates.editQuestionDrawerQuestionId = -1;
-    // console.log('clearEditFormValuesInAppObservableStore globalVariableStates:', globalVariableStates);
+    // console.log('clearEditFormValuesInAppContext globalVariableStates:', globalVariableStates);
     setAppContextValuesInBulk(globalVariableStates);
   };
 
@@ -52,7 +51,7 @@ const EditQuestionForm = ({ classes }) => {  //  classes, teamId
     setInputValues({});
     setFirstQuestionDataReceived(false);
     // setQuestionId(-1);
-    clearEditFormValuesInAppObservableStore();
+    clearEditFormValuesInAppContext();
     setAppContextValue('editQuestionDrawerOpen', false);
   };
 

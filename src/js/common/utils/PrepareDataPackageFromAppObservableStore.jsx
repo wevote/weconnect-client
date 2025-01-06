@@ -5,7 +5,7 @@ import { useConnectAppContext } from '../../contexts/ConnectAppContext';
 const PrepareDataPackageFromAppObservableStore  = ({ acceptedVariables }) => {
   // Extract data from AppObservableStore and put into data object, with Changed variable, to be sent to server
   const data = {};
-  const { getAppContextValue } = useConnectAppContext();  // This component will re-render whenever the value of WeAppContext changes
+  const { getAppContextValue } = useConnectAppContext();  // This component will re-render whenever the value of ConnectAppContext changes
 
 
   for (let i = 0; i < acceptedVariables.length; i++) {

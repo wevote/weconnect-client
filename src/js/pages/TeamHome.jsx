@@ -1,7 +1,7 @@
 import { Button } from '@mui/material';
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Link } from 'react-router';
+import { Link, useParams } from 'react-router';
 // import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { withStyles } from '@mui/styles';
@@ -19,11 +19,12 @@ import convertToInteger from '../common/utils/convertToInteger';
 import { renderLog } from '../common/utils/logging';
 
 
-const TeamHome = ({ classes, match }) => {  //  classes, teamId
+const TeamHome = ({ classes }) => {  //  classes, params
   renderLog('TeamHome');  // Set LOG_RENDER_EVENTS to log all renders
+  const { params: { teamId: tId }} = useParams();
   const [team, setTeam] = React.useState({});
-  const [teamId, setTeamId] = React.useState(-1);
-  const { setAppContextValue } = useConnectAppContext();  // This component will re-render whenever the value of WeAppContext changes
+  const [teamId, setTeamId] = React.useState(tId);
+  const { setAppContextValue } = useConnectAppContext();  // This component will re-render whenever the value of ConnectAppContext changes
 
   const onRetrieveTeamChange = (teamIdIncoming) => {
     // console.log('TeamHome onRetrieveTeamChange, teamIdIncoming:', teamIdIncoming);
@@ -32,8 +33,7 @@ const TeamHome = ({ classes, match }) => {  //  classes, teamId
   };
 
   const onPersonStoreChange = () => {
-    const { params } = match;
-    const teamIdTemp = convertToInteger(params.teamId);
+    const teamIdTemp = convertToInteger(teamId);
     if (teamIdTemp >= 0) {
       setTeamId(teamIdTemp);
     }
@@ -44,8 +44,7 @@ const TeamHome = ({ classes, match }) => {  //  classes, teamId
   };
 
   const onTeamStoreChange = () => {
-    const { params } = match;
-    const teamIdTemp = convertToInteger(params.teamId);
+    const teamIdTemp = convertToInteger(teamId);
     if (teamIdTemp >= 0) {
       setTeamId(teamIdTemp);
     }
@@ -59,8 +58,7 @@ const TeamHome = ({ classes, match }) => {  //  classes, teamId
   };
 
   React.useEffect(() => {
-    const { params } = match;
-    const teamIdTemp = convertToInteger(params.teamId);
+    const teamIdTemp = convertToInteger(teamId);
 
     // const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
     // onAppObservableStoreChange();
@@ -118,8 +116,7 @@ const TeamHome = ({ classes, match }) => {  //  classes, teamId
 };
 TeamHome.propTypes = {
   classes: PropTypes.object.isRequired,
-  // teamId: PropTypes.number.isRequired,
-  match: PropTypes.object.isRequired,
+  params: PropTypes.object.isRequired,
 };
 
 const styles = (theme) => ({

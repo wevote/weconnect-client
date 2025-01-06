@@ -19,7 +19,7 @@ const AddPersonForm = ({ classes }) => {  //  classes, teamId
   const [firstName, setFirstName] = React.useState('');
   const [lastName, setLastName] = React.useState('');
   const [teamId, setTeamId] = React.useState(-1);
-  const { setAppContextValue, getAppContextValue } = useConnectAppContext();  // This component will re-render whenever the value of WeAppContext changes
+  const { setAppContextValue, getAppContextValue } = useConnectAppContext();  // This component will re-render whenever the value of ConnectAppContext changes
 
 
   useEffect(() => {  // Replaces onAppObservableStoreChange and will be called whenever the context value changes

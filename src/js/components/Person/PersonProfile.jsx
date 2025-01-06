@@ -17,7 +17,7 @@ const PersonProfile = ({ personId }) => {
   // eslint-disable-next-line no-unused-vars
   const [person, setPerson] = React.useState({});
   const [fullNamePreferred, setFullNamePreferred] = React.useState('');
-  const { getAppContextValue } = useConnectAppContext();  // This component will re-render whenever the value of WeAppContext changes
+  const { getAppContextValue } = useConnectAppContext();  // This component will re-render whenever the value of ConnectAppContext changes
 
   // const onAppObservableStoreChange = () => {
   //   // const teamIdTemp = AppObservableStore.getGlobalVariableState('personProfileDrawerTeamId');

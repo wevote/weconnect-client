@@ -17,7 +17,7 @@ const PersonProfileDrawerMainContent = ({ classes }) => {  //  classes, teamId
   renderLog('PersonProfileDrawerMainContent');  // Set LOG_RENDER_EVENTS to log all renders
   // eslint-disable-next-line no-unused-vars
   const [personId, setPersonId] = React.useState(-1);
-  const { getAppContextValue } = useConnectAppContext();  // This component will re-render whenever the value of WeAppContext changes
+  const { getAppContextValue } = useConnectAppContext();  // This component will re-render whenever the value of ConnectAppContext changes
 
   // const onAppObservableStoreChange = () => {
   //   // const teamIdTemp = AppObservableStore.getGlobalVariableState('personProfileDrawerTeamId');

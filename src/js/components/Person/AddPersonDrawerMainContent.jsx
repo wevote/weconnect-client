@@ -25,7 +25,7 @@ const AddPersonDrawerMainContent = ({ classes }) => {  //  classes, teamId
   const [personSearchResultsList, setPersonSearchResultsList] = React.useState([]);
   const [teamId, setTeamId] = React.useState(-1);
   const [teamMemberPersonIdList, setTeamMemberPersonIdList] = React.useState([]);
-  const { getAppContextValue } = useConnectAppContext();  // This component will re-render whenever the value of WeAppContext changes
+  const { getAppContextValue } = useConnectAppContext();  // This component will re-render whenever the value of ConnectAppContext changes
 
   useEffect(() => {  // Replaces onAppObservableStoreChange and will be called whenever the context value changes
     console.log('EditQuestionnaireDrawer: Context value changed:', true);

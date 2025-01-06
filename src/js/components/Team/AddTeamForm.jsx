@@ -13,7 +13,7 @@ import { useConnectAppContext } from '../../contexts/ConnectAppContext';
 const AddTeamForm = ({ classes }) => {  //  classes, teamId
   renderLog('AddTeamForm');  // Set LOG_RENDER_EVENTS to log all renders
   const [teamName, setTeamName] = React.useState('');
-  const { setAppContextValue, getAppContextValue } = useConnectAppContext();  // This component will re-render whenever the value of WeAppContext changes
+  const { setAppContextValue, getAppContextValue } = useConnectAppContext();  // This component will re-render whenever the value of ConnectAppContext changes
 
 
   const saveNewTeamSuccessful = () => {

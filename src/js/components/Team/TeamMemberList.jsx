@@ -7,8 +7,9 @@ import { withStyles } from '@mui/styles';
 import DesignTokenColors from '../../common/components/Style/DesignTokenColors';
 import { renderLog } from '../../common/utils/logging';
 import { useConnectAppContext } from '../../contexts/ConnectAppContext';
-import { getFullNamePreferred, personQueryFn } from '../../react-query/PersonQuery';
-import { getTeamPersonsList, teamsQueryFn } from '../../react-query/TeamsQuery';
+import { getFullNamePreferred } from '../../react-query/PersonQuery';
+import { getTeamPersonsList } from '../../react-query/TeamsQuery';
+import weConnectQueryFn from '../../react-query/WeConnectQuery';
 
 const TeamMemberList = ({ teamId }) => {
   renderLog('TeamMemberList');  // Set LOG_RENDER_EVENTS to log all renders
@@ -20,12 +21,12 @@ const TeamMemberList = ({ teamId }) => {
   const [listOfTeamPersons, setListOfTeamPersons] = React.useState([]);
 
   const removeTeamMemberMutation = useMutation({
-    mutationFn: (personId) => personQueryFn('remove-person-from-team', { personId, teamId }),
+    mutationFn: (personId) => weConnectQueryFn('remove-person-from-team', { personId, teamId }),
   });
 
   // const { data, error, isLoading, isSuccess } = useQuery({
   //   queryKey: ['person-list-retrieve'],
-  //   queryFn: ({ queryKey }) => personQueryFn(queryKey[0], { teamId }),
+  //   queryFn: ({ queryKey }) => weConnectQueryFn(queryKey[0], { teamId }),
   // });
   //
   // if (isLoading) {
@@ -42,7 +43,7 @@ const TeamMemberList = ({ teamId }) => {
 
   const { data: dataTeamPersons, error: errorTeamPersons, isLoading: isLoadingTeamPersons, isSuccess: isSuccessTeamPersons } = useQuery({
     queryKey: ['team-retrieve'],   // List of persons on a team by teamId
-    queryFn: ({ queryKey }) => teamsQueryFn(queryKey[0], { teamId }),
+    queryFn: ({ queryKey }) => weConnectQueryFn(queryKey[0], { teamId }),
   });
 
   if (isLoadingTeamPersons) {

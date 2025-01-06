@@ -13,7 +13,8 @@ import TeamMemberList from '../components/Team/TeamMemberList';
 import webAppConfig from '../config';
 import { renderLog } from '../common/utils/logging';
 import { useConnectAppContext } from '../contexts/ConnectAppContext';
-import { getTeamList, teamsQueryFn } from '../react-query/TeamsQuery';
+import { getTeamList } from '../react-query/TeamsQuery';
+import weConnectQueryFn from '../react-query/WeConnectQuery';
 // import AppObservableStore, { messageService } from '../stores/AppObservableStore';
 
 
@@ -28,7 +29,7 @@ const Teams = ({ classes, match }) => {  //  classes, teamId
 
   const { data, error, isLoading, isSuccess } = useQuery({
     queryKey: ['team-list-retrieve'],
-    queryFn: ({ queryKey }) => teamsQueryFn(queryKey[0], {}),
+    queryFn: ({ queryKey }) => weConnectQueryFn(queryKey[0], {}),
   });
 
   if (isLoading) {

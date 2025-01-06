@@ -44,6 +44,17 @@ const Teams = ({ classes, match }) => {  //  classes, teamId
     setTeamCount(teamListTemp.length);
   }
 
+  // const onPersonStoreChange = () => {
+  //   onRetrieveTeamListChange();
+  // };
+  //
+  // const onTeamStoreChange = () => {
+  //   onRetrieveTeamListChange();
+  //   if (apiCalming('teamListRetrieve', 1000)) {
+  //     TeamActions.teamListRetrieve();
+  //   }
+  // };
+
   const addTeamClick = () => {
     setAppContextValue('addTeamDrawerOpen', true);
   };

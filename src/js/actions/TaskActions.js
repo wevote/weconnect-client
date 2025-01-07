@@ -65,4 +65,15 @@ export default {
     };
     Dispatcher.loadEndpoint('task-save', data);
   },
+
+  taskStatusListRetrieve (personIdList = []) {
+    // console.log('TaskActions, taskStatusListRetrieve personIdList:', personIdList);
+    if (personIdList) {
+      Dispatcher.loadEndpoint('task-status-list-retrieve', {
+        personIdList,
+      });
+    } else {
+      Dispatcher.loadEndpoint('task-status-list-retrieve');
+    }
+  },
 };

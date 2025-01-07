@@ -15,9 +15,7 @@ export default function TabWithPushHistory (props) {
   const { classes, id, label, to, value, change: handleTabChange } = props;
 
   function handleClick () {
-    console.log(`TabWithPushHistory to: ${to}`);
     if (handleTabChange) {
-      console.log(`TabWithPushHistory value: ${value}`);
       handleTabChange(value);
     }
   }

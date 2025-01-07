@@ -1,43 +1,24 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import PropTypes from 'prop-types';
 import { renderLog } from '../../common/utils/logging';
-import PersonStore from '../../stores/PersonStore';
 
 
-const PersonHeader = ({ showHeaderLabels, person }) => {
+const PersonSummaryHeader = () => {
   renderLog('PersonHeader');  // Set LOG_RENDER_EVENTS to log all renders
 
   return (
     <OnePersonHeader>
       {/* Width (below) of this PersonHeaderCell comes from the combined widths of the first x columns in PersonMemberList */}
-      <PersonHeaderCell largeFont titleCell width={15 + 150 + 125}>
-        {person && (
-          <Link to={`/person-home/${person.id}`}>
-            {PersonStore.getFullNamePreferred(person.personId)}
-          </Link>
-        )}
+      <PersonHeaderCell largeFont titleCell width={150 + 125}>
+        &nbsp;
       </PersonHeaderCell>
-      {showHeaderLabels && (
-        <PersonHeaderCell width={190}>
-          Title / Volunteering Love
-        </PersonHeaderCell>
-      )}
+      <PersonHeaderCell width={190}>
+        Title / Volunteering Love
+      </PersonHeaderCell>
       {/* Edit icon */}
-      {showHeaderLabels && (
-        <PersonHeaderCell width={20} />
-      )}
-      {/* Delete icon */}
-      {showHeaderLabels && (
-        <PersonHeaderCell width={20} />
-      )}
+      <PersonHeaderCell width={20} />
     </OnePersonHeader>
   );
-};
-PersonHeader.propTypes = {
-  showHeaderLabels: PropTypes.bool,
-  person: PropTypes.object,
 };
 
 const OnePersonHeader = styled('div')`
@@ -62,4 +43,4 @@ const PersonHeaderCell = styled('div', {
   ${width ? `width: ${width}px;` : ''};
 `));
 
-export default PersonHeader;
+export default PersonSummaryHeader;

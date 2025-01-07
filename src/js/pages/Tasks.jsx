@@ -12,8 +12,9 @@ import TeamActions from '../actions/TeamActions';
 import TeamStore from '../stores/TeamStore';
 import { SpanWithLinkStyle } from '../components/Style/linkStyles';
 import { PageContentContainer } from '../components/Style/pageLayoutStyles';
-import PersonHeader from '../components/Person/PersonHeader';
-// import TaskList from '../components/Task/TaskList';
+import PersonSummaryHeader from '../components/Person/PersonSummaryHeader';
+import PersonSummaryRow from '../components/Person/PersonSummaryRow';
+import TaskListForPerson from '../components/Task/TaskListForPerson';
 import webAppConfig from '../config';
 import apiCalming from '../common/utils/apiCalming';
 import { renderLog } from '../common/utils/logging';
@@ -23,32 +24,34 @@ const Tasks = ({ classes, match }) => {  //  classes, teamId
   renderLog('Tasks');  // Set LOG_RENDER_EVENTS to log all renders
   const [showCompletedTasks, setShowCompletedTasks] = React.useState(true);
   const [personList, setPersonList] = React.useState([]);
+  const [taskListDictByPersonId, setTaskListDictByPersonId] = React.useState({});
   const [teamCount, setTeamCount] = React.useState(0);
 
   const onAppObservableStoreChange = () => {
   };
 
-  const onRetrieveProcessStepListChange = () => {
-    // const { params } = match;
-    // setShowCompletedTasks(false);
-    // const processStepListTemp = TeamStore.getProcessStepList(params.teamId);
-    // // console.log('Tasks onRetrieveProcessStepListChange, params.teamId:', params.teamId, ', TeamStore.getProcessStepList:', processStepListTemp);
-    // setProcessStepList(processStepListTemp);
-    // setTeamCount(processStepListTemp.length);
+  const onRetrieveTaskStatusListChange = () => {
+    const personListTemp = PersonStore.getAllCachedPeopleList();
+    const taskListDictByPersonIdTemp = {};
+    for (let i = 0; i < personListTemp.length; i++) {
+      const person = personListTemp[i];
+      taskListDictByPersonIdTemp[person.personId] = TaskStore.getTaskListForPerson(person.personId);
+    }
+    setTaskListDictByPersonId(taskListDictByPersonIdTemp);
   };
 
   const onPersonStoreChange = () => {
-    onRetrieveProcessStepListChange();
+    onRetrieveTaskStatusListChange();
     const personListTemp = PersonStore.getAllCachedPeopleList();
     setPersonList(personListTemp);
   };
 
   const onTaskStoreChange = () => {
-    //
+    onRetrieveTaskStatusListChange();
   };
 
   const onTeamStoreChange = () => {
-    onRetrieveProcessStepListChange();
+    onRetrieveTaskStatusListChange();
   };
 
   const addTeamClick = () => {
@@ -60,20 +63,24 @@ const Tasks = ({ classes, match }) => {  //  classes, teamId
     onAppObservableStoreChange();
     const personStoreListener = PersonStore.addListener(onPersonStoreChange);
     onPersonStoreChange();
+    const taskStoreListener = TaskStore.addListener(onTaskStoreChange);
+    onTaskStoreChange();
     const teamStoreListener = TeamStore.addListener(onTeamStoreChange);
     onTeamStoreChange();
 
-    if (apiCalming('processStepListRetrieve', 1000)) {
-      // TeamActions.processStepListRetrieve();
+    if (apiCalming('taskStatusListRetrieve', 1000)) {
+      TaskActions.taskStatusListRetrieve();
     }
 
     if (apiCalming('teamListRetrieve', 1000)) {
+      // Needed?
       TeamActions.teamListRetrieve();
     }
 
     return () => {
       appStateSubscription.unsubscribe();
       personStoreListener.remove();
+      taskStoreListener.remove();
       teamStoreListener.remove();
     };
   }, []);
@@ -97,14 +104,11 @@ const Tasks = ({ classes, match }) => {  //  classes, teamId
             <SpanWithLinkStyle onClick={() => setShowCompletedTasks(true)}>show completed</SpanWithLinkStyle>
           )}
         </div>
+        <PersonSummaryHeader />
         {personList.map((person, index) => (
           <OneTeamWrapper key={`team-${person.id}`}>
-            <PersonHeader person={person} showHeaderLabels={(index === 0) && showCompletedTasks} />
-            {/*
-            {showCompletedTasks && (
-              <TeamMemberList teamId={team.id} />
-            )}
-            */}
+            <PersonSummaryRow person={person} />
+            <TaskListForPerson personId={person.id} />
           </OneTeamWrapper>
         ))}
       </PageContentContainer>

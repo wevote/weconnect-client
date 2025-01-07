@@ -6,6 +6,7 @@ class TaskStore extends ReduceStore {
     return {
       allCachedTaskGroupsDict: {}, // This is a dictionary key: taskGroupId, value: TaskGroup dict
       allCachedTaskDefinitionsDict: {}, // This is a dictionary key: taskDefinitionId, value: TaskDefinition dict
+      allCachedTaskDependenciesDict: {}, // This is a dictionary key: taskDependencyId, value: TaskDependency dict
       allCachedTasksDict: {}, // This is a dictionary key: personId, value: another dictionary key: taskDefinitionId, value: Task dict
       mostRecentTaskDefinitionIdSaved: -1,
       mostRecentTaskDefinitionSaved: {
@@ -93,10 +94,17 @@ class TaskStore extends ReduceStore {
     return allCachedTaskDefinitionsDict[taskDefinitionId] || {};
   }
 
-  getTaskById (taskId) {
+  getTaskDictByPersonId (personId) {
     const { allCachedTasksDict } = this.getState();
-    // console.log('TaskStore getTaskById:', taskId, ', allCachedTasksDict:', allCachedTasksDict);
-    return allCachedTasksDict[taskId] || {};
+    // console.log('TaskStore getTaskDictByPersonId:', personId, ', allCachedTasksDict:', allCachedTasksDict);
+    return allCachedTasksDict[personId] || {};
+  }
+
+  getTaskListForPerson (personId) {
+    const taskDict = this.getTaskDictByPersonId(personId);
+    const taskList = Object.values(taskDict);
+    // console.log('TaskStore getTasksCompletedByPersonList:', personId, ', taskDefinitionsCompletedPersonIdList:', taskDefinitionsCompletedPersonIdList);
+    return taskList || [];
   }
 
   getSearchResults () {
@@ -106,7 +114,7 @@ class TaskStore extends ReduceStore {
 
   reduce (state, action) {
     const {
-      allCachedTaskGroupsDict, allCachedTaskDefinitionsDict,
+      allCachedTaskGroupsDict, allCachedTaskDefinitionsDict, allCachedTasksDict,
     } = state;
     // let taskId = -1;
     let taskDefinitionId = -1;
@@ -231,6 +239,64 @@ class TaskStore extends ReduceStore {
         } else {
           console.log('TaskStore task-group-save MISSING taskGroupId:', taskGroupId);
         }
+        return revisedState;
+
+      case 'task-status-list-retrieve':
+        if (!action.res.success) {
+          console.log('TaskStore ', action.type, ' FAILED action.res:', action.res);
+          return state;
+        }
+        revisedState = state;
+        // console.log('TaskStore task-definition-list-retrieve taskDefinitionList:', action.res.taskDefinitionList);
+        if (action.res.taskDefinitionList) {
+          action.res.taskDefinitionList.forEach((taskDefinition) => {
+            // console.log('TaskStore task-definition-list-retrieve adding taskDefinition:', taskDefinition);
+            if (taskDefinition && (taskDefinition.id >= 0)) {
+              allCachedTaskDefinitionsDict[taskDefinition.id] = taskDefinition;
+            }
+          });
+          // console.log('allCachedTaskDefinitionsDict:', allCachedTaskDefinitionsDict);
+          revisedState = {
+            ...revisedState,
+            allCachedTaskDefinitionsDict,
+          };
+        }
+        if (action.res.taskGroupList) {
+          action.res.taskGroupList.forEach((taskGroup) => {
+            // console.log('TaskStore task-group-list-retrieve adding taskGroup:', taskGroup);
+            if (taskGroup && (taskGroup.id >= 0)) {
+              allCachedTaskGroupsDict[taskGroup.id] = taskGroup;
+            }
+          });
+          // console.log('allCachedTaskGroupsDict:', allCachedTaskGroupsDict);
+          revisedState = {
+            ...revisedState,
+            allCachedTaskGroupsDict,
+          };
+        }
+        if (action.res.taskList) {
+          action.res.taskList.forEach((task) => {
+            // console.log('TaskStore task-group-list-retrieve adding taskGroup:', taskGroup);
+            if (task && (task.personId >= 0)) {
+              if (!allCachedTasksDict[task.personId]) {
+                allCachedTasksDict[task.personId] = {};
+              }
+              if (task && (task.taskDefinitionId >= 0)) {
+                allCachedTasksDict[task.personId][task.taskDefinitionId] = task;
+              } else {
+                console.log('TaskStore task-group-list-retrieve skipping task with missing personId:', task);
+              }
+            } else {
+              console.log('TaskStore task-group-list-retrieve skipping task with missing taskDefinitionId:', task);
+            }
+          });
+          console.log('allCachedTasksDict:', allCachedTasksDict);
+          revisedState = {
+            ...revisedState,
+            allCachedTasksDict,
+          };
+        }
+        // console.log('TaskStore revisedState:', revisedState);
         return revisedState;
 
       default:

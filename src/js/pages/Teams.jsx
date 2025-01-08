@@ -13,10 +13,9 @@ import TeamMemberList from '../components/Team/TeamMemberList';
 import webAppConfig from '../config';
 import { renderLog } from '../common/utils/logging';
 import { useConnectAppContext } from '../contexts/ConnectAppContext';
-import { getTeamList } from '../react-query/TeamsQuery';
+import { getTeamList } from '../react-query/TeamsQueryProcessing';
 import weConnectQueryFn from '../react-query/WeConnectQuery';
-// import AppObservableStore, { messageService } from '../stores/AppObservableStore';
-
+import AddTeamDrawer from '../components/Drawers/AddTeamDrawer';
 
 
 const Teams = ({ classes, match }) => {  //  classes, teamId
@@ -26,6 +25,7 @@ const Teams = ({ classes, match }) => {  //  classes, teamId
   const [teamCount, setTeamCount] = React.useState(-1);
   const { setAppContextValue, getAppContextValue, getAppContextData } = useConnectAppContext();  // This component will re-render whenever the value of ConnectAppContext changes
   console.log('match: ', match);
+  let displayDrawer = getAppContextValue('addTeamDrawerOpen');
 
   const { data, error, isLoading, isSuccess } = useQuery({
     queryKey: ['team-list-retrieve'],
@@ -43,46 +43,24 @@ const Teams = ({ classes, match }) => {  //  classes, teamId
     console.log('Teams onRetrieveTeamListChange, params.teamId:  HACKED nope', ', TeamStore.getTeamList:', teamListTemp);
     setTeamList(teamListTemp);
     setTeamCount(teamListTemp.length);
+    setAppContextValue('teamListNested', teamListTemp);
   }
-
-  // const onPersonStoreChange = () => {
-  //   onRetrieveTeamListChange();
-  // };
-  //
-  // const onTeamStoreChange = () => {
-  //   onRetrieveTeamListChange();
-  //   if (apiCalming('teamListRetrieve', 1000)) {
-  //     TeamActions.teamListRetrieve();
-  //   }
-  // };
 
   const addTeamClick = () => {
     setAppContextValue('addTeamDrawerOpen', true);
+    displayDrawer = true;
+    // setDisplayDrawer(true);
   };
 
   useEffect(() => {  // Replaces onAppObservableStoreChange and will be called whenever the context value changes
     console.log('Teams: Context value changed:', true);
-    if (!getAppContextValue('addTeamDrawerOpen')) {
-      setAppContextValue('addTeamDrawerOpen', true);
-    }
   }, [getAppContextData()]);
 
-  // React.useEffect(() => {
-  //   const personStoreListener = PersonStore.addListener(onPersonStoreChange);
-  //   onPersonStoreChange();
-  //   const teamStoreListener = TeamStore.addListener(onTeamStoreChange);
-  //   onTeamStoreChange();
-  //
-  //   if (apiCalming('teamListRetrieve', 1000)) {
-  //     TeamActions.teamListRetrieve();
-  //   }
-  //
-  //   return () => {
-  //     // appStateSubscription.unsubscribe();
-  //     personStoreListener.remove();
-  //     teamStoreListener.remove();
-  //   };
-  // }, []);
+  const personProfile = getAppContextValue('personProfileDrawerOpen');
+  if (personProfile === undefined) {
+    setAppContextValue('personProfileDrawerOpen', false);
+    setAppContextValue('addTeamDrawerOpen', false);
+  }
 
   return (
     <div>
@@ -114,7 +92,8 @@ const Teams = ({ classes, match }) => {  //  classes, teamId
           classes={{ root: classes.addTeamButtonRoot }}
           color="primary"
           variant="outlined"
-          onClick={addTeamClick}
+          // onClick={addTeamClick}
+          onClick={() => addTeamClick()}
         >
           Add Team
         </Button>
@@ -122,7 +101,7 @@ const Teams = ({ classes, match }) => {  //  classes, teamId
           <OneTeamWrapper key={`team-${team.id}`}>
             <TeamHeader team={team} showHeaderLabels={(index === 0) && showAllTeamMembers && (team.teamMemberList && team.teamMemberList.length > 0)} />
             {showAllTeamMembers && (
-              <TeamMemberList teamId={team.id} />
+              <TeamMemberList teamId={team.id} teamList={teamList} />
             )}
           </OneTeamWrapper>
         ))}
@@ -131,6 +110,7 @@ const Teams = ({ classes, match }) => {  //  classes, teamId
             Sign in
           </Link>
         </div>
+        {displayDrawer ? <AddTeamDrawer /> : null }
         {/* <ReactQueryDevtools initialIsOpen /> */}
       </PageContentContainer>
     </div>

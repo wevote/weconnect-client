@@ -2,82 +2,68 @@ import React from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { withStyles } from '@mui/styles';
-import AppObservableStore, { messageService } from '../../stores/AppObservableStore';
-import PersonActions from '../../actions/PersonActions';
-import TeamActions from '../../actions/TeamActions';
-import PersonStore from '../../stores/PersonStore';
-import TeamStore from '../../stores/TeamStore';
-import apiCalming from '../../common/utils/apiCalming';
+import { useQuery } from '@tanstack/react-query';
 import SearchBar2024 from '../../common/components/Search/SearchBar2024';
-import DesignTokenColors from '../../common/components/Style/DesignTokenColors';
-import arrayContains from '../../common/utils/arrayContains';
 import { renderLog } from '../../common/utils/logging';
 import AddTeamForm from './AddTeamForm';
+import weConnectQueryFn from '../../react-query/WeConnectQuery';
 
 
+// eslint-disable-next-line no-unused-vars
 const AddTeamDrawerMainContent = ({ classes }) => {  //  classes, teamId
   renderLog('AddTeamDrawerMainContent');  // Set LOG_RENDER_EVENTS to log all renders
-  const [allCachedPeopleList, setAllCachedPeopleList] = React.useState([]);
-  const [searchText, setSearchText] = React.useState('');
+  // const [allCachedPeopleList, setAllCachedPeopleList] = React.useState([]);
+  // const [searchText, setSearchText] = React.useState('');
+  // eslint-disable-next-line no-unused-vars
   const [personSearchResultsList, setPersonSearchResultsList] = React.useState([]);
-  const [teamId, setTeamId] = React.useState(-1);
-  const [teamMemberPersonIdList, setTeamMemberPersonIdList] = React.useState([]);
+  // const [teamId, setTeamId] = React.useState(-1);
+  // const [teamMemberPersonIdList, setTeamMemberPersonIdList] = React.useState([]);
+  // const [teamList, setTeamList] = React.useState([]);
+  const [teamCount] = React.useState(-1);
 
-  const onAppObservableStoreChange = () => {
-    // console.log('AddTeamDrawerMainContent AppObservableStore-addPersonDrawerTeamId: ', AppObservableStore.getGlobalVariableState('addPersonDrawerTeamId'));
-  };
 
-  const onPersonStoreChange = () => {
-  };
+  const { data, error, isLoading, isSuccess } = useQuery({
+    queryKey: ['person-list-retrieve'],
+    queryFn: ({ queryKey }) => weConnectQueryFn(queryKey[0], {}),
+  });
 
-  const onTeamStoreChange = () => {
-    // const teamSearchResultsListTemp = TeamStore.getSearchResults();
-  };
+  if (isLoading) {
+    console.log('Fetching teams...');
+  } else if (error) {
+    console.log(`An error occurred: ${error.message}`);
+  } else if (isSuccess && teamCount < 0) {
+    console.log('Successfully retrieved staff list...');
+    console.log('AddTeamDrawerMainContent "person-list-retrieve" data:', data);
+    // setTeamList(teamListTemp);
+    // setTeamCount(teamListTemp.length);
+  }
 
-  const searchFunction = (incomingSearchText) => {
-    let searchingJustStarted = false;
-    if (searchText.length === 0 && incomingSearchText.length > 0) {
-      searchingJustStarted = true;
-    }
-    const isSearching = (incomingSearchText && incomingSearchText.length > 0);
-    const teamIdTemp = AppObservableStore.getGlobalVariableState('addPersonDrawerTeamId');
-    if (apiCalming(`addPersonToTeamSearch-${teamIdTemp}-${incomingSearchText}`, 60000)) { // Only once per 60 seconds
-      PersonActions.personListRetrieve(incomingSearchText);
-    }
-    setSearchText(incomingSearchText);
-  };
+  // TODO: 12/6/25, temporarily removed to simplify debug
+  // const searchFunction = (incomingSearchText) => {
+  //   let searchingJustStarted = false;
+  //   if (searchText.length === 0 && incomingSearchText.length > 0) {
+  //     searchingJustStarted = true;
+  //   }
+  //   const isSearching = (incomingSearchText && incomingSearchText.length > 0);
+  //   const teamIdTemp = AppObservableStore.getGlobalVariableState('addPersonDrawerTeamId');
+  //   if (apiCalming(`addPersonToTeamSearch-${teamIdTemp}-${incomingSearchText}`, 60000)) { // Only once per 60 seconds
+  //     PersonActions.personListRetrieve(incomingSearchText);
+  //   }
+  //   setSearchText(incomingSearchText);
+  // };
 
   const clearFunction = () => {
     setPersonSearchResultsList([]);
-    setSearchText('');
+    // TODO setSearchText('');
   };
-
-  React.useEffect(() => {
-    const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
-    onAppObservableStoreChange();
-    const personStoreListener = PersonStore.addListener(onPersonStoreChange);
-    onPersonStoreChange();
-    const teamStoreListener = TeamStore.addListener(onTeamStoreChange);
-    onTeamStoreChange();
-
-    if (apiCalming('teamListRetrieve', 30000)) {
-      TeamActions.teamListRetrieve();
-    }
-
-    return () => {
-      // console.log('AddTeamDrawerMainContent cleanup');
-      appStateSubscription.unsubscribe();
-      personStoreListener.remove();
-      teamStoreListener.remove();
-    };
-  }, []);
 
   return (
     <AddTeamDrawerMainContentWrapper>
       <SearchBarWrapper>
         <SearchBar2024
           placeholder="Search by team name"
-          searchFunction={searchFunction}
+          // searchFunction={searchFunction}
+          searchFunction={() => console.log('searchFunction in AddTeamDrawerMainContent')}
           clearFunction={clearFunction}
           searchUpdateDelayTime={250}
         />

@@ -15,12 +15,14 @@ const EditQuestionnaireDrawer = () => {
 
 
   useEffect(() => {  // Replaces onAppObservableStoreChange and will be called whenever the context value changes
-    console.log('EditQuestionnaireDrawer: Context value changed:', true);
-    const questionnaireIdTemp = getAppContextValue('editQuestionnaireDrawerQuestionnaireId');
-    if (questionnaireIdTemp >= 0) {
-      setHeaderTitleJsx(<>Edit Questionnaire</>);
-    } else {
-      setHeaderTitleJsx(<>Add Questionnaire</>);
+    if (getAppContextValue('editQuestionnaireDrawerOpen')) {
+      console.log('EditQuestionnaireDrawer: Context value changed:', true);
+      const questionnaireIdTemp = getAppContextValue('editQuestionnaireDrawerQuestionnaireId');
+      if (questionnaireIdTemp >= 0) {
+        setHeaderTitleJsx(<>Edit Questionnaire</>);
+      } else {
+        setHeaderTitleJsx(<>Add Questionnaire</>);
+      }
     }
   }, [getAppContextValue]);
 

@@ -1,10 +1,10 @@
 import { StyledEngineProvider, ThemeProvider } from '@mui/material/styles';
-import React, { Suspense, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router';
 import styled from 'styled-components';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import muiTheme from './js/common/components/Style/muiTheme';
-import LoadingWheelComp from './js/common/components/Widgets/LoadingWheelComp';
+// import LoadingWheelComp from './js/common/components/Widgets/LoadingWheelComp';
 import { normalizedHref } from './js/common/utils/hrefUtils';
 import initializejQuery from './js/common/utils/initializejQuery';
 import { renderLog } from './js/common/utils/logging';
@@ -28,6 +28,7 @@ const Teams = React.lazy(() => import(/* webpackChunkName: 'Teams' */ './js/page
 
 
 function App () {
+  renderLog('App');
   // eslint-disable-next-line no-unused-vars
   const [hideHeader, setHideHeader] = useState(false);
 
@@ -67,9 +68,6 @@ function App () {
   }, []);
 
 
-
-  renderLog('App');
-
   const isAuth = localStorage.getItem('isAuthenticated');
   console.log('======================================== isAuthenticated: "  ', isAuth, ' =============================');
 
@@ -79,33 +77,26 @@ function App () {
         <QueryClientProvider client={queryClient}>
           <ConnectAppContext>
             <ThemeProvider theme={muiTheme}>
-              {/* March 2022: We used to have two themeproviders here, one for material-ui, and one for styled-components, but the two are combined in V5 MUI */}
               <WeVoteBody>
                 <Header hideHeader={hideHeader} params={{ }} pathname={normalizedHref()} />
-                <Suspense fallback={<></>}>
-                  <Drawers />
-                </Suspense>
-                <Suspense fallback={<LoadingWheelComp />}>
-                  <Router>
-                    <Routes>
-                      <Route element={<PrivateRoute />}>
-                        <Route path="/faq" element={<FAQ />} />
-                      </Route>
-                      <Route path="/login" element={<Login />} />
-                      <Route path="/q/:questionnaireId/:personId" element={<AnswerQuestionsForm />} />
-                      <Route path="/questionnaire/:questionnaireId" element={<QuestionnaireQuestionList />} />
-                      <Route path="/system-settings" element={<SystemSettings />} />
-                      <Route path="/teams" element={<Teams />} />
-                      <Route path="/team-home/:teamId" element={<TeamHome />} />
-                      <Route path="/" element={<Teams />} />
+                <Drawers />
+                <Router>
+                  <Routes>
+                    <Route element={<PrivateRoute />}>
+                      <Route path="/faq" element={<FAQ />} />
+                    </Route>
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/q/:questionnaireId/:personId" element={<AnswerQuestionsForm />} />
+                    <Route path="/questionnaire/:questionnaireId" element={<QuestionnaireQuestionList />} />
+                    <Route path="/system-settings" element={<SystemSettings />} />
+                    <Route path="/teams" element={<Teams />} />
+                    <Route path="/team-home/:teamId" element={<TeamHome />} />
+                    <Route path="/" element={<Teams />} />
 
-                      <Route path="*" element={<PageNotFound />} />
-                    </Routes>
-                  </Router>
-                </Suspense>
-                <Suspense fallback={<span>&nbsp;</span>}>
-                  <Footer />
-                </Suspense>
+                    <Route path="*" element={<PageNotFound />} />
+                  </Routes>
+                </Router>
+                <Footer />
               </WeVoteBody>
             </ThemeProvider>
           </ConnectAppContext>

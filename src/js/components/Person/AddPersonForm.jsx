@@ -3,10 +3,6 @@ import { withStyles } from '@mui/styles';
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
-// import AppObservableStore, { messageService } from '../../stores/AppObservableStore';
-import PersonActions from '../../actions/PersonActions';
-import PersonStore from '../../stores/PersonStore';
-import TeamStore from '../../stores/TeamStore';
 import { renderLog } from '../../common/utils/logging';
 import PrepareDataPackageFromAppObservableStore from '../../common/utils/PrepareDataPackageFromAppObservableStore';
 import { useConnectAppContext } from '../../contexts/ConnectAppContext';
@@ -24,16 +20,17 @@ const AddPersonForm = ({ classes }) => {  //  classes, teamId
 
   useEffect(() => {  // Replaces onAppObservableStoreChange and will be called whenever the context value changes
     console.log('AddPersonForm: Context value changed:', true);
-    setTeamId(getAppContextValue('addPersonDrawerTeamId'));
+    setTeamId(getAppContextValue('addPersonDrawerTeam').id);
   }, [getAppContextValue]);
 
   // const onAppObservableStoreChange = () => {
   //   setTeamId(AppObservableStore.getGlobalVariableState('addPersonDrawerTeamId'));
   // };
 
+  // eslint-disable-next-line no-unused-vars
   const saveNewPersonSuccessful = () => {
     setAppContextValue('addPersonDrawerOpen', false);
-    setAppContextValue('addPersonDrawerTeamId', -1);
+    setAppContextValue('addPersonDrawerTeamId', -1); // hack ?? 12/8/24
     for (let i = 0; i < FIELDS_IN_FORM.length; i++) {
       const fieldName = FIELDS_IN_FORM[i];
       setAppContextValue(`${fieldName}Changed`, false);
@@ -41,25 +38,13 @@ const AddPersonForm = ({ classes }) => {  //  classes, teamId
     }
   };
 
-  const onPersonStoreChange = () => {
-    const mostRecentPersonChanged = PersonStore.getMostRecentPersonChanged();
-    // console.log('AddPersonForm onPersonStoreChange mostRecentPersonChanged:', mostRecentPersonChanged);
-    // TODO: Figure out why firstName, lastName, and emailPersonal are not being updated
-    // console.log('firstName:', firstName, ', lastName:', lastName, ', emailPersonal:', emailPersonal);
-    // console.log('emailPersonalToBeSaved:', getAppContextValue('emailPersonalToBeSaved'));
-    if (mostRecentPersonChanged.emailPersonal === getAppContextValue('emailPersonalToBeSaved')) {
-      saveNewPersonSuccessful();
-    }
-  };
 
   const saveNewPerson = () => {
     const data = PrepareDataPackageFromAppObservableStore(FIELDS_IN_FORM);
     if (teamId >= 0) {
       data.teamId = teamId;
-      data.teamName = TeamStore.getTeamById(teamId).teamName;
+      data.teamName = 'hack'; // TeamStore.getTeamById(teamId).teamName;
     }
-    // console.log('saveNewPerson data:', data);
-    PersonActions.personSave('-1', data);
   };
 
   const updateEmailPersonal = (event) => {
@@ -93,11 +78,7 @@ const AddPersonForm = ({ classes }) => {  //  classes, teamId
   };
 
   React.useEffect(() => {
-    // const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
-    // onAppObservableStoreChange();
-    const personStoreListener = PersonStore.addListener(onPersonStoreChange);
-    onPersonStoreChange();
-    // console.log('Initial load emailPersonalToBeSaved:', getAppContextValue('emailPersonalToBeSaved'));
+    console.log('Initial load emailPersonalToBeSaved:', getAppContextValue('emailPersonalToBeSaved'));
     if (getAppContextValue('emailPersonalToBeSaved')) {
       setEmailPersonal(getAppContextValue('emailPersonalToBeSaved'));
     }
@@ -109,8 +90,6 @@ const AddPersonForm = ({ classes }) => {  //  classes, teamId
     }
 
     return () => {
-      // appStateSubscription.unsubscribe();
-      personStoreListener.remove();
     };
   }, []);
 

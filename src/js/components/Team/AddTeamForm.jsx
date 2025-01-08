@@ -3,18 +3,25 @@ import { withStyles } from '@mui/styles';
 import React from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
-// import AppObservableStore, { messageService } from '../../stores/AppObservableStore';
-import TeamActions from '../../actions/TeamActions';
-import TeamStore from '../../stores/TeamStore';
+import { useMutation } from '@tanstack/react-query';
 import { renderLog } from '../../common/utils/logging';
-import PrepareDataPackageFromAppObservableStore from '../../common/utils/PrepareDataPackageFromAppObservableStore';
 import { useConnectAppContext } from '../../contexts/ConnectAppContext';
+import weConnectQueryFn from '../../react-query/WeConnectQuery';
 
 const AddTeamForm = ({ classes }) => {  //  classes, teamId
   renderLog('AddTeamForm');  // Set LOG_RENDER_EVENTS to log all renders
   const [teamName, setTeamName] = React.useState('');
-  const { setAppContextValue, getAppContextValue } = useConnectAppContext();  // This component will re-render whenever the value of ConnectAppContext changes
+  const [mutateFired, setMutateFired] = React.useState(false);
+  const { setAppContextValue } = useConnectAppContext();  // This component will re-render whenever the value of ConnectAppContext changes
 
+
+  const saveTeamMutation = useMutation({  // teamId=-1&teamNameChanged=true&teamNameToBeSaved=mouse
+    mutationFn: (team) => weConnectQueryFn('team-save', {
+      teamName: team,
+      teamNameChanged: true,
+      teamId: '-1',
+    }),
+  });
 
   const saveNewTeamSuccessful = () => {
     setAppContextValue('addTeamDrawerOpen', false);
@@ -22,21 +29,28 @@ const AddTeamForm = ({ classes }) => {  //  classes, teamId
     setAppContextValue('teamNameToBeSaved', '');
   };
 
-  const onTeamStoreChange = () => {
-    const mostRecentTeamChanged = TeamStore.getMostRecentTeamChanged();
-    // console.log('AddTeamForm onTeamStoreChange mostRecentTeamChanged:', mostRecentTeamChanged);
-    // TODO: Figure out why teamName is not being updated locally
-    // console.log('teamName:', teamName);
-    if (mostRecentTeamChanged.teamName === getAppContextValue('teamNameToBeSaved')) {
-      saveNewTeamSuccessful();
-    }
-  };
+  if (saveTeamMutation.isSuccess && mutateFired) {
+    setMutateFired(false);
+    console.log('--------- saveTeamMutation mutated ---------');
+    setAppContextValue('saveTeamMutationMutated', new Date());
+    saveNewTeamSuccessful();
+  }
+
+  // const onTeamStoreChange = () => {
+  //   const mostRecentTeamChanged = TeamStore.getMostRecentTeamChanged();
+  //   // console.log('AddTeamForm onTeamStoreChange mostRecentTeamChanged:', mostRecentTeamChanged);
+  //   // TODO: Figure out why teamName is not being updated locally
+  //   // console.log('teamName:', teamName);
+  //   if (mostRecentTeamChanged.teamName === getAppContextValue('teamNameToBeSaved')) {
+  //     saveNewTeamSuccessful();
+  //   }
+  // };
 
   const saveNewTeam = () => {
-    const acceptedVariables = ['teamName'];
-    const data = PrepareDataPackageFromAppObservableStore(acceptedVariables);
-    // console.log('saveNewTeam data:', data);
-    TeamActions.teamSave('-1', data);
+    console.log('saveNewTeam data:', teamName);
+    setMutateFired(true);
+    const ret = saveTeamMutation.mutate(teamName);
+    console.log('saveNewTeam data:', teamName, JSON.stringify(ret));
   };
 
   const updateTeamName = (event) => {
@@ -49,20 +63,20 @@ const AddTeamForm = ({ classes }) => {  //  classes, teamId
     }
   };
 
-  React.useEffect(() => {
-    // const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
-    // onAppObservableStoreChange();
-    const teamStoreListener = TeamStore.addListener(onTeamStoreChange);
-    onTeamStoreChange();
-    if (getAppContextValue('teamNameToBeSaved')) {
-      setTeamName(getAppContextValue('teamNameToBeSaved'));
-    }
-
-    return () => {
-      // appStateSubscription.unsubscribe();
-      teamStoreListener.remove();
-    };
-  }, []);
+  // React.useEffect(() => {
+  //   // const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
+  //   // onAppObservableStoreChange();
+  //   const teamStoreListener = TeamStore.addListener(onTeamStoreChange);
+  //   onTeamStoreChange();
+  //   if (getAppContextValue('teamNameToBeSaved')) {
+  //     setTeamName(getAppContextValue('teamNameToBeSaved'));
+  //   }
+  //
+  //   return () => {
+  //     // appStateSubscription.unsubscribe();
+  //     teamStoreListener.remove();
+  //   };
+  // }, []);
 
   return (
     <AddTeamFormWrapper>

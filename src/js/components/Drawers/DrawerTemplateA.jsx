@@ -4,22 +4,20 @@ import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { withStyles } from '@mui/styles';
-// import AppObservableStore, { messageService } from '../../stores/AppObservableStore';
 import { DrawerHeaderAnimateDownInnerContainer, DrawerHeaderAnimateDownOuterContainer, DrawerTitle, DrawerHeaderWrapper } from '../Style/drawerLayoutStyles';
 import { cordovaDrawerTopMargin } from '../../utils/cordovaOffsets';
 import { hasIPhoneNotch } from '../../common/utils/cordovaUtils';
 import { renderLog } from '../../common/utils/logging';
 import { useConnectAppContext } from '../../contexts/ConnectAppContext';
-// import { useStateContext } from '../../contexts/KeyValCont';
 
 
 
 const DrawerTemplateA = ({ classes, drawerId, drawerOpenGlobalVariableName, headerFixedJsx, headerTitleJsx, mainContentJsx }) => {  //  classes, teamId
   renderLog(`DrawerTemplateA (${drawerId})`);  // Set LOG_RENDER_EVENTS to log all renders
-  const [drawerOpen, setDrawerOpen] = React.useState(false);
   const [scrolledDown, setScrolledDown] = React.useState(false);
   const { getAppContextData, setAppContextValue, getAppContextValue } = useConnectAppContext();  // This component will re-render whenever the value of ConnectAppContext changes
-
+  const drawerOpen = getAppContextValue(drawerOpenGlobalVariableName);
+  console.log('DrawerTemplateA drawerOpen: ', drawerOpenGlobalVariableName, drawerOpen);
 
   const handleScrolledDownDrawer = (evt) => {
     const { scrollTop } = evt.target;
@@ -32,20 +30,12 @@ const DrawerTemplateA = ({ classes, drawerId, drawerOpenGlobalVariableName, head
   };
 
   useEffect(() => {  // Replaces onAppObservableStoreChange and will be called whenever the context value changes
-    console.log('DrawerTemplateA: Context value changed: ', drawerId);
+    console.log('DrawerTemplateA: Context value changed: ',
+      drawerId, drawerOpenGlobalVariableName, getAppContextValue(drawerOpenGlobalVariableName));
     setScrolledDown(getAppContextValue('scrolledDownDrawer'));
-    setDrawerOpen(getAppContextValue('drawerOpenGlobalVariableName'));
   }, [getAppContextData]);
 
-  // const onAppObservableStoreChange = () => {
-  //   setScrolledDown(getAppContextValue('scrolledDownDrawer'));
-  //   setDrawerOpen(getAppContextValue('drawerOpenGlobalVariableName'));
-  // };
-
   React.useEffect(() => {
-    // const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
-    // onAppObservableStoreChange();
-
     setTimeout(() => {
       const drawer = document.querySelector('.MuiDrawer-paper');
       if (drawer) {
@@ -56,7 +46,10 @@ const DrawerTemplateA = ({ classes, drawerId, drawerOpenGlobalVariableName, head
     }, 100);
 
     return () => {
-      // appStateSubscription.unsubscribe();
+      const drawer = document.querySelector('.MuiDrawer-paper');
+      if (drawer) {
+        drawer.removeListeners();
+      }
     };
   }, []);
 
@@ -87,7 +80,8 @@ const DrawerTemplateA = ({ classes, drawerId, drawerOpenGlobalVariableName, head
           </IconButton>
         </CloseDrawerIconWrapper>
       </DrawerHeaderWrapper>
-      <DrawerHeaderAnimateDownOuterContainer id={`${drawerId}AnimateDownId`} scrolledDown={scrolledDown}>
+      {/* <DrawerHeaderAnimateDownOuterContainer id={`${drawerId}AnimateDownId`} scrolledDown={scrolledDown}> */}
+      <DrawerHeaderAnimateDownOuterContainer id={`${drawerId}AnimateDownId`} $scrolledDown={scrolledDown}>
         <DrawerHeaderAnimateDownInnerContainer>
           {headerFixedJsx}
         </DrawerHeaderAnimateDownInnerContainer>
@@ -138,7 +132,7 @@ const styles = () => ({
       margin: '0 auto',
       minWidth: 0,
       minHeight: 0,
-      transitionDuration: '.25s',
+      // transitionDuration: '.25s',
     },
     '@media (max-width: 576px)': {
       maxWidth: '360px',

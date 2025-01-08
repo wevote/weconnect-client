@@ -1,84 +1,57 @@
 import { Button } from '@mui/material';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link, useParams } from 'react-router';
-// import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { withStyles } from '@mui/styles';
 import { useConnectAppContext } from '../contexts/ConnectAppContext';
-// import AppObservableStore, { messageService } from '../stores/AppObservableStore';
-import PersonStore from '../stores/PersonStore';
-import TeamActions from '../actions/TeamActions';
-import TeamStore from '../stores/TeamStore';
 import { PageContentContainer } from '../components/Style/pageLayoutStyles';
 import TeamHeader from '../components/Team/TeamHeader';
 import TeamMemberList from '../components/Team/TeamMemberList';
 import webAppConfig from '../config';
-import apiCalming from '../common/utils/apiCalming';
-import convertToInteger from '../common/utils/convertToInteger';
 import { renderLog } from '../common/utils/logging';
+import AddPersonDrawer from '../components/Drawers/AddPersonDrawer';
+import useFetchData from '../react-query/fetchData';
+import { getTeamList } from '../react-query/TeamsQueryProcessing';
 
 
 const TeamHome = ({ classes }) => {  //  classes, params
   renderLog('TeamHome');  // Set LOG_RENDER_EVENTS to log all renders
-  const { params: { teamId: tId }} = useParams();
+  const params  = useParams();
   const [team, setTeam] = React.useState({});
-  const [teamId, setTeamId] = React.useState(tId);
-  const { setAppContextValue } = useConnectAppContext();  // This component will re-render whenever the value of ConnectAppContext changes
+  const [teamFound, setTeamFound] = React.useState(false);
+  const [teamId] = React.useState(params.teamId);
+  const { setAppContextValue, getAppContextValue } = useConnectAppContext();  // This component will re-render whenever the value of ConnectAppContext changes
+  const displayDrawer = getAppContextValue('addPersonDrawerOpen');
 
-  const onRetrieveTeamChange = (teamIdIncoming) => {
-    // console.log('TeamHome onRetrieveTeamChange, teamIdIncoming:', teamIdIncoming);
-    const teamTemp = TeamStore.getTeamById(teamIdIncoming);
-    setTeam(teamTemp);
+  const updateTeam = (tList) => {
+    const oneTeam = tList.find((staff) => staff.teamId === parseInt(teamId));
+    setTeam(oneTeam);
   };
 
-  const onPersonStoreChange = () => {
-    const teamIdTemp = convertToInteger(teamId);
-    if (teamIdTemp >= 0) {
-      setTeamId(teamIdTemp);
-    }
-    onRetrieveTeamChange(teamIdTemp);
-    if (apiCalming(`teamRetrieve-${teamIdTemp}`, 1000)) {
-      TeamActions.teamRetrieve(teamIdTemp);
-    }
-  };
+  const teamList = getAppContextValue('teamListNested');
+  if (teamList && !teamFound) {   // If you navigate directly to team-home, in a new session 'teamListNested' will not be set.  Fixable but low priority.
+    setTeamFound(true);
+    updateTeam(teamList);
+  }
 
-  const onTeamStoreChange = () => {
-    const teamIdTemp = convertToInteger(teamId);
-    if (teamIdTemp >= 0) {
-      setTeamId(teamIdTemp);
+  const isDrawerOpen = document.getElementById("addPersonDrawer");
+  const { data, isSuccess } = useFetchData('team-list-retrieve', {});
+  useEffect(() => {
+    console.log('teamListNested update with newly fetched data in TeamHome, isSuccess: ', isSuccess);
+    if (isSuccess) {
+      const tList = getTeamList(data);
+      setAppContextValue('teamListNested', tList);
+      updateTeam(tList);
     }
-    onRetrieveTeamChange(teamIdTemp);
-  };
+  }, [isDrawerOpen]);
+
 
   const addTeamMemberClick = () => {
     // console.log('TeamHome addTeamMemberClick, teamId:', teamId);
     setAppContextValue('addPersonDrawerOpen', true);
-    setAppContextValue('addPersonDrawerTeamId', teamId);
+    setAppContextValue('addPersonDrawerTeam', team);
   };
-
-  React.useEffect(() => {
-    const teamIdTemp = convertToInteger(teamId);
-
-    // const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
-    // onAppObservableStoreChange();
-    const personStoreListener = PersonStore.addListener(onPersonStoreChange);
-    onPersonStoreChange();
-    const teamStoreListener = TeamStore.addListener(onTeamStoreChange);
-    onTeamStoreChange();
-
-    if (teamIdTemp >= 0) {
-      if (apiCalming(`teamRetrieve-${teamIdTemp}`, 1000)) {
-        TeamActions.teamRetrieve(teamIdTemp);
-      }
-    }
-
-    return () => {
-      // appStateSubscription.unsubscribe();
-      personStoreListener.remove();
-      teamStoreListener.remove();
-    };
-  }, []);
 
   return (
     <div>
@@ -94,7 +67,7 @@ const TeamHome = ({ classes }) => {  //  classes, params
         <div>
           Team Home for
           {' '}
-          {team.teamName}
+          {team ? team.teamName : 'none'}
           {' '}
           -
           {' '}
@@ -110,13 +83,14 @@ const TeamHome = ({ classes }) => {  //  classes, params
         </Button>
         <TeamHeader showHeaderLabels={(team.teamMemberList && team.teamMemberList.length > 0)} />
         <TeamMemberList teamId={teamId} />
+        {displayDrawer ? <AddPersonDrawer /> : null }
       </PageContentContainer>
     </div>
   );
 };
 TeamHome.propTypes = {
   classes: PropTypes.object.isRequired,
-  params: PropTypes.object.isRequired,
+  // params: PropTypes.object.isRequired,
 };
 
 const styles = (theme) => ({

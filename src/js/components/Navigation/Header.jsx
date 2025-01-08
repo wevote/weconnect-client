@@ -1,7 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { Component, Suspense } from 'react';
 // import styled from 'styled-components';
-import VoterActions from '../../actions/VoterActions';
 import AppObservableStore, { messageService } from '../../stores/AppObservableStore';
 import apiCalming from '../../common/utils/apiCalming';
 import { normalizedHref } from '../../common/utils/hrefUtils';

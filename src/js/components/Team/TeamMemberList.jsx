@@ -1,62 +1,42 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import PropTypes from 'prop-types';
 import { Delete, Edit } from '@mui/icons-material';
 import { withStyles } from '@mui/styles';
 import DesignTokenColors from '../../common/components/Style/DesignTokenColors';
 import { renderLog } from '../../common/utils/logging';
 import { useConnectAppContext } from '../../contexts/ConnectAppContext';
-import { getFullNamePreferred } from '../../react-query/PersonQuery';
-import { getTeamPersonsList } from '../../react-query/TeamsQuery';
+import { getFullNamePreferred } from '../../react-query/PersonQueryProcessing';
+import { getTeamList } from '../../react-query/TeamsQueryProcessing';
 import weConnectQueryFn from '../../react-query/WeConnectQuery';
+import useFetchData from '../../react-query/fetchData';
 
 const TeamMemberList = ({ teamId }) => {
   renderLog('TeamMemberList');  // Set LOG_RENDER_EVENTS to log all renders
-  const { setAppContextValue } = useConnectAppContext();  // This component will re-render whenever the value of ConnectAppContext changes
-  // const [listOfTeamsLoaded, setListOfTeamsLoaded] = React.useState(false);
-  // const [listOfTeams, setListOfTeams] = React.useState([]);
-
-  const [listOfTeamPersonsLoaded, setListOfTeamPersonsLoaded] = React.useState(false);
-  const [listOfTeamPersons, setListOfTeamPersons] = React.useState([]);
+  console.log('TeamMemberList teamId: ', teamId);
+  const { setAppContextValue, getAppContextValue } = useConnectAppContext();  // This component will re-render whenever the value of ConnectAppContext changes
+  const queryClient = useQueryClient();
 
   const removeTeamMemberMutation = useMutation({
-    mutationFn: (personId) => weConnectQueryFn('remove-person-from-team', { personId, teamId }),
+    mutationFn: (personId) => weConnectQueryFn('remove-person-from-team', {
+      personId,
+      teamId,
+    }),
+    onSuccess: () => {
+      console.log('--------- removeTeamMemberMutation mutated ---------');
+      queryClient.invalidateQueries('team-list-retrieve').then(() => {});
+    },
   });
 
-  // const { data, error, isLoading, isSuccess } = useQuery({
-  //   queryKey: ['person-list-retrieve'],
-  //   queryFn: ({ queryKey }) => weConnectQueryFn(queryKey[0], { teamId }),
-  // });
-  //
-  // if (isLoading) {
-  //   console.log('Fetching team person members...');
-  // } else if (error) {
-  //   console.log(`An error occurred with person-list-retrieve: ${error.message}`);
-  // } else if (isSuccess && !listOfTeamsLoaded) {
-  //   setListOfTeamsLoaded(true);
-  //   const personOnTeamListTemp = personListRetrieve(data, teamId);
-  //   setPersonOnTeamList(personOnTeamListTemp);
-  //   console.log('Successfully retrieved person list for team...');
-  // }
-
-
-  const { data: dataTeamPersons, error: errorTeamPersons, isLoading: isLoadingTeamPersons, isSuccess: isSuccessTeamPersons } = useQuery({
-    queryKey: ['team-retrieve'],   // List of persons on a team by teamId
-    queryFn: ({ queryKey }) => weConnectQueryFn(queryKey[0], { teamId }),
-  });
-
-  if (isLoadingTeamPersons) {
-    console.log('Fetching team person members, staff on a specific team...');
-  } else if (errorTeamPersons) {
-    console.log(`An error occurred with person-list-retrieve: ${errorTeamPersons.message}`);
-  } else if (isSuccessTeamPersons && !listOfTeamPersonsLoaded) {
-    setListOfTeamPersonsLoaded(true);
-    const listOfPersonsOnTeamTemp = getTeamPersonsList(dataTeamPersons, teamId);
-    setListOfTeamPersons(listOfPersonsOnTeamTemp);
-    console.log('Successfully retrieved person list for team...');
-  }
-
+  const { data, isSuccess } = useFetchData('team-list-retrieve', {});
+  useEffect(() => {
+    console.log('teamListNested update with newly fetched data in TeamMemberList, isSuccess: ', isSuccess);
+    if (isSuccess) {
+      const tList = getTeamList(data);
+      setAppContextValue('teamListNested', tList);
+    }
+  }, [data]);
 
   const editPersonClick = (personId, hasEditRights = true) => {
     if (hasEditRights) {
@@ -71,18 +51,29 @@ const TeamMemberList = ({ teamId }) => {
   };
 
   const hasEditRights = true;
+  let teamMemberList = [];
+  const teamListFromContext = getAppContextValue('teamListNested');
+  if (teamListFromContext) {
+    const oneTeam = teamListFromContext[parseInt(teamId) - 1];
+    if (oneTeam && oneTeam.teamMemberList.length > 0) {
+      teamMemberList = oneTeam.teamMemberList;
+    }
+  } else {
+    // console.log('no teamListFromContext yet!');
+  }
+
   return (
     <TeamMembersWrapper>
-      {listOfTeamPersons.map((person, index) => (
-        <OnePersonWrapper key={`teamMember-${person.personId}`}>
-          <PersonCell id={`index-personId-${person.personId}`} width={15}>
+      {teamMemberList.length > 0 && teamMemberList.map((teamMember, index) => (
+        <OnePersonWrapper key={`teamMember-${teamMember.personId}`}>
+          <PersonCell id={`index-personId-${teamMember.personId}`} width={15}>
             <GraySpan>
               {index + 1}
             </GraySpan>
           </PersonCell>
           <PersonCell
-            id={`fullNamePreferred-personId-${person.personId}`}
-            onClick={() => personProfileClick(person.personId)}
+            id={`fullNamePreferred-personId-${teamMember.personId}`}
+            onClick={() => personProfileClick(teamMember.personId)}
             style={{
               cursor: 'pointer',
               textDecoration: 'underline',
@@ -90,18 +81,18 @@ const TeamMemberList = ({ teamId }) => {
             }}
             width={150}
           >
-            {getFullNamePreferred(person)}
+            {getFullNamePreferred(teamMember)}
           </PersonCell>
-          <PersonCell id={`location-personId-${person.personId}`} $smallFont width={125}>
-            {person.location}
+          <PersonCell id={`location-personId-${teamMember.personId}`} $smallFont width={125}>
+            {teamMember.location}
           </PersonCell>
-          <PersonCell id={`jobTitle-personId-${person.personId}`} $smallestFont width={190}>
-            {person.jobTitle}
+          <PersonCell id={`jobTitle-personId-${teamMember.personId}`} $smallestFont width={190}>
+            {teamMember.jobTitle}
           </PersonCell>
           {hasEditRights ? (
             <PersonCell
-              id={`editPerson-personId-${person.personId}`}
-              onClick={() => editPersonClick(person.personId, hasEditRights)}
+              id={`editPerson-personId-${teamMember.personId}`}
+              onClick={() => editPersonClick(teamMember.personId, hasEditRights)}
               style={{ cursor: 'pointer' }}
               width={20}
             >
@@ -109,7 +100,7 @@ const TeamMemberList = ({ teamId }) => {
             </PersonCell>
           ) : (
             <PersonCell
-              id={`editPerson-personId-${person.personId}`}
+              id={`editPerson-personId-${teamMember.personId}`}
               width={20}
             >
               &nbsp;
@@ -117,9 +108,9 @@ const TeamMemberList = ({ teamId }) => {
           )}
           {hasEditRights ? (
             <PersonCell
-              id={`removeMember-personId-${person.personId}`}
+              id={`removeMember-personId-${teamMember.personId}`}
               onClick={() => {
-                removeTeamMemberMutation.mutate(person.personId);
+                removeTeamMemberMutation.mutate(teamMember.personId);
               }}
               style={{ cursor: 'pointer' }}
               width={20}
@@ -128,7 +119,7 @@ const TeamMemberList = ({ teamId }) => {
             </PersonCell>
           ) : (
             <PersonCell
-              id={`removeMember-personId-${person.personId}`}
+              id={`removeMember-personId-${teamMember.personId}`}
               width={20}
             >
               &nbsp;
@@ -140,7 +131,7 @@ const TeamMemberList = ({ teamId }) => {
   );
 };
 TeamMemberList.propTypes = {
-  teamId: PropTypes.number.isRequired,
+  teamId: PropTypes.any.isRequired,
 };
 
 const styles = (theme) => ({

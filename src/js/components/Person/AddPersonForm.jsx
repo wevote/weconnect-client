@@ -1,81 +1,69 @@
+import React, { useEffect, useRef } from 'react';
 import { Button, FormControl, TextField } from '@mui/material';
 import { withStyles } from '@mui/styles';
-import React, { useEffect } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { renderLog } from '../../common/utils/logging';
-import PrepareDataPackageFromAppObservableStore from '../../common/utils/PrepareDataPackageFromAppObservableStore';
 import { useConnectAppContext } from '../../contexts/ConnectAppContext';
+import weConnectQueryFn from '../../react-query/WeConnectQuery';
 
-const FIELDS_IN_FORM = ['emailPersonal', 'firstName', 'lastName'];
 
 const AddPersonForm = ({ classes }) => {  //  classes, teamId
   renderLog('AddPersonForm');
-  const { setAppContextValue, getAppContextValue } = useConnectAppContext();
+  const { getAppContextValue } = useConnectAppContext();
 
-  const [emailPersonal, setEmailPersonal] = React.useState('');
-  const [firstName, setFirstName] = React.useState('');
-  const [lastName, setLastName] = React.useState('');
   const [teamId, setTeamId] = React.useState(-1);
+  const [teamName, setTeamName] = React.useState('');
+  const [mutateFired, setMutateFired] = React.useState(false);
+
+  const queryClient = useQueryClient();
+  const firstNameFldRef = useRef('');
+  const lastNameFldRef = useRef('');
+  const emailFldRef = useRef('');
 
   useEffect(() => {  // Replaces onAppObservableStoreChange and will be called whenever the context value changes
     console.log('AddPersonForm: Context value changed:', true);
     setTeamId(getAppContextValue('addPersonDrawerTeam').id);
+    setTeamName(getAppContextValue('addPersonDrawerTeam').teamName);
   }, [getAppContextValue]);
 
+  const saveNewPersonMutation = useMutation({
+    mutationFn: (params) => weConnectQueryFn(['person-save'], params),
+    onSuccess: () => {
+      console.log('--------- saveNewPersonMutation  mutated before invalidate ---------');
+      queryClient.invalidateQueries(['team-list-retrieve']).then(() => {});
+    },
+    onError: (err) => { console.log('saveNewPersonMutation error: ', err); },
+  });
+
+  if (saveNewPersonMutation.isSuccess && mutateFired) {   // do we need this??????????
+    setMutateFired(false);
+    console.log('--------- saveNewPersonMutation mutated on success ---------');
+  }
+
+  const makeSavePersonDict = (data) => {
+    let requestParams = '';
+    // for (const key in activePerson) {
+    Object.keys(data).forEach((key) => {
+      requestParams += `${key}ToBeSaved=${data[key]}&`;
+      requestParams += `${key}Changed=${true}&`;
+    });
+    requestParams += `personId=-1&teamId=${teamId}&teamName=${teamName}`;
+    return encodeURI(requestParams);
+  };
+
   const saveNewPerson = () => {
-    const data = PrepareDataPackageFromAppObservableStore(FIELDS_IN_FORM);
-    if (teamId >= 0) {
-      data.teamId = teamId;
-      data.teamName = 'hack'; // TeamStore.getTeamById(teamId).teamName;
-    }
-  };
-
-  const updateEmailPersonal = (event) => {
-    if (event.target.name === 'emailPersonalToBeSaved') {
-      const newEmailPersonal = event.target.value;
-      setAppContextValue('emailPersonalChanged', true);
-      setAppContextValue('emailPersonalToBeSaved', newEmailPersonal);
-      // console.log('updateEmailPersonal:', newEmailPersonal);
-      setEmailPersonal(newEmailPersonal);
-    }
-  };
-
-  const updateFirstName = (event) => {
-    if (event.target.name === 'firstNameToBeSaved') {
-      const newFirstName = event.target.value;
-      setAppContextValue('firstNameChanged', true);
-      setAppContextValue('firstNameToBeSaved', newFirstName);
-      // console.log('updateFirstName:', newFirstName);
-      setFirstName(newFirstName);
-    }
-  };
-
-  const updateLastName = (event) => {
-    if (event.target.name === 'lastNameToBeSaved') {
-      const newLastName = event.target.value;
-      setAppContextValue('lastNameChanged', true);
-      setAppContextValue('lastNameToBeSaved', newLastName);
-      // console.log('updateLastName:', newLastName);
-      setLastName(newLastName);
-    }
-  };
-
-  React.useEffect(() => {
-    console.log('Initial load emailPersonalToBeSaved:', getAppContextValue('emailPersonalToBeSaved'));
-    if (getAppContextValue('emailPersonalToBeSaved')) {
-      setEmailPersonal(getAppContextValue('emailPersonalToBeSaved'));
-    }
-    if (getAppContextValue('firstNameToBeSaved')) {
-      setFirstName(getAppContextValue('firstNameToBeSaved'));
-    }
-    if (getAppContextValue('lastNameToBeSaved')) {
-      setLastName(getAppContextValue('lastNameToBeSaved'));
-    }
-
-    return () => {
+    const data = {
+      firstName: firstNameFldRef.current.value,
+      lastName: lastNameFldRef.current.value,
+      emailPersonal: emailFldRef.current.value,
     };
-  }, []);
+    const requestParams = makeSavePersonDict(data);
+    // http://localhost:4500/apis/v1/person-save/?personId=-1&emailPersonalChanged=true&emailPersonalToBeSaved=steve%40podell.com&firstNameChanged=true&firstNameToBeSaved=Steve&lastNameChanged=true&lastNameToBeSaved=Podell&teamId=1&teamName=Levi
+    setMutateFired(true);
+    saveNewPersonMutation.mutate(requestParams);
+  };
 
   return (
     <AddPersonFormWrapper>
@@ -88,9 +76,8 @@ const AddPersonForm = ({ classes }) => {  //  classes, teamId
           name="firstNameToBeSaved"
           margin="dense"
           variant="outlined"
+          inputRef={firstNameFldRef}
           placeholder="First Name"
-          value={firstName}
-          onChange={updateFirstName}
         />
         <TextField
           // classes={{ root: classes.textField }} // Not working yet
@@ -99,9 +86,8 @@ const AddPersonForm = ({ classes }) => {  //  classes, teamId
           name="lastNameToBeSaved"
           margin="dense"
           variant="outlined"
+          inputRef={lastNameFldRef}
           placeholder="Last Name"
-          value={lastName}
-          onChange={updateLastName}
         />
         <TextField
           // classes={{ root: classes.textField }} // Not working yet
@@ -111,9 +97,7 @@ const AddPersonForm = ({ classes }) => {  //  classes, teamId
           margin="dense"
           variant="outlined"
           placeholder="Email Address, Personal"
-          value={emailPersonal}
-          onBlur={updateEmailPersonal}
-          onChange={updateEmailPersonal}
+          inputRef={emailFldRef}
         />
         <Button
           classes={{ root: classes.saveNewPersonButton }}

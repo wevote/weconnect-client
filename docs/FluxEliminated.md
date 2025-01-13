@@ -5,7 +5,7 @@
 
 #### Changing to react-query
  
-* Stores and actions go away, along with tons of boiler plate code in the pages and components -- maybe half the code in the app.
+* Stores and actions go away, along with tons of boiler plate code in the pages and components -- maybe half the code in the app goes away, with no loss in functionality.
 * All the listeners go away, since cache is managed by react-query, so we don't have to listen for changes.
 * The key is that instead of preprocessing data from the API in stores, and writing lots of code to maintain store
   "freshness" react-query automatically maintains fresh data.

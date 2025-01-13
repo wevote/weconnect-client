@@ -53,9 +53,9 @@ const TeamHome = ({ classes }) => {  //  classes, params
   useEffect(() => {
     console.log('useFetchData in TeamHome (person-list-retrieve) useEffect:', dataP, isSuccessP, isFetchingP, isStaleP);
     if (isSuccess) {
-      console.log('useFetchData in TeamHome (person-list-retrieve)useEffect data good:', dataP, isSuccessP, isFetchingP, isStaleP);
+      // console.log('useFetchData in TeamHome (person-list-retrieve)useEffect data good:', dataP, isSuccessP, isFetchingP, isStaleP);
       setAppContextValue('allStaffList', dataP ? dataP.personList : []);
-      console.log('allStaffList --- dataP.personList:', dataP ? dataP.personList : []);
+      // console.log('allStaffList --- dataP.personList:', dataP ? dataP.personList : []);
     }
   }, [dataP, isSuccessP, isFetchingP]);
 

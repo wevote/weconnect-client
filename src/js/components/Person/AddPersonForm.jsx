@@ -10,34 +10,18 @@ import { useConnectAppContext } from '../../contexts/ConnectAppContext';
 const FIELDS_IN_FORM = ['emailPersonal', 'firstName', 'lastName'];
 
 const AddPersonForm = ({ classes }) => {  //  classes, teamId
-  renderLog('AddPersonForm');  // Set LOG_RENDER_EVENTS to log all renders
+  renderLog('AddPersonForm');
+  const { setAppContextValue, getAppContextValue } = useConnectAppContext();
+
   const [emailPersonal, setEmailPersonal] = React.useState('');
   const [firstName, setFirstName] = React.useState('');
   const [lastName, setLastName] = React.useState('');
   const [teamId, setTeamId] = React.useState(-1);
-  const { setAppContextValue, getAppContextValue } = useConnectAppContext();  // This component will re-render whenever the value of ConnectAppContext changes
-
 
   useEffect(() => {  // Replaces onAppObservableStoreChange and will be called whenever the context value changes
     console.log('AddPersonForm: Context value changed:', true);
     setTeamId(getAppContextValue('addPersonDrawerTeam').id);
   }, [getAppContextValue]);
-
-  // const onAppObservableStoreChange = () => {
-  //   setTeamId(AppObservableStore.getGlobalVariableState('addPersonDrawerTeamId'));
-  // };
-
-  // eslint-disable-next-line no-unused-vars
-  const saveNewPersonSuccessful = () => {
-    setAppContextValue('addPersonDrawerOpen', false);
-    setAppContextValue('addPersonDrawerTeamId', -1); // hack ?? 12/8/24
-    for (let i = 0; i < FIELDS_IN_FORM.length; i++) {
-      const fieldName = FIELDS_IN_FORM[i];
-      setAppContextValue(`${fieldName}Changed`, false);
-      setAppContextValue(`${fieldName}ToBeSaved`, '');
-    }
-  };
-
 
   const saveNewPerson = () => {
     const data = PrepareDataPackageFromAppObservableStore(FIELDS_IN_FORM);

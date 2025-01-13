@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams } from 'react-router';
 import { withStyles } from '@mui/styles';
 import { SpanWithLinkStyle } from '../Style/linkStyles';
@@ -15,47 +15,52 @@ import weConnectQueryFn from '../../react-query/WeConnectQuery';
 
 // eslint-disable-next-line no-unused-vars
 const AddPersonDrawerMainContent = ({ classes }) => {
-  renderLog('AddPersonDrawerMainContent');  // Set LOG_RENDER_EVENTS to log all renders
+  renderLog('AddPersonDrawerMainContent');
+  const { getAppContextValue } = useConnectAppContext();
+
   const params  = useParams();
-  // eslint-disable-next-line no-unused-vars
-  const [allCachedPeopleList, setAllCachedPeopleList] = React.useState([]);
+  console.log('AddPersonDrawerMainContent params: ', params);
+  const queryClient = useQueryClient();
+
+  const [staffToDisplayList, setStaffToDisplayList] = React.useState([]);
   // eslint-disable-next-line no-unused-vars
   const [searchText, setSearchText] = React.useState('');
-  const [allStaffList, setAllStaffList] = React.useState([]);
-  const [teamId, setTeamId] = React.useState(params.teamId);
-  const [teamName, setTeamName] = React.useState();
+  const [allStaffList, setAllStaffList] = React.useState(getAppContextValue('allStaffList'));
+  const [thisTeamsCurrentMembersList, setThisTeamsCurrentMembersList] = React.useState([]);
+  const [teamId, setTeamId] = React.useState(getAppContextValue('teamId'));
+  const [teamName, setTeamName] = React.useState("");
+
   // eslint-disable-next-line no-unused-vars
   const [teamMemberPersonIdList, setTeamMemberPersonIdList] = React.useState([]);
-  const { getAppContextValue } = useConnectAppContext();  // This component will re-render whenever the value of ConnectAppContext changes
-  const [allStaffListLoaded, setAllStaffListLoaded] = React.useState(false);
   // eslint-disable-next-line no-unused-vars
-  const [personOnTeamList, setPersonOnTeamList] = React.useState([]);
+  const [searchResultsList, setSearchResultsList] = React.useState([]);
 
-  useEffect(() => {  // Replaces onAppObservableStoreChange and will be called whenever the context value changes
-    console.log('EditQuestionnaireDrawer: Context value changed:', true);
-    const team = getAppContextValue('addPersonDrawerTeam');
-    setTeamId(team.id);
-    setTeamName(team.teamName);
-  }, [getAppContextValue]);
+  let memberList = [];
+  const teamListFromContext = getAppContextValue('teamListNested');
+  if (teamListFromContext  && thisTeamsCurrentMembersList.length === 0 && teamName === "") {
+    const oneTeam = teamListFromContext.find((team) => team.id === parseInt(teamId));
+    setTeamName(oneTeam.teamName);
+    setTeamId(oneTeam.id);
 
-  const { data, error, isLoading, isSuccess } = useQuery({
-    queryKey: ['person-list-retrieve'],
-    queryFn: ({ queryKey }) => weConnectQueryFn(queryKey[0], { teamId }),
-  });
-
-  if (isLoading) {
-    console.log('Fetching all staff members list...');
-  } else if (error) {
-    console.log(`An error occurred with person-list-retrieve: ${error.message}`);
-  } else if (isSuccess && !allStaffListLoaded) {
-    setAllStaffListLoaded(true);
-    // const personOnTeamListTemp = personListRetrieve(data, teamId);
-    // setPersonOnTeamList(personOnTeamListTemp);
-    console.log('Successfully retrieved person list for team...');
-    setAllStaffList(data.personList);
+    if (oneTeam && oneTeam.teamMemberList.length > 0) {
+      memberList = oneTeam.teamMemberList;
+      setThisTeamsCurrentMembersList(memberList);
+    }
+  } else {
+    // console.log('no teamListFromContext yet!');
   }
 
-  const queryClient = useQueryClient();
+  if (staffToDisplayList.length === 0 && allStaffList && allStaffList.length > 0) {
+    const staffToDisplay = [];
+    allStaffList.forEach((oneStaff) => {
+      const isOnTeam = memberList.some((obj) => obj.id === oneStaff.id);
+      if (!isOnTeam) {
+        staffToDisplay.push(oneStaff);
+      }
+    });
+    setStaffToDisplayList(staffToDisplay);
+  }
+
   const addPersonToTeamMutation = useMutation({
     mutationFn: (person) => weConnectQueryFn('add-person-to-team', {
       personId: person.id,
@@ -89,8 +94,9 @@ const AddPersonDrawerMainContent = ({ classes }) => {
     addPersonToTeamMutation.mutate(person);
     if (addPersonToTeamMutation.isSuccess) {
       queryClient.invalidateQueries('team-list-retrieve').then(() => {
-        const updatedStaffList = allStaffList.filter((staff) => staff.id !== person.id);
-        setAllStaffList(updatedStaffList);
+        // This removes the recently "added" staff, from the list of staff who can be added, the staffToDisplayList
+        const updatedStaffToDisplayList = staffToDisplayList.filter((staff) => staff.id !== person.id);
+        setStaffToDisplayList(updatedStaffToDisplayList);
       });
     }
   };
@@ -101,15 +107,16 @@ const AddPersonDrawerMainContent = ({ classes }) => {
         <SearchBar2024
           placeholder="Search by name"
           // searchFunction={searchFunction}
+          searchFunction={() => console.log('searchFunction')}
           clearFunction={clearFunction}
           searchUpdateDelayTime={750}
         />
       </SearchBarWrapper>
-      {(allStaffList && allStaffList.length > 0) && (
+      {(searchResultsList && searchResultsList.length > 0) && (
         <PersonSearchResultsWrapper>
           <PersonListTitle>Search Results:</PersonListTitle>
           <PersonList>
-            {allStaffList.map((person) => (
+            {searchResultsList.map((person) => (
               <PersonItem key={`personResult-${person.id}`}>
                 {person.firstName}
                 {' '}
@@ -118,7 +125,6 @@ const AddPersonDrawerMainContent = ({ classes }) => {
                   <>
                     {' '}
                     <SpanWithLinkStyle onClick={() => addClicked(person)}>add</SpanWithLinkStyle>
-                    {/* <SpanWithLinkStyle onClick={() => TeamActions.addPersonToTeam(person.id, teamId)}>add</SpanWithLinkStyle> */}
                   </>
                 )}
               </PersonItem>
@@ -129,7 +135,7 @@ const AddPersonDrawerMainContent = ({ classes }) => {
       <PersonDirectoryWrapper>
         <PersonListTitle>All Staff:</PersonListTitle>
         <PersonList>
-          {allCachedPeopleList.map((person) => (
+          {staffToDisplayList.map((person) => (
             <PersonItem key={`personResult-${person.id}`}>
               {person.firstName}
               {' '}

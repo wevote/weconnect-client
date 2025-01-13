@@ -2,41 +2,16 @@ import React from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { withStyles } from '@mui/styles';
-import { useQuery } from '@tanstack/react-query';
 import SearchBar2024 from '../../common/components/Search/SearchBar2024';
 import { renderLog } from '../../common/utils/logging';
 import AddTeamForm from './AddTeamForm';
-import weConnectQueryFn from '../../react-query/WeConnectQuery';
 
 
 // eslint-disable-next-line no-unused-vars
 const AddTeamDrawerMainContent = ({ classes }) => {  //  classes, teamId
   renderLog('AddTeamDrawerMainContent');  // Set LOG_RENDER_EVENTS to log all renders
-  // const [allCachedPeopleList, setAllCachedPeopleList] = React.useState([]);
-  // const [searchText, setSearchText] = React.useState('');
   // eslint-disable-next-line no-unused-vars
   const [personSearchResultsList, setPersonSearchResultsList] = React.useState([]);
-  // const [teamId, setTeamId] = React.useState(-1);
-  // const [teamMemberPersonIdList, setTeamMemberPersonIdList] = React.useState([]);
-  // const [teamList, setTeamList] = React.useState([]);
-  const [teamCount] = React.useState(-1);
-
-
-  const { data, error, isLoading, isSuccess } = useQuery({
-    queryKey: ['person-list-retrieve'],
-    queryFn: ({ queryKey }) => weConnectQueryFn(queryKey[0], {}),
-  });
-
-  if (isLoading) {
-    console.log('Fetching teams...');
-  } else if (error) {
-    console.log(`An error occurred: ${error.message}`);
-  } else if (isSuccess && teamCount < 0) {
-    console.log('Successfully retrieved staff list...');
-    console.log('AddTeamDrawerMainContent "person-list-retrieve" data:', data);
-    // setTeamList(teamListTemp);
-    // setTeamCount(teamListTemp.length);
-  }
 
   // TODO: 12/6/25, temporarily removed to simplify debug
   // const searchFunction = (incomingSearchText) => {

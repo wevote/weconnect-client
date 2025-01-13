@@ -38,11 +38,9 @@ function startReact () {
   const root = createRoot(document.getElementById('app'));
   root.render(
     <ErrorBoundary>
-      {/* <WeVoteRouter> */}
       <HelmetProvider>
         <App />
       </HelmetProvider>
-      {/* </WeVoteRouter> */}
     </ErrorBoundary>,
   );
 

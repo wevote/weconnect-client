@@ -11,11 +11,11 @@ import { renderLog } from './js/common/utils/logging';
 import Login from './js/pages/Login';
 import { PrivateRoute } from './js/auth';
 import ConnectAppContext from './js/contexts/ConnectAppContext';
+import Drawers from './js/components/Drawers/Drawers';
 
 
 // Root URL pages
 
-const Drawers = React.lazy(() => import(/* webpackChunkName: 'Drawers' */ './js/components/Drawers/Drawers'));
 const FAQ = React.lazy(() => import(/* webpackChunkName: 'FAQ' */ './js/pages/FAQ'));
 const Footer = React.lazy(() => import(/* webpackChunkName: 'Footer' */ './js/components/Navigation/Footer'));
 const Header = React.lazy(() => import(/* webpackChunkName: 'Header' */ './js/components/Navigation/Header'));
@@ -29,8 +29,8 @@ const Teams = React.lazy(() => import(/* webpackChunkName: 'Teams' */ './js/page
 
 function App () {
   renderLog('App');
-  // eslint-disable-next-line no-unused-vars
-  const [hideHeader, setHideHeader] = useState(false);
+  const [hideHeader] = useState(false);
+
 
   // Inject this once for the app, for all react-query queries
   const queryClient = new QueryClient({
@@ -48,22 +48,8 @@ function App () {
     initializejQuery(() => {
       console.log('--------- jQuery has been initialized ---------');
     });
-
-    // Anything in here is fired on component mount, equiv to componentDidMount()
-    // const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
-    // const voterStoreListener = VoterStore.addListener(onVoterStoreChange());
-
-    // if (isCordova()) {
-    //   const size = isIOS() ?  getIOSSizeString() : getAndroidSize();
-    //   console.log('Cordova:   device model', window.device.model, '  size: ', size);
-    //   console.log('Cordova:   Header, hasDynamicIsland', hasDynamicIsland());
-    // }
-
-    // this.bypass2FA();
-
     return () => {
       // Anything in here is fired on component unmount, equiv to componentDidUnmount()
-      // removeCordovaListenersToken -- Do not remove this line!
     };
   }, []);
 

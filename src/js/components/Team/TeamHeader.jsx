@@ -8,7 +8,7 @@ import { renderLog } from '../../common/utils/logging';
 
 // eslint-disable-next-line no-unused-vars
 const TeamHeader = ({ classes, showHeaderLabels, team }) => {
-  renderLog('TeamHeader');  // Set LOG_RENDER_EVENTS to log all renders
+  renderLog('TeamHeader');
 
   return (
     <OneTeamHeader>

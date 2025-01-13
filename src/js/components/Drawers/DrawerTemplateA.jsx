@@ -14,9 +14,11 @@ import { useConnectAppContext } from '../../contexts/ConnectAppContext';
 
 const DrawerTemplateA = ({ classes, drawerId, drawerOpenGlobalVariableName, headerFixedJsx, headerTitleJsx, mainContentJsx }) => {  //  classes, teamId
   renderLog(`DrawerTemplateA (${drawerId})`);  // Set LOG_RENDER_EVENTS to log all renders
+  const { getAppContextData, setAppContextValue, getAppContextValue } = useConnectAppContext();
+
   const [scrolledDown, setScrolledDown] = React.useState(false);
-  const { getAppContextData, setAppContextValue, getAppContextValue } = useConnectAppContext();  // This component will re-render whenever the value of ConnectAppContext changes
   const drawerOpen = getAppContextValue(drawerOpenGlobalVariableName);
+
   console.log('DrawerTemplateA drawerOpen: ', drawerOpenGlobalVariableName, drawerOpen);
 
   const handleScrolledDownDrawer = (evt) => {
@@ -45,12 +47,12 @@ const DrawerTemplateA = ({ classes, drawerId, drawerOpenGlobalVariableName, head
       }
     }, 100);
 
-    return () => {
-      const drawer = document.querySelector('.MuiDrawer-paper');
-      if (drawer) {
-        drawer.removeListeners();
-      }
-    };
+    // return () => {
+    //   const drawer = document.querySelector('.MuiDrawer-paper');
+    //   if (drawer) {
+    //     drawer.removeListeners();
+    //   }
+    // };
   }, []);
 
   return (

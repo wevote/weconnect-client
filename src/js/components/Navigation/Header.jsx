@@ -1,19 +1,12 @@
 import PropTypes from 'prop-types';
 import React, { Component, Suspense } from 'react';
-// import styled from 'styled-components';
-import AppObservableStore, { messageService } from '../../stores/AppObservableStore';
-import apiCalming from '../../common/utils/apiCalming';
 import { normalizedHref } from '../../common/utils/hrefUtils';
 import { isCordova } from '../../common/utils/isCordovaOrWebApp';
 import { handleResize } from '../../common/utils/isMobileScreenSize';
 import { renderLog } from '../../common/utils/logging';
-// import stringContains from '../../common/utils/stringContains';
-import VoterStore from '../../stores/VoterStore';
-// import { dumpCssFromId } from '../../utils/appleSiliconUtils';
-// import { getApplicationViewBooleans, weVoteBrandingOff } from '../../utils/applicationUtils';
 import cordovaTopHeaderTopMargin from '../../utils/cordovaTopHeaderTopMargin';
 import { HeadroomWrapper } from '../Style/pageLayoutStyles';
-import IPhoneSpacer from '../Widgets/IPhoneSpacer';
+import AppObservableStore from '../../stores/AppObservableStore';
 
 // TODO: Convert to a functional component, so it can use getContext()
 export default class Header extends Component {
@@ -29,14 +22,14 @@ export default class Header extends Component {
 
   componentDidMount () {
     // console.log('-----------HEADER componentDidMount');
-    this.appStateSubscription = messageService.getMessage().subscribe((msg) => this.onAppObservableStoreChange(msg));
-    window.addEventListener('resize', this.handleResizeLocal);
+    // this.appStateSubscription = messageService.getMessage().subscribe((msg) => this.onAppObservableStoreChange(msg));
+    // window.addEventListener('resize', this.handleResizeLocal);
     // if (isIOSAppOnMac() && appleSiliconDebug) {
     //   dumpCssFromId('header-container');
     // }
-    if (VoterStore.getVoterWeVoteId() === '' && apiCalming('voterRetrieve', 500)) {
-      // VoterActions.voterRetrieve();
-    }
+    // if (VoterStore.getVoterWeVoteId() === '' && apiCalming('voterRetrieve', 500)) {
+    //   // VoterActions.voterRetrieve();
+    // }
   }
 
   componentDidCatch (error, info) {
@@ -46,8 +39,8 @@ export default class Header extends Component {
 
   componentWillUnmount () {
     // console.log('-----------HEADER componentWillUnmount');
-    this.appStateSubscription.unsubscribe();
-    window.removeEventListener('resize', this.handleResizeLocal);
+    // this.appStateSubscription.unsubscribe();
+    // window.removeEventListener('resize', this.handleResizeLocal);
   }
 
   static getDerivedStateFromError (error) {       // eslint-disable-line no-unused-vars
@@ -121,7 +114,7 @@ export default class Header extends Component {
     const headerBarObject = <div />;
     return (
       <div id="app-header">
-        <IPhoneSpacer />
+        {/* <IPhoneSpacer /> */}
         <HeadroomWrapper id="hw1">
           <div className={pageHeaderClasses} style={cordovaTopHeaderTopMargin()} id="header-container">
             <Suspense fallback={<></>}>

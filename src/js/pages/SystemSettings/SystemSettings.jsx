@@ -18,14 +18,13 @@ import DesignTokenColors from '../../common/components/Style/DesignTokenColors';
 
 
 const SystemSettings = ({ classes }) => {
-  renderLog('SystemSettings');  // Set LOG_RENDER_EVENTS to log all renders
+  renderLog('SystemSettings');
+  const { setAppContextValue } = useConnectAppContext();
+
   const [questionnaireList, setQuestionnaireList] = React.useState([]);
   // eslint-disable-next-line no-unused-vars
   const [questionnaireCount, setQuestionnaireCount] = React.useState(0);
-  const { setAppContextValue } = useConnectAppContext();  // This component will re-render whenever the value of ConnectAppContext changes
 
-  // const onAppObservableStoreChange = () => {
-  // };
 
   const onQuestionnaireStoreChange = () => {
     const questionnaireListTemp = QuestionnaireStore.getAllCachedQuestionnairesList();

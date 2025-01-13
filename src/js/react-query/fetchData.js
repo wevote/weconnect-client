@@ -14,11 +14,14 @@ export const weConnectQueryFn = async (queryKey, params) => {
 };
 
 const useFetchData = (queryKey, fetchParams) => {
-  const { data, isSuccess } = useQuery({
+  const { data, isSuccess, isFetching, isStale, refetch, error } = useQuery({
     queryKey,
     queryFn: () => weConnectQueryFn(queryKey, fetchParams),
   });
-  return { data, isSuccess };
+  if (error) {
+    console.log(`An error occurred with ${queryKey}: ${error.message}`);
+  }
+  return { data, isSuccess, isFetching, isStale, refetch };
 };
 
 export default useFetchData;

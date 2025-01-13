@@ -10,8 +10,8 @@ import { useConnectAppContext } from '../../contexts/ConnectAppContext';
 
 
 const EditQuestionDrawerMainContent = () => {
-  renderLog('EditQuestionDrawerMainContent');  // Set LOG_RENDER_EVENTS to log all renders
-  const { getAppContextValue } = useConnectAppContext();  // This component will re-render whenever the value of ConnectAppContext changes
+  renderLog('EditQuestionDrawerMainContent');
+  const { getAppContextValue } = useConnectAppContext();
 
   React.useEffect(() => {
     // We currently don't retrieve individual questions, only complete question lists for a questionnaire.

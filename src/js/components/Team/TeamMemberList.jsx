@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import PropTypes from 'prop-types';
@@ -8,14 +8,12 @@ import DesignTokenColors from '../../common/components/Style/DesignTokenColors';
 import { renderLog } from '../../common/utils/logging';
 import { useConnectAppContext } from '../../contexts/ConnectAppContext';
 import { getFullNamePreferred } from '../../react-query/PersonQueryProcessing';
-import { getTeamList } from '../../react-query/TeamsQueryProcessing';
 import weConnectQueryFn from '../../react-query/WeConnectQuery';
-import useFetchData from '../../react-query/fetchData';
 
 const TeamMemberList = ({ teamId }) => {
-  renderLog('TeamMemberList');  // Set LOG_RENDER_EVENTS to log all renders
-  console.log('TeamMemberList teamId: ', teamId);
-  const { setAppContextValue, getAppContextValue } = useConnectAppContext();  // This component will re-render whenever the value of ConnectAppContext changes
+  renderLog('TeamMemberList');
+  const { setAppContextValue, getAppContextValue } = useConnectAppContext();
+
   const queryClient = useQueryClient();
 
   const removeTeamMemberMutation = useMutation({
@@ -29,32 +27,24 @@ const TeamMemberList = ({ teamId }) => {
     },
   });
 
-  const { data, isSuccess } = useFetchData('team-list-retrieve', {});
-  useEffect(() => {
-    console.log('teamListNested update with newly fetched data in TeamMemberList, isSuccess: ', isSuccess);
-    if (isSuccess) {
-      const tList = getTeamList(data);
-      setAppContextValue('teamListNested', tList);
-    }
-  }, [data]);
-
-  const editPersonClick = (personId, hasEditRights = true) => {
+  const editPersonClick = (person, hasEditRights = true) => {
     if (hasEditRights) {
       setAppContextValue('editPersonDrawerOpen', true);
-      setAppContextValue('editPersonDrawerPersonId', personId);
+      setAppContextValue('editPersonDrawerPerson', person);
     }
   };
 
-  const personProfileClick = (personId) => {
+  const personProfileClick = (person) => {
+    console.log('personProfileClick: ', person.id);
     setAppContextValue('personProfileDrawerOpen', true);
-    setAppContextValue('personProfileDrawerPersonId', personId);
+    setAppContextValue('personProfileDrawerPerson', person);
   };
 
   const hasEditRights = true;
   let teamMemberList = [];
   const teamListFromContext = getAppContextValue('teamListNested');
   if (teamListFromContext) {
-    const oneTeam = teamListFromContext[parseInt(teamId) - 1];
+    const oneTeam = teamListFromContext.find((staff) => staff.teamId === parseInt(teamId));
     if (oneTeam && oneTeam.teamMemberList.length > 0) {
       teamMemberList = oneTeam.teamMemberList;
     }
@@ -73,7 +63,7 @@ const TeamMemberList = ({ teamId }) => {
           </PersonCell>
           <PersonCell
             id={`fullNamePreferred-personId-${teamMember.personId}`}
-            onClick={() => personProfileClick(teamMember.personId)}
+            onClick={() => personProfileClick(teamMember)}
             style={{
               cursor: 'pointer',
               textDecoration: 'underline',
@@ -92,7 +82,7 @@ const TeamMemberList = ({ teamId }) => {
           {hasEditRights ? (
             <PersonCell
               id={`editPerson-personId-${teamMember.personId}`}
-              onClick={() => editPersonClick(teamMember.personId, hasEditRights)}
+              onClick={() => editPersonClick(teamMember, hasEditRights)}
               style={{ cursor: 'pointer' }}
               width={20}
             >

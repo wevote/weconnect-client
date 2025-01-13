@@ -5,7 +5,8 @@ import { Link } from 'react-router';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { withStyles } from '@mui/styles';
-import { useQuery } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import useFetchData from '../react-query/fetchData';
 import { SpanWithLinkStyle } from '../components/Style/linkStyles';
 import { PageContentContainer } from '../components/Style/pageLayoutStyles';
 import TeamHeader from '../components/Team/TeamHeader';
@@ -14,47 +15,42 @@ import webAppConfig from '../config';
 import { renderLog } from '../common/utils/logging';
 import { useConnectAppContext } from '../contexts/ConnectAppContext';
 import { getTeamList } from '../react-query/TeamsQueryProcessing';
-import weConnectQueryFn from '../react-query/WeConnectQuery';
 import AddTeamDrawer from '../components/Drawers/AddTeamDrawer';
 
 
-const Teams = ({ classes, match }) => {  //  classes, teamId
-  renderLog('Teams');  // Set LOG_RENDER_EVENTS to log all renders
+const Teams = ({ classes, match }) => {
+  renderLog('Teams');
+  const { setAppContextValue, getAppContextValue } = useConnectAppContext();
+
   const [showAllTeamMembers, setShowAllTeamMembers] = React.useState(false);
   const [teamList, setTeamList] = React.useState([]);
   const [teamCount, setTeamCount] = React.useState(-1);
-  const { setAppContextValue, getAppContextValue, getAppContextData } = useConnectAppContext();  // This component will re-render whenever the value of ConnectAppContext changes
-  console.log('match: ', match);
-  let displayDrawer = getAppContextValue('addTeamDrawerOpen');
+  const [displayDrawer, setDisplayDrawer] = React.useState(getAppContextValue('addTeamDrawerOpen'));
 
-  const { data, error, isLoading, isSuccess } = useQuery({
-    queryKey: ['team-list-retrieve'],
-    queryFn: ({ queryKey }) => weConnectQueryFn(queryKey[0], {}),
-  });
+  console.log('match: ', match);  // dummy to clear warning
 
-  if (isLoading) {
-    console.log('Fetching teams...');
-  } else if (error) {
-    console.log(`An error occurred: ${error.message}`);
-  } else if (isSuccess && teamCount < 0) {
-    console.log('Successfully retrieved teams...');
-    const teamListTemp = getTeamList(data);
-    setShowAllTeamMembers(true);
-    console.log('Teams onRetrieveTeamListChange, params.teamId:  HACKED nope', ', TeamStore.getTeamList:', teamListTemp);
-    setTeamList(teamListTemp);
-    setTeamCount(teamListTemp.length);
-    setAppContextValue('teamListNested', teamListTemp);
+  const { data, isSuccess, isFetching, isStale } = useFetchData(['team-list-retrieve'], {});
+  console.log('useFetchData in Teams:', data, isSuccess, isFetching, isStale);
+  if (isFetching) {
+    console.log('isFetching  ------------');
   }
+  useEffect(() => {
+    console.log('useFetchData in Teams useEffect:', data, isSuccess, isFetching, isStale);
+    if (data !== undefined && isFetching === false && isStale === false) {
+      console.log('useFetchData in Teams useEffect data is good:', data, isSuccess, isFetching, isStale);
+      console.log('Successfully retrieved teams...');
+      const teamListTemp = getTeamList(data);
+      setShowAllTeamMembers(true);
+      setTeamList(teamListTemp);
+      setTeamCount(teamListTemp.length);
+      setAppContextValue('teamListNested', teamListTemp);
+    }
+  }, [data]);
 
   const addTeamClick = () => {
     setAppContextValue('addTeamDrawerOpen', true);
-    displayDrawer = true;
-    // setDisplayDrawer(true);
+    setDisplayDrawer(true);
   };
-
-  useEffect(() => {  // Replaces onAppObservableStoreChange and will be called whenever the context value changes
-    console.log('Teams: Context value changed:', true);
-  }, [getAppContextData()]);
 
   const personProfile = getAppContextValue('personProfileDrawerOpen');
   if (personProfile === undefined) {
@@ -92,7 +88,6 @@ const Teams = ({ classes, match }) => {  //  classes, teamId
           classes={{ root: classes.addTeamButtonRoot }}
           color="primary"
           variant="outlined"
-          // onClick={addTeamClick}
           onClick={() => addTeamClick()}
         >
           Add Team
@@ -111,7 +106,7 @@ const Teams = ({ classes, match }) => {  //  classes, teamId
           </Link>
         </div>
         {displayDrawer ? <AddTeamDrawer /> : null }
-        {/* <ReactQueryDevtools initialIsOpen /> */}
+        <ReactQueryDevtools initialIsOpen />
       </PageContentContainer>
     </div>
   );

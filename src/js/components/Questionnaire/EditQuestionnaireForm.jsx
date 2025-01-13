@@ -15,11 +15,12 @@ const QUESTIONNAIRE_FIELDS_IN_FORM = [
   'questionnaireInstructions', 'questionnaireName', 'questionnaireTitle'];
 
 const EditQuestionnaireForm = ({ classes }) => {
-  renderLog('EditQuestionnaireForm');  // Set LOG_RENDER_EVENTS to log all renders
+  renderLog('EditQuestionnaireForm');
+  const { setAppContextValue, getAppContextValue, setAppContextValuesInBulk } = useConnectAppContext();
+
   const [firstQuestionnaireDataReceived, setFirstQuestionnaireDataReceived] = React.useState(false);
   const [inputValues, setInputValues] = React.useState({});
   const [saveButtonActive, setSaveButtonActive] = React.useState(false);
-  const { setAppContextValue, getAppContextValue, setAppContextValuesInBulk } = useConnectAppContext();  // This component will re-render whenever the value of ConnectAppContext changes
 
   // const [questionnaireId, setQuestionnaireId] = React.useState(-1);
   // const [questionnaireDictAlreadySaved, setQuestionnaireDictAlreadySaved] = React.useState({});

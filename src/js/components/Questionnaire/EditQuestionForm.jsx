@@ -13,8 +13,10 @@ const QUESTION_FIELDS_IN_FORM = [
   'answerType', 'fieldMappingRule', 'questionInstructions', 'questionText',
   'requireAnswer', 'statusActive'];
 
-const EditQuestionForm = ({ classes }) => {  //  classes, teamId
-  renderLog('EditQuestionForm');  // Set LOG_RENDER_EVENTS to log all renders
+const EditQuestionForm = ({ classes }) => {
+  renderLog('EditQuestionForm');
+  const { setAppContextValue, getAppContextValue, setAppContextValuesInBulk } = useConnectAppContext();
+
   const [firstQuestionDataReceived, setFirstQuestionDataReceived] = React.useState(false);
   const [inputValues, setInputValues] = React.useState({
     answerType: '',
@@ -24,7 +26,6 @@ const EditQuestionForm = ({ classes }) => {  //  classes, teamId
     statusActive: true,
   });
   const [saveButtonActive, setSaveButtonActive] = React.useState(false);
-  const { setAppContextValue, getAppContextValue, setAppContextValuesInBulk } = useConnectAppContext();  // This component will re-render whenever the value of ConnectAppContext changes
 
   // const [questionId, setQuestionId] = React.useState(-1);
   // const [questionDictAlreadySaved, setQuestionDictAlreadySaved] = React.useState({});

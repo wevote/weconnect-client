@@ -44,7 +44,6 @@ const AddPersonForm = ({ classes }) => {  //  classes, teamId
 
   const makeSavePersonDict = (data) => {
     let requestParams = '';
-    // for (const key in activePerson) {
     Object.keys(data).forEach((key) => {
       requestParams += `${key}ToBeSaved=${data[key]}&`;
       requestParams += `${key}Changed=${true}&`;

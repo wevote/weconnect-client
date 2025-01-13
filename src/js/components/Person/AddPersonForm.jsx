@@ -15,7 +15,6 @@ const AddPersonForm = ({ classes }) => {  //  classes, teamId
 
   const [teamId, setTeamId] = React.useState(-1);
   const [teamName, setTeamName] = React.useState('');
-  const [mutateFired, setMutateFired] = React.useState(false);
 
   const queryClient = useQueryClient();
   const firstNameFldRef = useRef('');
@@ -37,11 +36,6 @@ const AddPersonForm = ({ classes }) => {  //  classes, teamId
     onError: (err) => { console.log('saveNewPersonMutation error: ', err); },
   });
 
-  if (saveNewPersonMutation.isSuccess && mutateFired) {   // do we need this??????????
-    setMutateFired(false);
-    console.log('--------- saveNewPersonMutation mutated on success ---------');
-  }
-
   const makeSavePersonDict = (data) => {
     let requestParams = '';
     Object.keys(data).forEach((key) => {
@@ -59,8 +53,7 @@ const AddPersonForm = ({ classes }) => {  //  classes, teamId
       emailPersonal: emailFldRef.current.value,
     };
     const requestParams = makeSavePersonDict(data);
-    // http://localhost:4500/apis/v1/person-save/?personId=-1&emailPersonalChanged=true&emailPersonalToBeSaved=steve%40podell.com&firstNameChanged=true&firstNameToBeSaved=Steve&lastNameChanged=true&lastNameToBeSaved=Podell&teamId=1&teamName=Levi
-    setMutateFired(true);
+    // http://localhost:4500/apis/v1/person-save/?personId=-1&emailPersonalChanged=true&emailPersonalToBeSaved=steve%40gmail.com&firstNameChanged=true&firstNameToBeSaved=Steve&lastNameChanged=true&lastNameToBeSaved=Smithl&teamId=1&teamName=Levi
     saveNewPersonMutation.mutate(requestParams);
   };
 

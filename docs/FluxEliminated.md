@@ -33,3 +33,17 @@
   which makes the team-list-retrieve in cache stale, so it needs to be invalidated.  The next time a page is 
   loaded that relies on the data from team-list-retrieve the API fires and the cache regains freshness.
 
+#### Watch out for
+* It is easy to get in endless loops if you are updating state in a component, and have no way to preven subsequent
+  updates from further updating the same state variable.
+  * useEffect() can solve the problem here, since with no `useEffect` dependencies in square brackets, since this is like the old `componentDidUnmount()`.
+* Unfigured out:  
+  * Sometimes parameters that come into a functional component (with a render call), don't appear in the component. 
+  * Sometimes `const params  = useParams();` gets the params (maybe if coming in as URL params).
+  * Almost always something like 'getAppContextValue('addPersonDrawerOpen');' works
+  * Getters and Setters like 'const [team, setTeam] = React.useState({});' work well, but this fails...
+    ```
+    const [bob, setBob] = React.useState('yes');
+    console.log(bob);      // returns undefined   
+    ```
+    Since the state initialization is not complete until the component re-renders.

@@ -12,9 +12,6 @@ import weConnectQueryFn from '../../react-query/WeConnectQuery';
 const AddTeamForm = ({ classes }) => {
   renderLog('AddTeamForm');
 
-  // const [teamName, setTeamName] = React.useState('');
-  const [mutateFired, setMutateFired] = React.useState(false);
-
   const teamNameFldRef = useRef('');
   const queryClient = useQueryClient();
 
@@ -30,11 +27,6 @@ const AddTeamForm = ({ classes }) => {
     },
   });
 
-  if (saveTeamMutation.isSuccess && mutateFired) {
-    setMutateFired(false);
-    console.log('--------- saveTeamMutation mutated ---------');
-  }
-
   const saveNewTeam = () => {
     const teamName = teamNameFldRef.current.value;
     if (teamName.length === 0) {
@@ -42,7 +34,6 @@ const AddTeamForm = ({ classes }) => {
       return;
     }
     console.log('saveNewTeam data:', teamName);
-    setMutateFired(true);
     saveTeamMutation.mutate(teamName);
   };
 

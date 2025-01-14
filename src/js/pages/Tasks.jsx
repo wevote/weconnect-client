@@ -22,7 +22,7 @@ import { renderLog } from '../common/utils/logging';
 
 const Tasks = ({ classes, match }) => {  //  classes, teamId
   renderLog('Tasks');  // Set LOG_RENDER_EVENTS to log all renders
-  const [showCompletedTasks, setShowCompletedTasks] = React.useState(true);
+  const [showCompletedTasks, setShowCompletedTasks] = React.useState(false);
   const [personList, setPersonList] = React.useState([]);
   const [taskListDictByPersonId, setTaskListDictByPersonId] = React.useState({});
   const [teamCount, setTeamCount] = React.useState(0);
@@ -108,7 +108,7 @@ const Tasks = ({ classes, match }) => {  //  classes, teamId
         {personList.map((person, index) => (
           <OneTeamWrapper key={`team-${person.id}`}>
             <PersonSummaryRow person={person} />
-            <TaskListForPerson personId={person.id} />
+            <TaskListForPerson personId={person.id} showCompletedTasks={showCompletedTasks} />
           </OneTeamWrapper>
         ))}
       </PageContentContainer>

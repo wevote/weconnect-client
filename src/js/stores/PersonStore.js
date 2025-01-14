@@ -106,6 +106,10 @@ class PersonStore extends ReduceStore {
     return this.getState().searchResults || [];
   }
 
+  getSignedInPersonId () {
+    // TODO: Implement this logic
+  }
+
   reduce (state, action) {
     const { allCachedPeopleDict } = state;
     let personTemp = {};

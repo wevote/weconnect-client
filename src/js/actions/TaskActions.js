@@ -56,9 +56,10 @@ export default {
     Dispatcher.loadEndpoint('task-group-save', data);
   },
 
-  taskSave (taskGroupId = -1, taskDefinitionId = -1, incomingData = {}) {
-    // console.log('TaskActions, taskSave taskDefinitionId:', taskDefinitionId, ', incomingData:', incomingData);
+  taskSave (personId = -1, taskDefinitionId = -1, taskGroupId = -1, incomingData = {}) {
+    // console.log('TaskActions, taskSave personId:', personId, ', taskDefinitionId:', taskDefinitionId, ', ', taskGroupId:', taskGroupId, ', incomingData:', incomingData);
     const data = {
+      personId,
       taskDefinitionId,
       taskGroupId,
       ...incomingData,

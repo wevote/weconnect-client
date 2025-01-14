@@ -8,7 +8,7 @@ import TaskSummaryRow from './TaskSummaryRow';
 import { renderLog } from '../../common/utils/logging';
 
 
-const TaskListForPerson = ({ personId }) => {
+const TaskListForPerson = ({ personId, showCompletedTasks }) => {
   renderLog('TaskListForPerson');  // Set LOG_RENDER_EVENTS to log all renders
   const [taskList, setTaskList] = React.useState([]);
 
@@ -52,13 +52,21 @@ const TaskListForPerson = ({ personId }) => {
   return (
     <TaskListWrapper>
       {taskList.map((task, index) => (
-        <TaskSummaryRow personId={personId} taskDefinitionId={task.taskDefinitionId} rowNumberForDisplay={index + 1} />
+        <TaskSummaryRow
+          hideIfCompleted={!showCompletedTasks}
+          key={`taskSummaryRow-${task.personId}-${task.taskDefinitionId}`}
+          personId={personId}
+          taskDefinitionId={task.taskDefinitionId}
+          taskGroupId={task.taskGroupId}
+          rowNumberForDisplay={index + 1}
+        />
       ))}
     </TaskListWrapper>
   );
 };
 TaskListForPerson.propTypes = {
   personId: PropTypes.number.isRequired,
+  showCompletedTasks: PropTypes.bool,
 };
 
 const TaskListWrapper = styled('div')`

@@ -69,6 +69,12 @@ class TaskStore extends ReduceStore {
     return this.getState().mostRecentTaskGroupIdSaved;
   }
 
+  getTask (personId, taskDefinitionId) {
+    const { allCachedTasksDict } = this.getState();
+    // console.log('TaskStore getTaskListDictByPersonId:', personId, ', allCachedTasksDict:', allCachedTasksDict);
+    return allCachedTasksDict[personId][taskDefinitionId] || {};
+  }
+
   getTaskDefinitionListByTaskGroupId (taskGroupId) {
     const { allCachedTaskDefinitionsDict } = this.getState();
     const taskDefinitionListRaw = Object.values(allCachedTaskDefinitionsDict);
@@ -88,20 +94,25 @@ class TaskStore extends ReduceStore {
     return allCachedTaskGroupsDict[taskGroupId] || {};
   }
 
+  getTaskGroupIdByTaskDefinitionId (taskDefinitionId) {
+    const taskDefinitionDict = this.getTaskDefinitionById(taskDefinitionId);
+    return taskDefinitionDict.taskGroupId || -1;
+  }
+
   getTaskDefinitionById (taskDefinitionId) {
     const { allCachedTaskDefinitionsDict } = this.getState();
     // console.log('TaskStore getTaskDefinitionById:', taskDefinitionId, ', allCachedTaskDefinitionsDict:', allCachedTaskDefinitionsDict);
     return allCachedTaskDefinitionsDict[taskDefinitionId] || {};
   }
 
-  getTaskDictByPersonId (personId) {
+  getTaskListDictByPersonId (personId) {
     const { allCachedTasksDict } = this.getState();
-    // console.log('TaskStore getTaskDictByPersonId:', personId, ', allCachedTasksDict:', allCachedTasksDict);
+    // console.log('TaskStore getTaskListDictByPersonId:', personId, ', allCachedTasksDict:', allCachedTasksDict);
     return allCachedTasksDict[personId] || {};
   }
 
   getTaskListForPerson (personId) {
-    const taskDict = this.getTaskDictByPersonId(personId);
+    const taskDict = this.getTaskListDictByPersonId(personId);
     const taskList = Object.values(taskDict);
     // console.log('TaskStore getTasksCompletedByPersonList:', personId, ', taskDefinitionsCompletedPersonIdList:', taskDefinitionsCompletedPersonIdList);
     return taskList || [];
@@ -116,7 +127,8 @@ class TaskStore extends ReduceStore {
     const {
       allCachedTaskGroupsDict, allCachedTaskDefinitionsDict, allCachedTasksDict,
     } = state;
-    // let taskId = -1;
+    let missingRequiredVariable = false;
+    let personId = -1;
     let taskDefinitionId = -1;
     let revisedState = state;
     let searchResults = [];
@@ -241,6 +253,38 @@ class TaskStore extends ReduceStore {
         }
         return revisedState;
 
+      case 'task-save':
+        if (!action.res.success) {
+          console.log('TaskStore ', action.type, ' FAILED action.res:', action.res);
+          return state;
+        }
+        missingRequiredVariable = false;
+        revisedState = state;
+        if (action.res.personId >= 0) {
+          personId = action.res.personId;
+        } else {
+          personId = -1;
+          missingRequiredVariable = true;
+        }
+        if (action.res.taskDefinitionId >= 0) {
+          taskDefinitionId = action.res.taskDefinitionId;
+        } else {
+          taskDefinitionId = -1;
+          missingRequiredVariable = true;
+        }
+
+        if (!missingRequiredVariable) {
+          // console.log('TaskStore task-save personId:', personId, ', taskDefinitionId:', taskDefinitionId);
+          allCachedTasksDict[personId][taskDefinitionId] = action.res;
+          revisedState = {
+            ...revisedState,
+            allCachedTasksDict,
+          };
+        } else {
+          console.log('TaskStore task-save MISSING_REQUIRED_VARIABLE personId:', personId, ', taskDefinitionId:', taskDefinitionId);
+        }
+        return revisedState;
+
       case 'task-status-list-retrieve':
         if (!action.res.success) {
           console.log('TaskStore ', action.type, ' FAILED action.res:', action.res);
@@ -290,7 +334,7 @@ class TaskStore extends ReduceStore {
               console.log('TaskStore task-group-list-retrieve skipping task with missing taskDefinitionId:', task);
             }
           });
-          console.log('allCachedTasksDict:', allCachedTasksDict);
+          // console.log('allCachedTasksDict:', allCachedTasksDict);
           revisedState = {
             ...revisedState,
             allCachedTasksDict,

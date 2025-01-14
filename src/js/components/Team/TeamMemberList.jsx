@@ -34,7 +34,12 @@ const TeamMemberList = ({ teamId }) => {
   return (
     <TeamMembersWrapper>
       {teamMemberList.map((person, index) => (
-        <PersonSummaryRow person={person} rowNumberForDisplay={index + 1} teamId={teamId} />
+        <PersonSummaryRow
+          key={`teamMember-${teamId}-${person.id}`}
+          person={person}
+          rowNumberForDisplay={index + 1}
+          teamId={teamId}
+        />
       ))}
     </TeamMembersWrapper>
   );

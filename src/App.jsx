@@ -1,12 +1,7 @@
 import { StyledEngineProvider, ThemeProvider } from '@mui/material/styles';
 import React, { useEffect, useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  BrowserRouter
-} from 'react-router';
+import { Routes, Route, BrowserRouter } from 'react-router';
 import styled from 'styled-components';
 import muiTheme from './js/common/components/Style/muiTheme';
 // import LoadingWheelComp from './js/common/components/Widgets/LoadingWheelComp';
@@ -23,7 +18,7 @@ import Drawers from './js/components/Drawers/Drawers';
 
 const AnswerQuestionsForm = React.lazy(() => import(/* webpackChunkName: 'AnswerQuestionsForm' */ './js/pages/AnswerQuestionsForm'));
 const FAQ = React.lazy(() => import(/* webpackChunkName: 'FAQ' */ './js/pages/FAQ'));
-const Footer = React.lazy(() => import(/* webpackChunkName: 'Footer' */ './js/components/Navigation/Footer'));
+// const Footer = React.lazy(() => import(/* webpackChunkName: 'Footer' */ './js/components/Navigation/Footer'));
 const Header = React.lazy(() => import(/* webpackChunkName: 'Header' */ './js/components/Navigation/Header'));
 const PageNotFound = React.lazy(() => import(/* webpackChunkName: 'PageNotFound' */ './js/pages/PageNotFound'));
 const QuestionnaireAnswers = React.lazy(() => import(/* webpackChunkName: 'QuestionnaireAnswers' */ './js/pages/QuestionnaireAnswers'));
@@ -32,7 +27,7 @@ const SystemSettings = React.lazy(() => import(/* webpackChunkName: 'SystemSetti
 const TeamHome = React.lazy(() => import(/* webpackChunkName: 'TeamHome' */ './js/pages/TeamHome'));
 const TaskGroup = React.lazy(() => import(/* webpackChunkName: 'TaskGroup' */ './js/pages/SystemSettings/TaskGroup'));
 const Tasks = React.lazy(() => import(/* webpackChunkName: 'Tasks' */ './js/pages/Tasks'));
-const TeamMembers = React.lazy(() => import(/* webpackChunkName: 'TeamMembers' */ './js/pages/TeamHome'));
+// const TeamMembers = React.lazy(() => import(/* webpackChunkName: 'TeamMembers' */ './js/pages/TeamHome'));
 const Teams = React.lazy(() => import(/* webpackChunkName: 'Teams' */ './js/pages/Teams'));
 
 

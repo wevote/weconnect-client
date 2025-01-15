@@ -41,11 +41,6 @@ const SystemSettings = ({ classes }) => {
     }
   }, [dataQList]);
 
-  const addTeamClick = () => {
-    setAppContextValue('addTeamDrawerOpen', true);
-    setDisplayDrawer(true);
-  };
-
 
   /* Hack 1/14/25 to get compile
   const onQuestionnaireStoreChange = () => {

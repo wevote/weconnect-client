@@ -30,6 +30,10 @@ const PersonSummaryRow = ({ person, rowNumberForDisplay, teamId }) => {
     },
   });
 
+  const removeTeamMemberClick = () => {
+    removeTeamMemberMutation.mutate(person.id);
+  };
+
   const editPersonClick = (hasEditRights = true) => {
     if (hasEditRights) {
       setAppContextValue('editPersonDrawerOpen', true);
@@ -92,7 +96,7 @@ const PersonSummaryRow = ({ person, rowNumberForDisplay, teamId }) => {
           {hasEditRights ? (
             <PersonCell
               id={`removeMember-personId-${person.personId}`}
-              onClick={() => removeTeamMemberMutation}
+              onClick={() => removeTeamMemberClick(person)}
               style={{ cursor: 'pointer' }}
               width={20}
             >
@@ -101,6 +105,7 @@ const PersonSummaryRow = ({ person, rowNumberForDisplay, teamId }) => {
           ) : (
             <PersonCell
               id={`removeMember-personId-${person.personId}`}
+              onClick={() => removeTeamMemberClick(person)}
               width={20}
             >
               &nbsp;

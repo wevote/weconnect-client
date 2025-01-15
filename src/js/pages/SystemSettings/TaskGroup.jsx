@@ -22,6 +22,7 @@ const TaskGroup = ({ classes, match }) => {
   renderLog('TaskGroup');  // Set LOG_RENDER_EVENTS to log all renders
   const [taskDefinitionList, setTaskDefinitionList] = React.useState([]);
   const [taskGroup, setTaskGroup] = React.useState({});
+  // eslint-disable-next-line no-unused-vars
   const [taskGroupCount, setTaskGroupCount] = React.useState(0);
 
   const onAppObservableStoreChange = () => {
@@ -181,14 +182,14 @@ const TaskDefinitionListWrapper = styled('div')`
   padding-bottom: 24px;
 `;
 
-const RequiredStar = styled('span')`
-  color: ${DesignTokenColors.alert800};
-  font-weight: bold;
-`;
+// const RequiredStar = styled('span')`
+//   color: ${DesignTokenColors.alert800};
+//   font-weight: bold;
+// `;
 
-const TitleWrapper = styled('h1')`
-  line-height: 1.1;
-  margin-bottom: 8px;
-`;
+// const TitleWrapper = styled('h1')`
+//   line-height: 1.1;
+//   margin-bottom: 8px;
+// `;
 
 export default withStyles(styles)(TaskGroup);

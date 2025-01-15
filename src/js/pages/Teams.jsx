@@ -24,6 +24,7 @@ const Teams = ({ classes, match }) => {
 
   const [showAllTeamMembers, setShowAllTeamMembers] = React.useState(false);
   const [teamList, setTeamList] = React.useState([]);
+  // eslint-disable-next-line no-unused-vars
   const [teamCount, setTeamCount] = React.useState(-1);
   const [displayDrawer, setDisplayDrawer] = React.useState(getAppContextValue('addTeamDrawerOpen'));
 

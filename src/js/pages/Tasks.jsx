@@ -1,10 +1,12 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Helmet } from 'react-helmet-async';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { withStyles } from '@mui/styles';
 import { CircularProgress } from '@mui/material';
+import useFetchData from '../react-query/fetchData';
 import TaskStore from '../stores/TaskStore';
 import { SpanWithLinkStyle } from '../components/Style/linkStyles';
 import { PageContentContainer } from '../components/Style/pageLayoutStyles';
@@ -13,9 +15,7 @@ import PersonSummaryRow from '../components/Person/PersonSummaryRow';
 import TaskListForPerson from '../components/Task/TaskListForPerson';
 import webAppConfig from '../config';
 import { renderLog } from '../common/utils/logging';
-import useFetchData from '../react-query/fetchData';
-import { useConnectAppContext } from '../contexts/ConnectAppContext';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+
 
 
 // eslint-disable-next-line no-unused-vars
@@ -25,6 +25,7 @@ const Tasks = ({ classes, match }) => {
 
   const [showCompletedTasks, setShowCompletedTasks] = React.useState(false);
   // const [personList, setPersonList] = React.useState([]);
+  // eslint-disable-next-line no-unused-vars
   const [taskListDictByPersonId, setTaskListDictByPersonId] = React.useState({});
   // const [teamCount, setTeamCount] = React.useState(0);
   const [allStaffList, setAllStaffList] = React.useState([]);
@@ -79,7 +80,7 @@ const Tasks = ({ classes, match }) => {
           {webAppConfig.NAME_FOR_BROWSER_TAB_TITLE}
         </title>
         {/*  Executing a link to a full url restarts the session, <Link rel="canonical" href={`${webAppConfig.WECONNECT_URL_FOR_SEO}/team-home`} /> */}
-        {/* <Link to="/team-home">Home</Link> */}
+        <Link to="/team-home">Home</Link>
       </Helmet>
       <PageContentContainer>
         <h1>Dashboard</h1>

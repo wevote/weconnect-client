@@ -2,11 +2,11 @@ import { Edit } from '@mui/icons-material';
 import { Button } from '@mui/material';
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { withStyles } from '@mui/styles';
-import AppObservableStore, { messageService } from '../../stores/AppObservableStore';
+// import AppObservableStore, { messageService } from '../../stores/AppObservableStore';
 import QuestionnaireActions from '../../actions/QuestionnaireActions';
 import QuestionnaireStore from '../../stores/QuestionnaireStore';
 import { SpanWithLinkStyle } from '../../components/Style/linkStyles';
@@ -16,16 +16,18 @@ import webAppConfig from '../../config';
 import apiCalming from '../../common/utils/apiCalming';
 import { renderLog } from '../../common/utils/logging';
 import convertToInteger from '../../common/utils/convertToInteger';
+import { useConnectAppContext } from '../../contexts/ConnectAppContext';
 
 
 const Questionnaire = ({ classes, match }) => {
-  renderLog('Questionnaire');  // Set LOG_RENDER_EVENTS to log all renders
+  renderLog('Questionnaire');
+  const { setAppContextValue } = useConnectAppContext();
+
   const [questionList, setQuestionList] = React.useState([]);
   const [questionnaire, setQuestionnaire] = React.useState({});
+  // eslint-disable-next-line no-unused-vars
   const [questionnaireCount, setQuestionnaireCount] = React.useState(0);
 
-  const onAppObservableStoreChange = () => {
-  };
 
   const onQuestionnaireStoreChange = () => {
     const { params } = match;
@@ -41,32 +43,32 @@ const Questionnaire = ({ classes, match }) => {
   const addQuestionClick = () => {
     const { params } = match;
     const questionnaireIdTemp = convertToInteger(params.questionnaireId);
-    AppObservableStore.setGlobalVariableState('editQuestionDrawerOpen', true);
-    AppObservableStore.setGlobalVariableState('editQuestionDrawerQuestionId', -1);
-    AppObservableStore.setGlobalVariableState('editQuestionDrawerQuestionnaireId', questionnaireIdTemp);
+    setAppContextValue('editQuestionDrawerOpen', true);
+    setAppContextValue('editQuestionDrawerQuestionId', -1);
+    setAppContextValue('editQuestionDrawerQuestionnaireId', questionnaireIdTemp);
   };
 
   const editQuestionClick = (questionId) => {
     const { params } = match;
     const questionnaireIdTemp = convertToInteger(params.questionnaireId);
-    AppObservableStore.setGlobalVariableState('editQuestionDrawerOpen', true);
-    AppObservableStore.setGlobalVariableState('editQuestionDrawerQuestionId', questionId);
-    AppObservableStore.setGlobalVariableState('editQuestionDrawerQuestionnaireId', questionnaireIdTemp);
+    setAppContextValue('editQuestionDrawerOpen', true);
+    setAppContextValue('editQuestionDrawerQuestionId', questionId);
+    setAppContextValue('editQuestionDrawerQuestionnaireId', questionnaireIdTemp);
   };
 
   const editQuestionnaireClick = () => {
     const { params } = match;
     const questionnaireIdTemp = convertToInteger(params.questionnaireId);
-    AppObservableStore.setGlobalVariableState('editQuestionnaireDrawerOpen', true);
-    AppObservableStore.setGlobalVariableState('editQuestionnaireDrawerQuestionnaireId', questionnaireIdTemp);
+    setAppContextValue('editQuestionnaireDrawerOpen', true);
+    setAppContextValue('editQuestionnaireDrawerQuestionnaireId', questionnaireIdTemp);
   };
 
   React.useEffect(() => {
     const { params } = match;
     const questionnaireIdTemp = convertToInteger(params.questionnaireId);
 
-    const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
-    onAppObservableStoreChange();
+    // const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
+    // onAppObservableStoreChange();
     const questionnaireStoreListener = QuestionnaireStore.addListener(onQuestionnaireStoreChange);
     onQuestionnaireStoreChange();
 
@@ -80,7 +82,7 @@ const Questionnaire = ({ classes, match }) => {
     }
 
     return () => {
-      appStateSubscription.unsubscribe();
+      // appStateSubscription.unsubscribe();
       questionnaireStoreListener.remove();
     };
   }, []);

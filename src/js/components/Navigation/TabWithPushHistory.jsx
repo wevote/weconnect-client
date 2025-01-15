@@ -1,7 +1,7 @@
 import { Tab } from '@mui/material';
 import PropTypes from 'prop-types';
 import React from 'react';
-import { Link } from 'react-router-dom'; // useHistory
+import { Link } from 'react-router'; // useHistory
 
 
 /*

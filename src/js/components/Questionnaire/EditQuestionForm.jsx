@@ -1,15 +1,13 @@
 import { ContentCopy } from '@mui/icons-material';
 import { Button, Checkbox, FormControl, FormControlLabel, TextField } from '@mui/material'; // FormLabel, Radio, RadioGroup,
 import { withStyles } from '@mui/styles';
-import React from 'react';
+import React, { useEffect } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
-import AppObservableStore, { messageService } from '../../stores/AppObservableStore';
-import QuestionnaireActions from '../../actions/QuestionnaireActions';
+import { useConnectAppContext } from '../../contexts/ConnectAppContext';
 import QuestionnaireStore from '../../stores/QuestionnaireStore';
 import { renderLog } from '../../common/utils/logging';
-import prepareDataPackageFromAppObservableStore from '../../common/utils/prepareDataPackageFromAppObservableStore';
 import DesignTokenColors from '../../common/components/Style/DesignTokenColors';
 import { SpanWithLinkStyle } from '../Style/linkStyles';
 
@@ -30,8 +28,9 @@ const QUESTION_FIELDS_IN_FORM = [
   'questionInstructions', 'questionText',
   'requireAnswer', 'statusActive'];
 
-const EditQuestionForm = ({ classes }) => {  //  classes, teamId
-  renderLog('EditQuestionForm');  // Set LOG_RENDER_EVENTS to log all renders
+const EditQuestionForm = ({ classes }) => {
+  renderLog('EditQuestionForm');
+  const { setAppContextValue, getAppContextValue, setAppContextValuesInBulk } = useConnectAppContext();
   const [fieldMappingRuleCopied, setFieldMappingRuleCopied] = React.useState('');
   const [firstQuestionDataReceived, setFirstQuestionDataReceived] = React.useState(false);
   const [inputValues, setInputValues] = React.useState({
@@ -51,7 +50,7 @@ const EditQuestionForm = ({ classes }) => {  //  classes, teamId
   //   },
   // };
 
-  const clearEditFormValuesInAppObservableStore = () => {
+  const clearEditFormValuesInAppContext = () => {
     const globalVariableStates = {};
     for (let i = 0; i < QUESTION_FIELDS_IN_FORM.length; i++) {
       const fieldName = QUESTION_FIELDS_IN_FORM[i];
@@ -59,16 +58,16 @@ const EditQuestionForm = ({ classes }) => {  //  classes, teamId
       globalVariableStates[`${fieldName}ToBeSaved`] = '';
     }
     globalVariableStates.editQuestionDrawerQuestionId = -1;
-    // console.log('clearEditFormValuesInAppObservableStore globalVariableStates:', globalVariableStates);
-    AppObservableStore.setGlobalVariableStateInBulk(globalVariableStates);
+    // console.log('clearEditFormValuesInAppContext globalVariableStates:', globalVariableStates);
+    setAppContextValuesInBulk(globalVariableStates);
   };
 
   const clearEditedValues = () => {
     setInputValues({});
     setFirstQuestionDataReceived(false);
     // setQuestionId(-1);
-    clearEditFormValuesInAppObservableStore();
-    AppObservableStore.setGlobalVariableState('editQuestionDrawerOpen', false);
+    clearEditFormValuesInAppContext();
+    setAppContextValue('editQuestionDrawerOpen', false);
   };
 
   const copyFieldMappingRule = (fieldMappingRule) => {
@@ -76,8 +75,10 @@ const EditQuestionForm = ({ classes }) => {  //  classes, teamId
     // openSnackbar({ message: 'Copied!' });
     setFieldMappingRuleCopied(fieldMappingRule);
     setInputValues({ ...inputValues, ['fieldMappingRule']: fieldMappingRule });
-    AppObservableStore.setGlobalVariableState('fieldMappingRuleChanged', true);
-    AppObservableStore.setGlobalVariableState('fieldMappingRuleToBeSaved', fieldMappingRule);
+    // Hack 1/14/25 to get compile
+    // AppObservableStore.setGlobalVariableState('fieldMappingRuleChanged', true);
+    // AppObservableStore.setGlobalVariableState('fieldMappingRuleToBeSaved', fieldMappingRule);
+    // End Hack 1/14/25 to get compile
     setSaveButtonActive(true);
     setTimeout(() => {
       setFieldMappingRuleCopied('');
@@ -86,7 +87,7 @@ const EditQuestionForm = ({ classes }) => {  //  classes, teamId
 
   const updateInputValuesFromQuestionnaireStore = (inputValuesIncoming) => {
     const revisedInputValues = { ...inputValuesIncoming };
-    const questionIdTemp = AppObservableStore.getGlobalVariableState('editQuestionDrawerQuestionId');
+    const questionIdTemp = getAppContextValue('editQuestionDrawerQuestionId');
     const questionDict = QuestionnaireStore.getQuestionById(questionIdTemp) || {};
     // console.log('=== updateInputValuesFromQuestionnaireStore questionIdTemp:', questionIdTemp, ', questionDict:', questionDict);
     if (questionIdTemp && questionDict.questionId) {
@@ -100,16 +101,25 @@ const EditQuestionForm = ({ classes }) => {  //  classes, teamId
     return revisedInputValues;
   };
 
-  const onAppObservableStoreChange = () => {
-    const editQuestionDrawerOpenTemp = AppObservableStore.getGlobalVariableState('editQuestionDrawerOpen');
-    const questionIdTemp = AppObservableStore.getGlobalVariableState('editQuestionDrawerQuestionId');
+  useEffect(() => {  // Replaces onAppObservableStoreChange and will be called whenever the context value changes
+    console.log('EditQuestionForm: Context value changed:', true);
+    const editQuestionDrawerOpenTemp = getAppContextValue('editQuestionDrawerOpen');
+    const questionIdTemp = getAppContextValue('editQuestionDrawerQuestionId');
     if (questionIdTemp >= 0 && !editQuestionDrawerOpenTemp) {
       clearEditedValues();
     }
-  };
+  }, [getAppContextValue]);
+
+  // const onAppObservableStoreChange = () => {
+  //   const editQuestionDrawerOpenTemp = getAppContextValue('editQuestionDrawerOpen');
+  //   const questionIdTemp = getAppContextValue('editQuestionDrawerQuestionId');
+  //   if (questionIdTemp >= 0 && !editQuestionDrawerOpenTemp) {
+  //     clearEditedValues();
+  //   }
+  // };
 
   const onQuestionnaireStoreChange = () => {
-    const questionIdTemp = AppObservableStore.getGlobalVariableState('editQuestionDrawerQuestionId');
+    const questionIdTemp = getAppContextValue('editQuestionDrawerQuestionId');
     const questionDict = QuestionnaireStore.getQuestionById(questionIdTemp) || {};
     // console.log('EditQuestionForm onQuestionnaireStoreChange questionIdTemp:', questionIdTemp, ', questionDict:', questionDict);
     if (!firstQuestionDataReceived) {
@@ -123,11 +133,13 @@ const EditQuestionForm = ({ classes }) => {  //  classes, teamId
   };
 
   const saveQuestion = () => {
-    const questionIdTemp = AppObservableStore.getGlobalVariableState('editQuestionDrawerQuestionId');
-    const questionnaireIdTemp = AppObservableStore.getGlobalVariableState('editQuestionDrawerQuestionnaireId');
-    const data = prepareDataPackageFromAppObservableStore(QUESTION_FIELDS_IN_FORM);
-    // console.log('saveQuestion questionId: ', questionIdTemp, ', data:', data);
-    QuestionnaireActions.questionSave(questionnaireIdTemp, questionIdTemp, data);
+    // Hack 1/14/25 to get compile
+    // const questionIdTemp = getAppContextValue('editQuestionDrawerQuestionId');
+    // const questionnaireIdTemp = getAppContextValue('editQuestionDrawerQuestionnaireId');
+    // const data = prepareDataPackageFromAppObservableStore(QUESTION_FIELDS_IN_FORM);
+    // // console.log('saveQuestion questionId: ', questionIdTemp, ', data:', data);
+    // QuestionnaireActions.questionSave(questionnaireIdTemp, questionIdTemp, data);
+    // End Hack
     setSaveButtonActive(false);
     setTimeout(() => {
       clearEditedValues();
@@ -142,8 +154,8 @@ const EditQuestionForm = ({ classes }) => {  //  classes, teamId
       } else {
         newValue = event.target.value || '';
       }
-      AppObservableStore.setGlobalVariableState(`${event.target.name}Changed`, true);
-      AppObservableStore.setGlobalVariableState(`${event.target.name}ToBeSaved`, newValue);
+      setAppContextValue(`${event.target.name}Changed`, true);
+      setAppContextValue(`${event.target.name}ToBeSaved`, newValue);
       // console.log('updateQuestionField:', event.target.name, ', newValue:', newValue);
       setInputValues({ ...inputValues, [event.target.name]: newValue });
       setSaveButtonActive(true);
@@ -153,13 +165,13 @@ const EditQuestionForm = ({ classes }) => {  //  classes, teamId
   };
 
   React.useEffect(() => {
-    const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
-    onAppObservableStoreChange();
+    // const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
+    // onAppObservableStoreChange();
     const personStoreListener = QuestionnaireStore.addListener(onQuestionnaireStoreChange);
     onQuestionnaireStoreChange();
 
     return () => {
-      appStateSubscription.unsubscribe();
+      // appStateSubscription.unsubscribe();
       personStoreListener.remove();
     };
   }, []);

@@ -2,7 +2,7 @@ import { Edit } from '@mui/icons-material';
 import { Button } from '@mui/material';
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { withStyles } from '@mui/styles';

@@ -1,18 +1,19 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { withStyles } from '@mui/styles';
 import { renderLog } from '../../common/utils/logging';
 
 
+// eslint-disable-next-line no-unused-vars
 const TeamHeader = ({ classes, showHeaderLabels, team }) => {
-  renderLog('TeamHeader');  // Set LOG_RENDER_EVENTS to log all renders
+  renderLog('TeamHeader');
 
   return (
     <OneTeamHeader>
       {/* Width (below) of this TeamHeaderCell comes from the combined widths of the first x columns in TeamMemberList */}
-      <TeamHeaderCell largeFont titleCell width={15 + 150 + 125}>
+      <TeamHeaderCell $largeFont $titleCell width={15 + 150 + 125}>
         {team && (
           <Link to={`/team-home/${team.id}`}>
             {team.teamName}
@@ -37,8 +38,8 @@ const TeamHeader = ({ classes, showHeaderLabels, team }) => {
 };
 TeamHeader.propTypes = {
   classes: PropTypes.object.isRequired,
-  showHeaderLabels: PropTypes.bool,
-  team: PropTypes.object,
+  // showHeaderLabels: PropTypes.bool,
+  // team: PropTypes.object.isRequired,
 };
 
 const styles = (theme) => ({

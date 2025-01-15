@@ -48,7 +48,7 @@ const Header = ({ hideHeader }) => {
       <IPhoneSpacer />
       <HeadroomWrapper id="hw1">
         <div className={pageHeaderClasses} style={cordovaTopHeaderTopMargin()} id="header-container">
-          {!hideHeader && <HeaderBar />}
+          <HeaderBar style={hideHeader ? { display: 'none' } : { display: 'unset' }} />
         </div>
       </HeadroomWrapper>
     </div>

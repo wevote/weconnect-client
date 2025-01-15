@@ -1,31 +1,53 @@
 import { Edit } from '@mui/icons-material';
 import { Button } from '@mui/material';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Link } from 'react-router-dom';
+// import { Link } from 'react-router';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { withStyles } from '@mui/styles';
-import AppObservableStore, { messageService } from '../../stores/AppObservableStore';
-import QuestionnaireActions from '../../actions/QuestionnaireActions';
-import QuestionnaireStore from '../../stores/QuestionnaireStore';
-import TaskActions from '../../actions/TaskActions';
-import TaskStore from '../../stores/TaskStore';
+import { useConnectAppContext } from '../../contexts/ConnectAppContext';
 import DesignTokenColors from '../../common/components/Style/DesignTokenColors';
 import { PageContentContainer } from '../../components/Style/pageLayoutStyles';
 import webAppConfig from '../../config';
-import apiCalming from '../../common/utils/apiCalming';
 import { renderLog } from '../../common/utils/logging';
+import useFetchData from '../../react-query/fetchData';
 
 
 const SystemSettings = ({ classes }) => {
-  renderLog('SystemSettings');  // Set LOG_RENDER_EVENTS to log all renders
+  renderLog('SystemSettings');
+  const { setAppContextValue } = useConnectAppContext();
+
+  // eslint-disable-next-line no-unused-vars
   const [questionnaireList, setQuestionnaireList] = React.useState([]);
+  // eslint-disable-next-line no-unused-vars
   const [taskGroupList, setTaskGroupList] = React.useState([]);
 
-  const onAppObservableStoreChange = () => {
+
+
+
+  const { data: dataQList, isSuccess: isSuccessQList, isFetching: isFetchingQList } = useFetchData(['questionnaire-list-retrieve'], {});
+  console.log('useFetchData in SystemSettings:', dataQList, isSuccessQList, isFetchingQList);
+  if (isFetchingQList) {
+    console.log('isFetching  ------------');
+  }
+  useEffect(() => {
+    console.log('useFetchData in SystemSettings useEffect:', dataQList, isSuccessQList, isFetchingQList);
+    if (dataQList !== undefined && isFetchingQList === false) {
+      console.log('useFetchData in SystemSettings useEffect data is good:', dataQList, isSuccessQList, isFetchingQList);
+      console.log('Successfully retrieved questionnaire-list-retrieve...');
+      const questionnaireListTemp = dataQList.questionnaireList;
+      setQuestionnaireList(questionnaireListTemp);
+    }
+  }, [dataQList]);
+
+  const addTeamClick = () => {
+    setAppContextValue('addTeamDrawerOpen', true);
+    setDisplayDrawer(true);
   };
 
+
+  /* Hack 1/14/25 to get compile
   const onQuestionnaireStoreChange = () => {
     const questionnaireListTemp = QuestionnaireStore.getAllCachedQuestionnairesList();
     // console.log('SystemSettings QuestionnaireStore.getQuestionnaireList:', questionnaireListTemp);
@@ -44,48 +66,63 @@ const SystemSettings = ({ classes }) => {
       TaskActions.taskGroupListRetrieve();
     }
   };
+*/
 
   const addQuestionnaireClick = () => {
-    AppObservableStore.setGlobalVariableState('editQuestionnaireDrawerOpen', true);
-    AppObservableStore.setGlobalVariableState('editQuestionnaireDrawerQuestionnaireId', -1);
+    setAppContextValue('editQuestionnaireDrawerOpen', true);
+    setAppContextValue('editQuestionnaireDrawerQuestionnaireId', -1);
   };
 
   const editQuestionnaireClick = (questionnaireId) => {
-    AppObservableStore.setGlobalVariableState('editQuestionnaireDrawerOpen', true);
-    AppObservableStore.setGlobalVariableState('editQuestionnaireDrawerQuestionnaireId', questionnaireId);
+    setAppContextValue('editQuestionnaireDrawerOpen', true);
+    setAppContextValue('editQuestionnaireDrawerQuestionnaireId', questionnaireId);
   };
 
   const addTaskGroupClick = () => {
-    AppObservableStore.setGlobalVariableState('editTaskGroupDrawerOpen', true);
-    AppObservableStore.setGlobalVariableState('editTaskGroupDrawerTaskGroupId', -1);
+    // Hack 1/14/25 to get compile
+    // AppObservableStore.setGlobalVariableState('editTaskGroupDrawerOpen', true);
+    // AppObservableStore.setGlobalVariableState('editTaskGroupDrawerTaskGroupId', -1);
   };
 
+  // eslint-disable-next-line no-unused-vars
   const editTaskGroupClick = (taskGroupId) => {
-    AppObservableStore.setGlobalVariableState('editTaskGroupDrawerOpen', true);
-    AppObservableStore.setGlobalVariableState('editTaskGroupDrawerTaskGroupId', taskGroupId);
+    // Hack 1/14/25 to get compile
+    // AppObservableStore.setGlobalVariableState('editTaskGroupDrawerOpen', true);
+    // AppObservableStore.setGlobalVariableState('editTaskGroupDrawerTaskGroupId', taskGroupId);
   };
 
-  React.useEffect(() => {
-    const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
-    onAppObservableStoreChange();
-    const questionnaireStoreListener = QuestionnaireStore.addListener(onQuestionnaireStoreChange);
-    onQuestionnaireStoreChange();
-    const taskStoreListener = TaskStore.addListener(onTaskStoreChange);
-    onTaskStoreChange();
-
-    if (apiCalming('questionnaireListRetrieve', 1000)) {
-      QuestionnaireActions.questionnaireListRetrieve();
-    }
-    if (apiCalming('taskGroupListRetrieve', 1000)) {
-      TaskActions.taskGroupListRetrieve();
-    }
-
-    return () => {
-      appStateSubscription.unsubscribe();
-      questionnaireStoreListener.remove();
-      taskStoreListener.remove();
-    };
-  }, []);
+/* eslint-disable indent */
+//   React.useEffect(() => {
+// <<<<<<< HEAD
+//     // const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
+//     // onAppObservableStoreChange();
+//     const personStoreListener = QuestionnaireStore.addListener(onQuestionnaireStoreChange);
+// =======
+//     const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
+//     onAppObservableStoreChange();
+//     const questionnaireStoreListener = QuestionnaireStore.addListener(onQuestionnaireStoreChange);
+// >>>>>>> upstream/develop
+//     onQuestionnaireStoreChange();
+//     const taskStoreListener = TaskStore.addListener(onTaskStoreChange);
+//     onTaskStoreChange();
+//
+//     if (apiCalming('questionnaireListRetrieve', 1000)) {
+//       QuestionnaireActions.questionnaireListRetrieve();
+//     }
+//     if (apiCalming('taskGroupListRetrieve', 1000)) {
+//       TaskActions.taskGroupListRetrieve();
+//     }
+//
+//     return () => {
+// <<<<<<< HEAD
+//       // appStateSubscription.unsubscribe();
+//       personStoreListener.remove();
+// =======
+//       appStateSubscription.unsubscribe();
+//       questionnaireStoreListener.remove();
+//       taskStoreListener.remove();
+// >>>>>>> upstream/develop
+// End Hack 1/14/25 to get compile
 
   return (
     <div>
@@ -106,9 +143,10 @@ const SystemSettings = ({ classes }) => {
         {questionnaireList.map((questionnaire) => (
           <OneQuestionnaireWrapper key={`questionnaire-${questionnaire.id}`}>
             <QuestionnaireInnerWrapper>
-              <Link to={`/questionnaire/${questionnaire.id}`}>
-                {questionnaire.questionnaireName}
-              </Link>
+              {/* Hack 1/14/25 to get compile */}
+              {/* <Link to={`/questionnaire/${questionnaire.id}`}> */}
+              {/*  {questionnaire.questionnaireName} */}
+              {/* </Link> */}
               <EditQuestionnaire onClick={() => editQuestionnaireClick(questionnaire.questionnaireId)}>
                 <EditStyled />
               </EditQuestionnaire>
@@ -130,9 +168,10 @@ const SystemSettings = ({ classes }) => {
         {taskGroupList.map((taskGroup) => (
           <OneQuestionnaireWrapper key={`taskGroup-${taskGroup.id}`}>
             <QuestionnaireInnerWrapper>
-              <Link to={`/task-group/${taskGroup.id}`}>
-                {taskGroup.taskGroupName}
-              </Link>
+              {/* Hack 1/14/25 to get compile */}
+              {/* <Link to={`/task-group/${taskGroup.id}`}> */}
+              {/*  {taskGroup.taskGroupName} */}
+              {/* </Link> */}
               <EditQuestionnaire onClick={() => editTaskGroupClick(taskGroup.taskGroupId)}>
                 <EditStyled />
               </EditQuestionnaire>

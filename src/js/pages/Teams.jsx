@@ -1,74 +1,62 @@
 import { Button } from '@mui/material';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { withStyles } from '@mui/styles';
-import AppObservableStore, { messageService } from '../stores/AppObservableStore';
-import PersonStore from '../stores/PersonStore';
-import TeamActions from '../actions/TeamActions';
-import TeamStore from '../stores/TeamStore';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import useFetchData from '../react-query/fetchData';
 import { SpanWithLinkStyle } from '../components/Style/linkStyles';
 import { PageContentContainer } from '../components/Style/pageLayoutStyles';
 import TeamHeader from '../components/Team/TeamHeader';
 import TeamMemberList from '../components/Team/TeamMemberList';
 import webAppConfig from '../config';
-import apiCalming from '../common/utils/apiCalming';
 import { renderLog } from '../common/utils/logging';
+import { useConnectAppContext } from '../contexts/ConnectAppContext';
+import { getTeamList } from '../react-query/TeamsQueryProcessing';
+import AddTeamDrawer from '../components/Drawers/AddTeamDrawer';
 
 
-const Teams = ({ classes, match }) => {  //  classes, teamId
-  renderLog('Teams');  // Set LOG_RENDER_EVENTS to log all renders
+const Teams = ({ classes, match }) => {
+  renderLog('Teams');
+  const { setAppContextValue, getAppContextValue } = useConnectAppContext();
+
   const [showAllTeamMembers, setShowAllTeamMembers] = React.useState(false);
   const [teamList, setTeamList] = React.useState([]);
-  const [teamCount, setTeamCount] = React.useState(0);
+  const [teamCount, setTeamCount] = React.useState(-1);
+  const [displayDrawer, setDisplayDrawer] = React.useState(getAppContextValue('addTeamDrawerOpen'));
 
-  const onAppObservableStoreChange = () => {
-  };
+  console.log('match: ', match);  // dummy to clear warning
 
-  const onRetrieveTeamListChange = () => {
-    const { params } = match;
-    setShowAllTeamMembers(true);
-    const teamListTemp = TeamStore.getTeamList(params.teamId);
-    // console.log('Teams onRetrieveTeamListChange, params.teamId:', params.teamId, ', TeamStore.getTeamList:', teamListTemp);
-    setTeamList(teamListTemp);
-    setTeamCount(teamListTemp.length);
-  };
-
-  const onPersonStoreChange = () => {
-    onRetrieveTeamListChange();
-  };
-
-  const onTeamStoreChange = () => {
-    onRetrieveTeamListChange();
-    if (apiCalming('teamListRetrieve', 1000)) {
-      TeamActions.teamListRetrieve();
+  const { data, isSuccess, isFetching, isStale } = useFetchData(['team-list-retrieve'], {});
+  console.log('useFetchData in Teams:', data, isSuccess, isFetching, isStale);
+  if (isFetching) {
+    console.log('isFetching  ------------');
+  }
+  useEffect(() => {
+    console.log('useFetchData in Teams useEffect:', data, isSuccess, isFetching, isStale);
+    if (data !== undefined && isFetching === false && isStale === false) {
+      console.log('useFetchData in Teams useEffect data is good:', data, isSuccess, isFetching, isStale);
+      console.log('Successfully retrieved teams...');
+      const teamListTemp = getTeamList(data);
+      setShowAllTeamMembers(true);
+      setTeamList(teamListTemp);
+      setTeamCount(teamListTemp.length);
+      setAppContextValue('teamListNested', teamListTemp);
     }
-  };
+  }, [data]);
 
   const addTeamClick = () => {
-    AppObservableStore.setGlobalVariableState('addTeamDrawerOpen', true);
+    setAppContextValue('addTeamDrawerOpen', true);
+    setDisplayDrawer(true);
   };
 
-  React.useEffect(() => {
-    const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
-    onAppObservableStoreChange();
-    const personStoreListener = PersonStore.addListener(onPersonStoreChange);
-    onPersonStoreChange();
-    const teamStoreListener = TeamStore.addListener(onTeamStoreChange);
-    onTeamStoreChange();
-
-    if (apiCalming('teamListRetrieve', 1000)) {
-      TeamActions.teamListRetrieve();
-    }
-
-    return () => {
-      appStateSubscription.unsubscribe();
-      personStoreListener.remove();
-      teamStoreListener.remove();
-    };
-  }, []);
+  const personProfile = getAppContextValue('personProfileDrawerOpen');
+  if (personProfile === undefined) {
+    setAppContextValue('personProfileDrawerOpen', false);
+    setAppContextValue('addTeamDrawerOpen', false);
+  }
 
   return (
     <div>
@@ -78,7 +66,8 @@ const Teams = ({ classes, match }) => {  //  classes, teamId
           {' '}
           {webAppConfig.NAME_FOR_BROWSER_TAB_TITLE}
         </title>
-        <link rel="canonical" href={`${webAppConfig.WECONNECT_URL_FOR_SEO}/team-home`} />
+        {/* Hack to get to compile */}
+        {/* <link rel="canonical" href={`${webAppConfig.WECONNECT_URL_FOR_SEO}/team-home`} /> */}
       </Helmet>
       <PageContentContainer>
         <h1>
@@ -95,7 +84,7 @@ const Teams = ({ classes, match }) => {  //  classes, teamId
           classes={{ root: classes.addTeamButtonRoot }}
           color="primary"
           variant="outlined"
-          onClick={addTeamClick}
+          onClick={() => addTeamClick()}
         >
           Add Team
         </Button>
@@ -103,7 +92,7 @@ const Teams = ({ classes, match }) => {  //  classes, teamId
           <OneTeamWrapper key={`team-${team.id}`}>
             <TeamHeader team={team} showHeaderLabels={(index === 0) && showAllTeamMembers && (team.teamMemberList && team.teamMemberList.length > 0)} />
             {showAllTeamMembers && (
-              <TeamMemberList teamId={team.id} />
+              <TeamMemberList teamId={team.id} teamList={teamList} />
             )}
           </OneTeamWrapper>
         ))}
@@ -112,19 +101,15 @@ const Teams = ({ classes, match }) => {  //  classes, teamId
             Sign in
           </Link>
         </div>
-        <div style={{ padding: '10px 0 25px 0', fontWeight: '700' }}>
-          <Link to="/test-auth">
-            Example protected page
-          </Link>
-        </div>
-
+        {displayDrawer ? <AddTeamDrawer /> : null }
+        <ReactQueryDevtools initialIsOpen />
       </PageContentContainer>
     </div>
   );
 };
 Teams.propTypes = {
   classes: PropTypes.object.isRequired,
-  match: PropTypes.object.isRequired,
+  match: PropTypes.object,
 };
 
 const styles = (theme) => ({

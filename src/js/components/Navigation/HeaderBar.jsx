@@ -1,130 +1,126 @@
-import { Tabs } from '@mui/material';
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router';
+import { Tab, Tabs } from '@mui/material';
 import { withStyles } from '@mui/styles';
-import React from 'react';
 import styled from 'styled-components';
-import { messageService } from '../../stores/AppObservableStore';
 import standardBoxShadow from '../../common/components/Style/standardBoxShadow';
 import { hasIPhoneNotch } from '../../common/utils/cordovaUtils';
-import { handleResize } from '../../common/utils/isMobileScreenSize';
+// import { handleResize } from '../../common/utils/isMobileScreenSize';
 import { normalizedHrefPage } from '../../common/utils/hrefUtils';
 import { renderLog } from '../../common/utils/logging';
 import { displayTopMenuShadow } from '../../utils/applicationUtils';
 import { TopOfPageHeader, TopRowOneLeftContainer, TopRowOneMiddleContainer, TopRowOneRightContainer, TopRowTwoLeftContainer } from '../Style/pageLayoutStyles';
 import HeaderBarLogo from './HeaderBarLogo';
-import TabWithPushHistory from './TabWithPushHistory';
 
 
 const HeaderBar = () => {
   renderLog('HeaderBar');  // Set LOG_RENDER_EVENTS to log all renders
+  // eslint-disable-next-line no-unused-vars
   const [scrolledDown, setScrolledDown] = React.useState(false);
-  const [tabsValue, setTabsValue] = React.useState(0);
+  const [tabsValue, setTabsValue] = React.useState('1');
+  // eslint-disable-next-line no-unused-vars
+  const [showTabs, setShowTabs] = React.useState(true);
+  const navigate = useNavigate();
 
-  const handleResizeLocal = () => {
-    if (handleResize('HeaderBar')) {
-      // this.setState({});
-    }
-  };
 
-  const handleTabChange = (newValue) => {
-    // console.log(`handleTabChange newValue: ${newValue}`);
-    setTabsValue(newValue);
-  };
+  // This does not do anything
+  // const handleResizeLocal = () => {
+  //   if (handleResize('HeaderBar')) {
+  //     // this.setState({});
+  //   }
+  // };
 
   const initializeTabValue = () => {
-    // console.log('initializeTabValue normalizedHrefPage():', normalizedHrefPage());
+    console.log('initializeTabValue normalizedHrefPage():', normalizedHrefPage());
     switch (normalizedHrefPage()) {
       case 'tasks':
-        setTabsValue(0);
+        setTabsValue('1');
+        console.log('initializeTabValue  setTabsValue: 1');
         break;
       case 'team-home':
       case 'teams':
-        setTabsValue(1);
+        setTabsValue('2');
+        console.log('initializeTabValue  setTabsValue: 2');
         break;
       case 'questionnaire':
       case 'system-settings':
       case 'task-group':
-        setTabsValue(2);
+        setTabsValue('3');
+        console.log('initializeTabValue  setTabsValue: 3');
         break;
       default:
-        setTabsValue(0);
+        setTabsValue('1');
+        console.log('initializeTabValue  setTabsValue default: 1');
         break;
     }
   };
 
-  const showTabs = () => {
-    // console.log('showTabs normalizedHrefPage():', normalizedHrefPage());
-    switch (normalizedHrefPage()) {
-      case 'q':
-        return false;
+  const handleTabChange = (event, newValue) => {
+    console.log(`handleTabChange newValue: ${newValue}`);
+    // setTabsValue(newValue);
+    switch (newValue) {
+      case '1':
+        // window.history.pushState({}, '', '/tasks'); Only changes the url, does not change the page render
+        navigate('/tasks');
+        break;
+      case '2':
+        navigate('/teams');
+        break;
+      case '3':
+        navigate('/system-settings');
+        break;
       default:
+        navigate('/tasks');
         break;
     }
-    return true;
-  };
-
-  const onAppObservableStoreChange = () => {
-    // console.log('------ HeaderBar, onAppObservableStoreChange received: ', msg);
-    setScrolledDown(false);
-  };
-
-  React.useEffect(() => {
-    const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
-    onAppObservableStoreChange();
-    window.addEventListener('resize', handleResizeLocal);
-
     initializeTabValue();
+  };
 
-    return () => {
-      appStateSubscription.unsubscribe();
-      window.removeEventListener('resize', handleResizeLocal);
-    };
+  useEffect(() => {
+    initializeTabValue();
   }, []);
 
+  // This does not look like it does anything, except always return true
+  // const showTabs = () => {
+  //   // console.log('showTabs normalizedHrefPage():', normalizedHrefPage());
+  //   switch (normalizedHrefPage()) {
+  //     case 'q':
+  //       return false;
+  //     default:
+  //       break;
+  //   }
+  //   return true;
+  // };
+
+  // const onAppObservableStoreChange = () => {
+  //   // console.log('------ HeaderBar, onAppObservableStoreChange received: ', msg);
+  //   setScrolledDown(false);
+  // };
+  console.log('tabs value ==== ', tabsValue);
   return (
     <HeaderBarWrapper
-      hasNotch={hasIPhoneNotch()}
-      scrolledDown={scrolledDown}
-      hasSubmenu={displayTopMenuShadow()}
+      $hasNotch={hasIPhoneNotch()}
+      $scrolledDown={scrolledDown}
+      $hasSubmenu={displayTopMenuShadow()}
     >
       <TopOfPageHeader>
         <TopRowOneLeftContainer>
-          <HeaderBarLogo linkOff={!showTabs()} />
+          <HeaderBarLogo linkOff={!showTabs} />
         </TopRowOneLeftContainer>
         <TopRowOneMiddleContainer>
-          {showTabs() && (
-            <TabsStyled
-              value={tabsValue}
-              indicatorColor="primary"
-            >
-              <TabWithPushHistory
-                id="headerTabDashboard"
-                label="Dashboard"
-                change={handleTabChange}
-                to="/tasks"
-                value={0}
-              />
-              <TabWithPushHistory
-                id="headerTabTeams"
-                label="Teams"
-                change={handleTabChange}
-                to="/teams"
-                value={1}
-              />
-              <TabWithPushHistory
-                id="headerTabSettings"
-                label="Settings"
-                change={handleTabChange}
-                to="/system-settings"
-                value={2}
-              />
-            </TabsStyled>
+          {showTabs && (
+            <Tabs value={tabsValue} onChange={handleTabChange} aria-label="Tabs selector">
+              <Tab value="1" label="Dashboard" />
+              <Tab value="2" label="Teams" />
+              <Tab value="3" label="Settings" />
+            </Tabs>
           )}
         </TopRowOneMiddleContainer>
         <TopRowOneRightContainer className="u-cursor--pointer">
           &nbsp;
         </TopRowOneRightContainer>
         <TopRowTwoLeftContainer>
-          &nbsp;
+         &nbsp;
         </TopRowTwoLeftContainer>
       </TopOfPageHeader>
     </HeaderBarWrapper>
@@ -151,7 +147,35 @@ const HeaderBarWrapper = styled('div', {
   border-bottom: ${(!scrolledDown || !hasSubmenu) ? '' : '1px solid #aaa'};
 `));
 
-const TabsStyled = styled(Tabs)`
-`;
+// const TabsStyled = styled(Tabs)`
+// `;
 
 export default withStyles(styles)(HeaderBar);
+
+
+// {/* <TabsStyled */}
+// {/*   value={tabsValue} */}
+// {/*   indicatorColor="primary" */}
+// {/* > */}
+// {/*         <TabWithPushHistory */}
+// {/*           id="headerTabDashboard" */}
+// {/*           label="Dashboard" */}
+// {/*           change={handleTabChange} */}
+// {/*           to="/tasks" */}
+// {/*           value={0} */}
+// {/*         /> */}
+// {/*         <TabWithPushHistory */}
+// {/*           id="headerTabTeams" */}
+// {/*           label="Teams" */}
+// {/*           change={handleTabChange} */}
+// {/*           to="/teams" */}
+// {/*           value={1} */}
+// {/*         /> */}
+// {/*         <TabWithPushHistory */}
+// {/*           id="headerTabSettings" */}
+// {/*           label="Settings" */}
+// {/*           change={handleTabChange} */}
+// {/*           to="/system-settings" */}
+// {/*           value={2} */}
+// {/*         /> */}
+// </TabsStyled>

@@ -1,90 +1,75 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { Link } from 'react-router';
 import { Helmet } from 'react-helmet-async';
-import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { withStyles } from '@mui/styles';
-import AppObservableStore, { messageService } from '../stores/AppObservableStore';
-import PersonStore from '../stores/PersonStore';
-import TaskActions from '../actions/TaskActions';
+import { CircularProgress } from '@mui/material';
 import TaskStore from '../stores/TaskStore';
-import TeamActions from '../actions/TeamActions';
-import TeamStore from '../stores/TeamStore';
 import { SpanWithLinkStyle } from '../components/Style/linkStyles';
 import { PageContentContainer } from '../components/Style/pageLayoutStyles';
 import PersonSummaryHeader from '../components/Person/PersonSummaryHeader';
 import PersonSummaryRow from '../components/Person/PersonSummaryRow';
 import TaskListForPerson from '../components/Task/TaskListForPerson';
 import webAppConfig from '../config';
-import apiCalming from '../common/utils/apiCalming';
 import { renderLog } from '../common/utils/logging';
+import useFetchData from '../react-query/fetchData';
+import { useConnectAppContext } from '../contexts/ConnectAppContext';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 
-const Tasks = ({ classes, match }) => {  //  classes, teamId
+// eslint-disable-next-line no-unused-vars
+const Tasks = ({ classes, match }) => {
   renderLog('Tasks');  // Set LOG_RENDER_EVENTS to log all renders
+  // const { getAppContextValue, setAppContextValue } = useConnectAppContext();
+
   const [showCompletedTasks, setShowCompletedTasks] = React.useState(false);
-  const [personList, setPersonList] = React.useState([]);
+  // const [personList, setPersonList] = React.useState([]);
   const [taskListDictByPersonId, setTaskListDictByPersonId] = React.useState({});
-  const [teamCount, setTeamCount] = React.useState(0);
+  // const [teamCount, setTeamCount] = React.useState(0);
+  const [allStaffList, setAllStaffList] = React.useState([]);
+  const [isFetching, setIsFetching] = React.useState([false]);
 
-  const onAppObservableStoreChange = () => {
-  };
-
-  const onRetrieveTaskStatusListChange = () => {
-    const personListTemp = PersonStore.getAllCachedPeopleList();
-    const taskListDictByPersonIdTemp = {};
-    for (let i = 0; i < personListTemp.length; i++) {
-      const person = personListTemp[i];
-      taskListDictByPersonIdTemp[person.personId] = TaskStore.getTaskListForPerson(person.personId);
+  // Roughly equivalent to PersonStore.getAllCachedPeopleList(); and TaskActions.taskStatusListRetrieve();
+  const { data: dataPerson, isSuccess: isSuccessPerson, isFetching: isFetchingPerson } = useFetchData(['person-list-retrieve'], {});
+  const ids = ['1', '2', '3', '4', '5'];
+  const { data: dataTask, isSuccess: isSuccessTask, isFetching: isFetchingTask } = useFetchData(['task-status-list-retrieve'], { personIdList: ids });
+  useEffect(() => {
+    console.log('useFetchData in Tasks (person-list-retrieve) useEffect:', isSuccessPerson, isFetchingPerson, dataPerson);
+    console.log('useFetchData in Tasks (task-status-list-retrieve) useEffect:', isSuccessTask, isFetchingTask, dataTask);
+    setIsFetching(isFetchingTask || isFetchingPerson);
+    if (isSuccessPerson && isSuccessTask) {
+      const allStaff = dataPerson ? dataPerson.personList : [];
+      setAllStaffList(allStaff);
+      const taskListDictByPersonIdTemp = {};
+      for (let i = 0; i < allStaff.length; i++) {
+        const person = allStaff[i];
+        taskListDictByPersonIdTemp[person.personId] = TaskStore.getTaskListForPerson(person.personId);
+      }
+      setTaskListDictByPersonId(taskListDictByPersonIdTemp);
     }
-    setTaskListDictByPersonId(taskListDictByPersonIdTemp);
-  };
+  }, [dataPerson, dataTask, isSuccessPerson, isSuccessTask]);
 
-  const onPersonStoreChange = () => {
-    onRetrieveTaskStatusListChange();
-    const personListTemp = PersonStore.getAllCachedPeopleList();
-    setPersonList(personListTemp);
-  };
 
-  const onTaskStoreChange = () => {
-    onRetrieveTaskStatusListChange();
-  };
+  // const onRetrieveTaskStatusListChange = () => {
+  //   const personListTemp = PersonStore.getAllCachedPeopleList();
+  //   const taskListDictByPersonIdTemp = {};
+  //   for (let i = 0; i < personListTemp.length; i++) {
+  //     const person = personListTemp[i];
+  //     taskListDictByPersonIdTemp[person.personId] = TaskStore.getTaskListForPerson(person.personId);
+  //   }
+  //   setTaskListDictByPersonId(taskListDictByPersonIdTemp);
+  // };
 
-  const onTeamStoreChange = () => {
-    onRetrieveTaskStatusListChange();
-  };
+  // React.useEffect(() => {
+  //  // TaskActions.taskStatusListRetrieve();
+  //
+  //  // Needed?
+  //  // TeamActions.teamListRetrieve();
+  //
+  // }, []);
 
-  const addTeamClick = () => {
-    AppObservableStore.setGlobalVariableState('addTeamDrawerOpen', true);
-  };
-
-  React.useEffect(() => {
-    const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
-    onAppObservableStoreChange();
-    const personStoreListener = PersonStore.addListener(onPersonStoreChange);
-    onPersonStoreChange();
-    const taskStoreListener = TaskStore.addListener(onTaskStoreChange);
-    onTaskStoreChange();
-    const teamStoreListener = TeamStore.addListener(onTeamStoreChange);
-    onTeamStoreChange();
-
-    if (apiCalming('taskStatusListRetrieve', 1000)) {
-      TaskActions.taskStatusListRetrieve();
-    }
-
-    if (apiCalming('teamListRetrieve', 1000)) {
-      // Needed?
-      TeamActions.teamListRetrieve();
-    }
-
-    return () => {
-      appStateSubscription.unsubscribe();
-      personStoreListener.remove();
-      taskStoreListener.remove();
-      teamStoreListener.remove();
-    };
-  }, []);
-
+  const teamId = 0;  // hack 1/15/25
   return (
     <div>
       <Helmet>
@@ -93,7 +78,8 @@ const Tasks = ({ classes, match }) => {  //  classes, teamId
           {' '}
           {webAppConfig.NAME_FOR_BROWSER_TAB_TITLE}
         </title>
-        <link rel="canonical" href={`${webAppConfig.WECONNECT_URL_FOR_SEO}/team-home`} />
+        {/*  Executing a link to a full url restarts the session, <Link rel="canonical" href={`${webAppConfig.WECONNECT_URL_FOR_SEO}/team-home`} /> */}
+        {/* <Link to="/team-home">Home</Link> */}
       </Helmet>
       <PageContentContainer>
         <h1>Dashboard</h1>
@@ -105,19 +91,26 @@ const Tasks = ({ classes, match }) => {  //  classes, teamId
           )}
         </div>
         <PersonSummaryHeader />
-        {personList.map((person, index) => (
+        {isFetching && (
+          <div style={{ padding: '50px 30px 30px 320px' }}>
+            <CircularProgress />
+          </div>
+        )}
+        {allStaffList.map((person) => (
           <OneTeamWrapper key={`team-${person.id}`}>
-            <PersonSummaryRow person={person} />
+            <PersonSummaryRow person={person} teamId={teamId} />
             <TaskListForPerson personId={person.id} showCompletedTasks={showCompletedTasks} />
           </OneTeamWrapper>
         ))}
+        <ReactQueryDevtools />
       </PageContentContainer>
     </div>
   );
 };
 Tasks.propTypes = {
   classes: PropTypes.object.isRequired,
-  match: PropTypes.object.isRequired,
+  // match: PropTypes.object.isRequired,
+  match: PropTypes.object,
 };
 
 const styles = (theme) => ({

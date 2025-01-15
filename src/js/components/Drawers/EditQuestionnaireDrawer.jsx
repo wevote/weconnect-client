@@ -1,32 +1,29 @@
-import React from 'react';
-import AppObservableStore, { messageService } from '../../stores/AppObservableStore';
+import React, { useEffect } from 'react';
+import { useConnectAppContext } from '../../contexts/ConnectAppContext';
 import DrawerTemplateA from './DrawerTemplateA';
 import { renderLog } from '../../common/utils/logging';
 import EditQuestionnaireDrawerMainContent from '../Questionnaire/EditQuestionnaireDrawerMainContent';
 
 
 const EditQuestionnaireDrawer = () => {
-  renderLog('EditQuestionnaireDrawer');  // Set LOG_RENDER_EVENTS to log all renders
+  renderLog('EditQuestionnaireDrawer');
+  const { getAppContextValue } = useConnectAppContext();
+
   const [headerTitleJsx, setHeaderTitleJsx] = React.useState(<></>);
-  const [headerFixedJsx, setHeaderFixedJsx] = React.useState(<></>);
+  const [headerFixedJsx] = React.useState(<></>);
 
-  const onAppObservableStoreChange = () => {
-    const questionnaireIdTemp = AppObservableStore.getGlobalVariableState('editQuestionnaireDrawerQuestionnaireId');
-    if (questionnaireIdTemp >= 0) {
-      setHeaderTitleJsx(<>Edit Questionnaire</>);
-    } else {
-      setHeaderTitleJsx(<>Add Questionnaire</>);
+
+  useEffect(() => {  // Replaces onAppObservableStoreChange and will be called whenever the context value changes
+    if (getAppContextValue('editQuestionnaireDrawerOpen')) {
+      console.log('EditQuestionnaireDrawer: Context value changed:', true);
+      const questionnaireIdTemp = getAppContextValue('editQuestionnaireDrawerQuestionnaireId');
+      if (questionnaireIdTemp >= 0) {
+        setHeaderTitleJsx(<>Edit Questionnaire</>);
+      } else {
+        setHeaderTitleJsx(<>Add Questionnaire</>);
+      }
     }
-  };
-
-  React.useEffect(() => {
-    const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
-    onAppObservableStoreChange();
-
-    return () => {
-      appStateSubscription.unsubscribe();
-    };
-  }, []);
+  }, [getAppContextValue]);
 
   return (
     <DrawerTemplateA

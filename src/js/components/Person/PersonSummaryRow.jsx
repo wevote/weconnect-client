@@ -1,56 +1,46 @@
 import React from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { Delete, Edit } from '@mui/icons-material';
 import { withStyles } from '@mui/styles';
-import AppObservableStore, { messageService } from '../../stores/AppObservableStore';
-import PersonStore from '../../stores/PersonStore';
-import TeamActions from '../../actions/TeamActions';
-import TeamStore from '../../stores/TeamStore';
 import DesignTokenColors from '../../common/components/Style/DesignTokenColors';
 import { renderLog } from '../../common/utils/logging';
+import { useConnectAppContext } from '../../contexts/ConnectAppContext';
+import weConnectQueryFn from '../../react-query/WeConnectQuery';
 
 
 const PersonSummaryRow = ({ person, rowNumberForDisplay, teamId }) => {
   renderLog('PersonSummaryRow');  // Set LOG_RENDER_EVENTS to log all renders
-  // const [person, setPerson] = React.useState({});
+  const { setAppContextValue } = useConnectAppContext();
 
-  const onAppObservableStoreChange = () => {
-  };
+  const queryClient = useQueryClient();
 
-  const onPersonStoreChange = () => {
-  };
+  // const [removeTeamMember, { error, data }] = RemoveTeamMemberMutation(person.personId , teamId);
+  // console.log('RemoveTeamMemberMutation called: ', error, data);
 
-  const onTeamStoreChange = () => {
-  };
+  const removeTeamMemberMutation = useMutation({
+    mutationFn: (personId) => weConnectQueryFn('remove-person-from-team', {
+      personId,
+      teamId,
+    }),
+    onSuccess: () => {
+      console.log('--------- removeTeamMemberMutation mutated ---------');
+      queryClient.invalidateQueries('team-list-retrieve').then(() => {});
+    },
+  });
 
-  const editPersonClick = (personId, hasEditRights = true) => {
+  const editPersonClick = (hasEditRights = true) => {
     if (hasEditRights) {
-      AppObservableStore.setGlobalVariableState('editPersonDrawerOpen', true);
-      AppObservableStore.setGlobalVariableState('editPersonDrawerPersonId', personId);
+      setAppContextValue('editPersonDrawerOpen', true);
+      setAppContextValue('editPersonDrawerPerson', person);
     }
   };
 
-  const personProfileClick = (personId) => {
-    AppObservableStore.setGlobalVariableState('personProfileDrawerOpen', true);
-    AppObservableStore.setGlobalVariableState('personProfileDrawerPersonId', personId);
+  const personProfileClick = () => {
+    setAppContextValue('personProfileDrawerOpen', true);
+    setAppContextValue('personProfileDrawerPerson', person);
   };
-
-  React.useEffect(() => {
-    // setTeamMemberList([]);
-    const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
-    onAppObservableStoreChange();
-    const personStoreListener = PersonStore.addListener(onPersonStoreChange);
-    onPersonStoreChange();
-    const teamStoreListener = TeamStore.addListener(onTeamStoreChange);
-    onTeamStoreChange();
-
-    return () => {
-      appStateSubscription.unsubscribe();
-      personStoreListener.remove();
-      teamStoreListener.remove();
-    };
-  }, []);
 
   const hasEditRights = true;
   return (
@@ -64,7 +54,7 @@ const PersonSummaryRow = ({ person, rowNumberForDisplay, teamId }) => {
       )}
       <PersonCell
         id={`fullNamePreferred-personId-${person.personId}`}
-        onClick={() => personProfileClick(person.personId)}
+        onClick={() => personProfileClick(person)}
         style={{
           cursor: 'pointer',
           textDecoration: 'underline',
@@ -72,18 +62,18 @@ const PersonSummaryRow = ({ person, rowNumberForDisplay, teamId }) => {
         }}
         width={150}
       >
-        {PersonStore.getFullNamePreferred(person.personId)}
+        {person.firstName} {person.lastName}
       </PersonCell>
-      <PersonCell id={`location-personId-${person.personId}`} smallFont width={125}>
-        {PersonStore.getPersonById(person.personId).location}
+      <PersonCell id={`location-personId-${person.personId}`} $smallFont width={125}>
+        {person.location}
       </PersonCell>
-      <PersonCell id={`jobTitle-personId-${person.personId}`} smallestFont width={190}>
-        {PersonStore.getPersonById(person.personId).jobTitle}
+      <PersonCell id={`jobTitle-personId-${person.personId}`} $smallestFont width={190}>
+        {person.jobTitle}
       </PersonCell>
       {hasEditRights ? (
         <PersonCell
           id={`editPerson-personId-${person.personId}`}
-          onClick={() => editPersonClick(person.personId, hasEditRights)}
+          onClick={() => editPersonClick(hasEditRights)}
           style={{ cursor: 'pointer' }}
           width={20}
         >
@@ -97,12 +87,12 @@ const PersonSummaryRow = ({ person, rowNumberForDisplay, teamId }) => {
           &nbsp;
         </PersonCell>
       )}
-      {teamId && (
+      {teamId > 0 && (
         <>
           {hasEditRights ? (
             <PersonCell
               id={`removeMember-personId-${person.personId}`}
-              onClick={() => TeamActions.removePersonFromTeam(person.personId, teamId)}
+              onClick={() => removeTeamMemberMutation}
               style={{ cursor: 'pointer' }}
               width={20}
             >

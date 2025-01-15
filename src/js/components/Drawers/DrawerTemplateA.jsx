@@ -1,40 +1,43 @@
 import { Close } from '@mui/icons-material'; // Info
 import { Drawer, IconButton } from '@mui/material';
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { withStyles } from '@mui/styles';
-import AppObservableStore, { messageService } from '../../stores/AppObservableStore';
 import { DrawerHeaderAnimateDownInnerContainer, DrawerHeaderAnimateDownOuterContainer, DrawerTitle, DrawerHeaderWrapper } from '../Style/drawerLayoutStyles';
 import { cordovaDrawerTopMargin } from '../../utils/cordovaOffsets';
 import { hasIPhoneNotch } from '../../common/utils/cordovaUtils';
 import { renderLog } from '../../common/utils/logging';
+import { useConnectAppContext } from '../../contexts/ConnectAppContext';
+
 
 
 const DrawerTemplateA = ({ classes, drawerId, drawerOpenGlobalVariableName, headerFixedJsx, headerTitleJsx, mainContentJsx }) => {  //  classes, teamId
-  renderLog('DrawerTemplateA');  // Set LOG_RENDER_EVENTS to log all renders
-  const [drawerOpen, setDrawerOpen] = React.useState(false);
+  renderLog(`DrawerTemplateA (${drawerId})`);  // Set LOG_RENDER_EVENTS to log all renders
+  const { getAppContextData, setAppContextValue, getAppContextValue } = useConnectAppContext();
+
   const [scrolledDown, setScrolledDown] = React.useState(false);
+  const drawerOpen = getAppContextValue(drawerOpenGlobalVariableName);
+
+  console.log('DrawerTemplateA drawerOpen: ', drawerOpenGlobalVariableName, drawerOpen);
 
   const handleScrolledDownDrawer = (evt) => {
     const { scrollTop } = evt.target;
-    if (scrollTop > 200 && !AppObservableStore.getScrolledDownDrawer()) {
-      AppObservableStore.setScrolledDownDrawer(true);
+    if (scrollTop > 200 && !getAppContextValue('scrolledDownDrawer')) {
+      setAppContextValue('scrolledDownDrawer', true);
     }
-    if (scrollTop < 200 && AppObservableStore.getScrolledDownDrawer()) {
-      AppObservableStore.setScrolledDownDrawer(false);
+    if (scrollTop < 200 && getAppContextValue('scrolledDownDrawer')) {
+      setAppContextValue('scrolledDownDrawer', false);
     }
   };
 
-  const onAppObservableStoreChange = () => {
-    setScrolledDown(AppObservableStore.getScrolledDownDrawer());
-    setDrawerOpen(AppObservableStore.getGlobalVariableState(drawerOpenGlobalVariableName));
-  };
+  useEffect(() => {  // Replaces onAppObservableStoreChange and will be called whenever the context value changes
+    console.log('DrawerTemplateA: Context value changed: ',
+      drawerId, drawerOpenGlobalVariableName, getAppContextValue(drawerOpenGlobalVariableName));
+    setScrolledDown(getAppContextValue('scrolledDownDrawer'));
+  }, [getAppContextData]);
 
   React.useEffect(() => {
-    const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
-    onAppObservableStoreChange();
-
     setTimeout(() => {
       const drawer = document.querySelector('.MuiDrawer-paper');
       if (drawer) {
@@ -44,9 +47,12 @@ const DrawerTemplateA = ({ classes, drawerId, drawerOpenGlobalVariableName, head
       }
     }, 100);
 
-    return () => {
-      appStateSubscription.unsubscribe();
-    };
+    // return () => {
+    //   const drawer = document.querySelector('.MuiDrawer-paper');
+    //   if (drawer) {
+    //     drawer.removeListeners();
+    //   }
+    // };
   }, []);
 
   return (
@@ -55,7 +61,7 @@ const DrawerTemplateA = ({ classes, drawerId, drawerOpenGlobalVariableName, head
       classes={{ paper: classes.drawer }}
       direction="left"
       id={drawerId}
-      onClose={() => AppObservableStore.setGlobalVariableState(drawerOpenGlobalVariableName, false)}
+      onClose={() => setAppContextValue(drawerOpenGlobalVariableName, false)}
       open={drawerOpen}
     >
       <DrawerHeaderWrapper>
@@ -67,7 +73,7 @@ const DrawerTemplateA = ({ classes, drawerId, drawerOpenGlobalVariableName, head
             aria-label="Close"
             className={classes.closeButton}
             id={`${drawerId}Close`}
-            onClick={() => AppObservableStore.setGlobalVariableState(drawerOpenGlobalVariableName, false)}
+            onClick={() => setAppContextValue(drawerOpenGlobalVariableName, false)}
             size="large"
           >
             <span className="u-cursor--pointer">
@@ -76,7 +82,8 @@ const DrawerTemplateA = ({ classes, drawerId, drawerOpenGlobalVariableName, head
           </IconButton>
         </CloseDrawerIconWrapper>
       </DrawerHeaderWrapper>
-      <DrawerHeaderAnimateDownOuterContainer id={`${drawerId}AnimateDownId`} scrolledDown={scrolledDown}>
+      {/* <DrawerHeaderAnimateDownOuterContainer id={`${drawerId}AnimateDownId`} scrolledDown={scrolledDown}> */}
+      <DrawerHeaderAnimateDownOuterContainer id={`${drawerId}AnimateDownId`} $scrolledDown={scrolledDown}>
         <DrawerHeaderAnimateDownInnerContainer>
           {headerFixedJsx}
         </DrawerHeaderAnimateDownInnerContainer>
@@ -127,7 +134,7 @@ const styles = () => ({
       margin: '0 auto',
       minWidth: 0,
       minHeight: 0,
-      transitionDuration: '.25s',
+      // transitionDuration: '.25s',
     },
     '@media (max-width: 576px)': {
       maxWidth: '360px',

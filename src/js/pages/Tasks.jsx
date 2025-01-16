@@ -80,7 +80,8 @@ const Tasks = ({ classes, match }) => {
           {webAppConfig.NAME_FOR_BROWSER_TAB_TITLE}
         </title>
         {/*  Executing a link to a full url restarts the session, <Link rel="canonical" href={`${webAppConfig.WECONNECT_URL_FOR_SEO}/team-home`} /> */}
-        <Link to="/team-home">Home</Link>
+        {/* Latest Helmet wont take a link or Link, <Link to="/team-home">Home</Link> */}
+        {/* browser.js:38 Uncaught Invariant Violation: Only elements types base, body, head, html, link, meta, noscript, script, style, title, Symbol(react.fragment) are allowed. Helmet does not support rendering <[object Object]> elements. Refer to our API for more information. */}
       </Helmet>
       <PageContentContainer>
         <h1>Dashboard</h1>

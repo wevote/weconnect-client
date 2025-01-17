@@ -1,14 +1,35 @@
+import { withStyles } from '@mui/styles';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import PropTypes from 'prop-types';
 import React from 'react';
 import { Link } from 'react-router';
 import styled from 'styled-components';
-import PropTypes from 'prop-types';
-import { withStyles } from '@mui/styles';
 import { renderLog } from '../../common/utils/logging';
+import weConnectQueryFn from '../../react-query/WeConnectQuery';
+import { DeleteStyled, EditStyled } from '../Style/iconStyles';
 
 
 // eslint-disable-next-line no-unused-vars
-const TeamHeader = ({ classes, showHeaderLabels, team }) => {
+const TeamHeader = ({ classes, showHeaderLabels, showIcons, team }) => {
   renderLog('TeamHeader');
+
+  const queryClient = useQueryClient();
+
+  const removeTeamMutation = useMutation({
+    mutationFn: (teamId) => weConnectQueryFn('team-delete', {
+      teamId,
+    }),
+    onSuccess: () => {
+      console.log('--------- removeMemberMutation mutated ---------');
+      queryClient.invalidateQueries('team-list-retrieve').then(() => {});
+    },
+  });
+
+
+  const removeTeamClick = () => {
+    removeTeamMutation.mutate(team.id);
+  };
+
 
   return (
     <OneTeamHeader>
@@ -26,12 +47,16 @@ const TeamHeader = ({ classes, showHeaderLabels, team }) => {
         </TeamHeaderCell>
       )}
       {/* Edit icon */}
-      {showHeaderLabels && (
-        <TeamHeaderCell width={20} />
+      {showHeaderLabels && showIcons && (
+        <TeamHeaderCell width={20}>
+          <EditStyled />
+        </TeamHeaderCell>
       )}
       {/* Delete icon */}
-      {showHeaderLabels && (
-        <TeamHeaderCell width={20} />
+      {showHeaderLabels && showIcons && (
+        <TeamHeaderCell width={20} onClick={() => removeTeamClick(team)}>
+          <DeleteStyled />
+        </TeamHeaderCell>
       )}
     </OneTeamHeader>
   );

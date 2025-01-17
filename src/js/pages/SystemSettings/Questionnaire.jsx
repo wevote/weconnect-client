@@ -20,8 +20,13 @@ const Questionnaire = ({ classes, match }) => {
   renderLog('Questionnaire');
   const { setAppContextValue, getAppContextValue } = useConnectAppContext();
 
+  const dummy = {
+    questionnaireName: '---',
+    questionnaireTitle: '---',
+    questionnaireInstructions: 'Dev note: There is enough info in the URL to handle the edge case of the bookmarking this page, or hard refreshing while on this page... someday...',
+  };
   const [questionList, setQuestionList] = React.useState([]);
-  const [questionnaire] = React.useState(getAppContextValue('selectedQuestionnaire'));
+  const [questionnaire] = React.useState(getAppContextValue('selectedQuestionnaire') || dummy);
   // eslint-disable-next-line no-unused-vars
   const [questionnaireList, setQuestionnaireList] = React.useState([]);
 
@@ -64,16 +69,6 @@ const Questionnaire = ({ classes, match }) => {
     setAppContextValue('editQuestionnaireDrawerOpen', true);
   };
 
-  if (!questionnaire) {
-    return (
-      <PageContentContainer>
-        <div style={{ marginTop: '100px' }}>
-          No questionnaire, due to starting a session on this page with no chance to set &quot;selectedQuestionnaire&quot;<br />
-          This can be fixed, but good enough for now.<br />  (We have the questionnaire ID in the URL).
-        </div>
-      </PageContentContainer>
-    );
-  }
   return (
     <>
       <Helmet>

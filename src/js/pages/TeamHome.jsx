@@ -21,7 +21,6 @@ const TeamHome = ({ classes }) => {  //  classes, params
 
   const params  = useParams();
   const [team, setTeam] = React.useState({});
-  const [teamFound, setTeamFound] = React.useState(false);
   const [teamId] = React.useState(params.teamId);
   const displayAddDrawer = getAppContextValue('addPersonDrawerOpen');
 
@@ -29,12 +28,6 @@ const TeamHome = ({ classes }) => {  //  classes, params
     const oneTeam = tList.find((staff) => staff.teamId === parseInt(teamId));
     setTeam(oneTeam);
   };
-
-  const teamList = getAppContextValue('teamListNested');
-  if (teamList && !teamFound) {   // If you navigate directly to team-home, in a new session 'teamListNested' will not be set.  Fixable but low priority.
-    setTeamFound(true);
-    updateTeam(teamList);
-  }
 
   const isAddPersonDrawerOpen = document.getElementById('addPersonDrawer');
   const { data, isSuccess, isFetching, isStale } = useFetchData(['team-list-retrieve'], {});
@@ -95,7 +88,7 @@ const TeamHome = ({ classes }) => {  //  classes, params
         >
           Add Team Member
         </Button>
-        <TeamHeader showHeaderLabels={(team.teamMemberList && team.teamMemberList.length > 0)} />
+        <TeamHeader team={team} showHeaderLabels={(team.teamMemberList && team.teamMemberList.length > 0)} showIcons={false} />
         <TeamMemberList teamId={teamId} />
         {displayAddDrawer ? <AddPersonDrawer /> : null }
       </PageContentContainer>

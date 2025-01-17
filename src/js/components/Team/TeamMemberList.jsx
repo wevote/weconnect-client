@@ -22,7 +22,7 @@ const TeamMemberList = ({ teamId }) => {
       teamMemberList = oneTeam.teamMemberList;
     }
   } else {
-    // console.log('no teamListFromContext yet!');
+    console.log('no teamListFromContext yet!');
   }
 
   return (

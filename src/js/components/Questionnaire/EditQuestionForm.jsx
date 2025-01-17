@@ -44,7 +44,6 @@ const EditQuestionForm = ({ classes }) => {
   const [requireAnswerValue, setRequireAnswerValue] = React.useState(false);
   const [statusActiveValue, setStatusActiveValue]  = React.useState(true);
 
-
   // eslint-disable-next-line no-unused-vars
   const [fieldMappingRuleCopied, setFieldMappingRuleCopied] = React.useState('');
   const [saveButtonActive, setSaveButtonActive] = React.useState(false);
@@ -79,7 +78,7 @@ const EditQuestionForm = ({ classes }) => {
   const questionSaveMutation = useMutation({
     mutationFn: (requestParams) => weConnectQueryFn('question-save', requestParams),
     onSuccess: () => {
-      // console.log('--------- questionSaveMutation mutated ---------');
+      // console.log('--------- questionSaveMutation mutated --------- ');
       queryClient.invalidateQueries('question-list-retrieve').then(() => {});
     },
   });

@@ -90,7 +90,7 @@ const Teams = ({ classes, match }) => {
         </Button>
         {teamList.map((team, index) => (
           <OneTeamWrapper key={`team-${team.id}`}>
-            <TeamHeader team={team} showHeaderLabels={(index === 0) && showAllTeamMembers && (team.teamMemberList && team.teamMemberList.length > 0)} />
+            <TeamHeader team={team} showHeaderLabels={(index === 0) && showAllTeamMembers && (team.teamMemberList && team.teamMemberList.length > 0)} showIcons />
             {showAllTeamMembers && (
               <TeamMemberList teamId={team.id} teamList={teamList} />
             )}

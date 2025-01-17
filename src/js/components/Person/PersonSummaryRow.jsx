@@ -1,13 +1,13 @@
-import React from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import styled from 'styled-components';
-import PropTypes from 'prop-types';
-import { Delete, Edit } from '@mui/icons-material';
 import { withStyles } from '@mui/styles';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import PropTypes from 'prop-types';
+import React from 'react';
+import styled from 'styled-components';
 import DesignTokenColors from '../../common/components/Style/DesignTokenColors';
 import { renderLog } from '../../common/utils/logging';
 import { useConnectAppContext } from '../../contexts/ConnectAppContext';
 import weConnectQueryFn from '../../react-query/WeConnectQuery';
+import { DeleteStyled, EditStyled } from '../Style/iconStyles';
 
 
 const PersonSummaryRow = ({ person, rowNumberForDisplay, teamId }) => {
@@ -133,19 +133,6 @@ const styles = (theme) => ({
     },
   },
 });
-
-const DeleteStyled = styled(Delete)`
-  color: ${DesignTokenColors.neutral200};
-  width: 20px;
-  height: 20px;
-`;
-
-const EditStyled = styled(Edit)`
-  color: ${DesignTokenColors.neutral100};
-  height: 16px;
-  margin-left: 2px;
-  width: 16px;
-`;
 
 const GraySpan = styled('span')`
   color: ${DesignTokenColors.neutral400};

@@ -1,17 +1,17 @@
 import { StyledEngineProvider, ThemeProvider } from '@mui/material/styles';
-import React, { useEffect, useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Routes, Route, BrowserRouter } from 'react-router';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import React, { useEffect, useState } from 'react';
+import { BrowserRouter, Route, Routes } from 'react-router';
 import styled from 'styled-components';
+import { PrivateRoute } from './js/auth';
 import muiTheme from './js/common/components/Style/muiTheme';
-// import LoadingWheelComp from './js/common/components/Widgets/LoadingWheelComp';
 import { normalizedHref } from './js/common/utils/hrefUtils';
 import initializejQuery from './js/common/utils/initializejQuery';
 import { renderLog } from './js/common/utils/logging';
-import Login from './js/pages/Login';
-import { PrivateRoute } from './js/auth';
-import ConnectAppContext from './js/contexts/ConnectAppContext';
 import Drawers from './js/components/Drawers/Drawers';
+import ConnectAppContext from './js/contexts/ConnectAppContext';
+import Login from './js/pages/Login';
 
 
 // Root URL pages
@@ -88,6 +88,7 @@ function App () {
                     <Route path="*" element={<PageNotFound />} />
                   </Routes>
                   {/* Hack 1/14/25 <Footer /> */}
+                  <ReactQueryDevtools />
                 </WeVoteBody>
               </BrowserRouter>
             </ThemeProvider>

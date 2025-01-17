@@ -1,108 +1,94 @@
 import { Edit } from '@mui/icons-material';
 import { Button } from '@mui/material';
-import React from 'react';
+import { withStyles } from '@mui/styles';
+import PropTypes from 'prop-types';
+import React, { useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router';
 import styled from 'styled-components';
-import PropTypes from 'prop-types';
-import { withStyles } from '@mui/styles';
-// import AppObservableStore, { messageService } from '../../stores/AppObservableStore';
-import QuestionnaireActions from '../../actions/QuestionnaireActions';
-import QuestionnaireStore from '../../stores/QuestionnaireStore';
+import DesignTokenColors from '../../common/components/Style/DesignTokenColors';
+import { renderLog } from '../../common/utils/logging';
 import { SpanWithLinkStyle } from '../../components/Style/linkStyles';
 import { PageContentContainer } from '../../components/Style/pageLayoutStyles';
-import DesignTokenColors from '../../common/components/Style/DesignTokenColors';
 import webAppConfig from '../../config';
-import apiCalming from '../../common/utils/apiCalming';
-import { renderLog } from '../../common/utils/logging';
-import convertToInteger from '../../common/utils/convertToInteger';
 import { useConnectAppContext } from '../../contexts/ConnectAppContext';
+import useFetchData from '../../react-query/fetchData';
 
 
+// eslint-disable-next-line no-unused-vars
 const Questionnaire = ({ classes, match }) => {
   renderLog('Questionnaire');
-  const { setAppContextValue } = useConnectAppContext();
+  const { setAppContextValue, getAppContextValue } = useConnectAppContext();
 
   const [questionList, setQuestionList] = React.useState([]);
-  const [questionnaire, setQuestionnaire] = React.useState({});
+  const [questionnaire] = React.useState(getAppContextValue('selectedQuestionnaire'));
   // eslint-disable-next-line no-unused-vars
-  const [questionnaireCount, setQuestionnaireCount] = React.useState(0);
+  const [questionnaireList, setQuestionnaireList] = React.useState([]);
 
+  const { data: dataQList, isSuccess: isSuccessQList, isFetching: isFetchingQList } = useFetchData(['questionnaire-list-retrieve'], {});
+  useEffect(() => {
+    console.log('useFetchData in Questionnaire useEffect:', dataQList, isSuccessQList, isFetchingQList);
+    if (dataQList !== undefined && isFetchingQList === false && questionnaire) {
+      console.log('useFetchData in Questionnaire useEffect data is good:', dataQList, isSuccessQList, isFetchingQList);
+      console.log('Successfully retrieved questionnaire-list-retrieve...');
+      const questionnaireListTemp = dataQList.questionnaireList;
+      setQuestionnaireList(questionnaireListTemp);
+    }
+  }, [dataQList, questionnaire]);
 
-  const onQuestionnaireStoreChange = () => {
-    const { params } = match;
-    const questionnaireIdTemp = convertToInteger(params.questionnaireId);
-    const questionnaireTemp = QuestionnaireStore.getQuestionnaireById(questionnaireIdTemp);
-    setQuestionnaire(questionnaireTemp);
-    const questionListTemp = QuestionnaireStore.getQuestionListByQuestionnaireId(questionnaireIdTemp);
-    // console.log('Questionnaire QuestionnaireStore.getQuestionList:', questionListTemp);
-    setQuestionList(questionListTemp);
-    setQuestionnaireCount(questionListTemp.length);
-  };
+  const { data: dataQuestionList, isSuccess: isSuccessQuestionList, isFetching: isFetchingQuestionList } =
+    useFetchData(['question-list-retrieve'], { questionnaireId: questionnaire ? questionnaire.questionnaireId : '-1'});
+  useEffect(() => {
+    console.log('useFetchData question-list-retrieve in Questionnaire useEffect:', dataQuestionList, isSuccessQuestionList, isFetchingQuestionList);
+    if (dataQuestionList !== undefined && isFetchingQuestionList === false) {
+      console.log('useFetchData question-list-retrieve in Questionnaire useEffect data is good:', dataQuestionList, isSuccessQuestionList, isFetchingQuestionList);
+      const questionListTemp = dataQuestionList.questionList;
+      console.log('Successfully retrieved question-list-retrieve... questionListTemp', questionListTemp);
+      // const questionsForThisQuestionnaire = questionListTemp.filter((question) => question.questionnaireId !== questionnaire.questionnaireId);
+      // console.log('questionsForThisQuestionnaire: ', questionsForThisQuestionnaire);
+      setQuestionList(questionListTemp);
+    }
+  }, [dataQuestionList]);
 
   const addQuestionClick = () => {
-    const { params } = match;
-    const questionnaireIdTemp = convertToInteger(params.questionnaireId);
     setAppContextValue('editQuestionDrawerOpen', true);
-    setAppContextValue('editQuestionDrawerQuestionId', -1);
-    setAppContextValue('editQuestionDrawerQuestionnaireId', questionnaireIdTemp);
+    setAppContextValue('selectedQuestion', undefined);
   };
 
-  const editQuestionClick = (questionId) => {
-    const { params } = match;
-    const questionnaireIdTemp = convertToInteger(params.questionnaireId);
+  const editQuestionClick = (question) => {
     setAppContextValue('editQuestionDrawerOpen', true);
-    setAppContextValue('editQuestionDrawerQuestionId', questionId);
-    setAppContextValue('editQuestionDrawerQuestionnaireId', questionnaireIdTemp);
+    setAppContextValue('selectedQuestion', question);
   };
 
   const editQuestionnaireClick = () => {
-    const { params } = match;
-    const questionnaireIdTemp = convertToInteger(params.questionnaireId);
     setAppContextValue('editQuestionnaireDrawerOpen', true);
-    setAppContextValue('editQuestionnaireDrawerQuestionnaireId', questionnaireIdTemp);
   };
 
-  React.useEffect(() => {
-    const { params } = match;
-    const questionnaireIdTemp = convertToInteger(params.questionnaireId);
-
-    // const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
-    // onAppObservableStoreChange();
-    const questionnaireStoreListener = QuestionnaireStore.addListener(onQuestionnaireStoreChange);
-    onQuestionnaireStoreChange();
-
-    if (questionnaireIdTemp >= 0) {
-      if (apiCalming('questionnaireListRetrieve', 1000)) {
-        QuestionnaireActions.questionnaireListRetrieve();
-      }
-      if (apiCalming(`questionListRetrieve-${questionnaireIdTemp}`, 1000)) {
-        QuestionnaireActions.questionListRetrieve(questionnaireIdTemp);
-      }
-    }
-
-    return () => {
-      // appStateSubscription.unsubscribe();
-      questionnaireStoreListener.remove();
-    };
-  }, []);
-
-  const { params } = match;
-  const questionnaireIdTemp = convertToInteger(params.questionnaireId);
-
+  if (!questionnaire) {
+    return (
+      <PageContentContainer>
+        <div style={{ marginTop: '100px' }}>
+          No questionnaire, due to starting a session on this page with no chance to set &quot;selectedQuestionnaire&quot;<br />
+          This can be fixed, but good enough for now.<br />  (We have the questionnaire ID in the URL).
+        </div>
+      </PageContentContainer>
+    );
+  }
   return (
-    <div>
+    <>
       <Helmet>
         <title>
           Questionnaire Details -
           {' '}
           {webAppConfig.NAME_FOR_BROWSER_TAB_TITLE}
         </title>
-        <link rel="canonical" href={`${webAppConfig.WECONNECT_URL_FOR_SEO}/questionnaire-question-list/${questionnaireIdTemp}`} />
+        {/* <link rel="canonical" href={`${webAppConfig.WECONNECT_URL_FOR_SEO}/questionnaire-question-list/${questionnaireIdTemp}`} /> */}
       </Helmet>
       <PageContentContainer>
-        <div>
-          <Link to="/system-settings">Questionnaires</Link>
+        <QuestionnaireTitleWrapper>
+          <Link to="/system-settings" style={{ height: '40px', fontSize: 'large' }} className="u-cursor--pointer u-link-color">
+            Questionnaires
+          </Link>
           {' '}
           &gt;
           {' '}
@@ -110,10 +96,12 @@ const Questionnaire = ({ classes, match }) => {
           <SpanWithLinkStyle onClick={editQuestionnaireClick}>
             <EditStyled />
           </SpanWithLinkStyle>
-        </div>
+        </QuestionnaireTitleWrapper>
         {questionnaire.questionnaireTitle && (
           <TitleWrapper>
-            {questionnaire.questionnaireTitle}
+            Questionnaire Name: {questionnaire.questionnaireName}
+            <br />
+            Questionnaire Title: {questionnaire.questionnaireTitle}
           </TitleWrapper>
         )}
         {questionnaire.questionnaireInstructions && (
@@ -124,12 +112,13 @@ const Questionnaire = ({ classes, match }) => {
         <QuestionListWrapper>
           {questionList.map((question) => (
             <OneQuestionnaireWrapper key={`questionnaire-${question.id}`}>
-              {question.questionText}
+              {console.log('questionList.map((questionnaire)', questionList)}
+              Question: {question.questionText}
               {' '}
               {question.requireAnswer && (
                 <RequiredStar> *</RequiredStar>
               )}
-              <SpanWithLinkStyle onClick={() => editQuestionClick(question.id)}>
+              <SpanWithLinkStyle onClick={() => editQuestionClick(question)}>
                 <EditStyled />
               </SpanWithLinkStyle>
             </OneQuestionnaireWrapper>
@@ -146,12 +135,12 @@ const Questionnaire = ({ classes, match }) => {
           </Button>
         </AddButtonWrapper>
       </PageContentContainer>
-    </div>
+    </>
   );
 };
 Questionnaire.propTypes = {
   classes: PropTypes.object.isRequired,
-  match: PropTypes.object.isRequired,
+  match: PropTypes.object,
 };
 
 const styles = (theme) => ({
@@ -182,6 +171,10 @@ const InstructionsWrapper = styled('div')`
   font-size: 1.2em;
 `;
 
+const QuestionnaireTitleWrapper = styled('div')`
+  height: 100px;
+  align-content: center;
+`;
 const OneQuestionnaireWrapper = styled('div')`
   margin-bottom: 20px;
 `;

@@ -1,18 +1,17 @@
 import { Button } from '@mui/material';
+import { withStyles } from '@mui/styles';
+import PropTypes from 'prop-types';
 import React, { useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link, useParams } from 'react-router';
-import PropTypes from 'prop-types';
-import { withStyles } from '@mui/styles';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import useFetchData from '../react-query/fetchData';
-import { useConnectAppContext } from '../contexts/ConnectAppContext';
+import { renderLog } from '../common/utils/logging';
+import AddPersonDrawer from '../components/Drawers/AddPersonDrawer';
 import { PageContentContainer } from '../components/Style/pageLayoutStyles';
 import TeamHeader from '../components/Team/TeamHeader';
 import TeamMemberList from '../components/Team/TeamMemberList';
 import webAppConfig from '../config';
-import { renderLog } from '../common/utils/logging';
-import AddPersonDrawer from '../components/Drawers/AddPersonDrawer';
+import { useConnectAppContext } from '../contexts/ConnectAppContext';
+import useFetchData from '../react-query/fetchData';
 import { getTeamList } from '../react-query/TeamsQueryProcessing';
 
 
@@ -99,7 +98,6 @@ const TeamHome = ({ classes }) => {  //  classes, params
         <TeamHeader showHeaderLabels={(team.teamMemberList && team.teamMemberList.length > 0)} />
         <TeamMemberList teamId={teamId} />
         {displayAddDrawer ? <AddPersonDrawer /> : null }
-        <ReactQueryDevtools initialIsOpen />
       </PageContentContainer>
     </div>
   );

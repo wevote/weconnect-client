@@ -1,14 +1,17 @@
-const makeRequestParams = (fixedPreamble = '', data) => {
-  let requestParams = '';
-  if (fixedPreamble.length) {
-    requestParams += `${fixedPreamble}&`;
-  }
-  Object.keys(data).forEach((key) => {
-    requestParams += `${key}ToBeSaved=${data[key]}&`;
-    requestParams += `${key}Changed=${true}&`;
+const makeRequestParams = (plainParams, data) => {
+  const expandedParams = {};
+  Object.keys(plainParams).forEach((key) => {
+    expandedParams[`${key}`] = plainParams[key];
   });
-  requestParams = requestParams.slice(0, -1);
-  return encodeURI(requestParams);
+  Object.keys(data).forEach((key) => {
+    expandedParams[`${key}ToBeSaved`] = data[key];
+    expandedParams[`${key}Changed`] = 'true';
+  });
+  const queryString = Object.entries(expandedParams)
+    .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+    .join('&');
+
+  return queryString;
 };
 
 export default makeRequestParams;

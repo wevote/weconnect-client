@@ -1,5 +1,6 @@
-import axios from 'axios';
 import { useQuery } from '@tanstack/react-query';
+import axios from 'axios';
+import { httpLog } from '../common/utils/logging';
 import webAppConfig from '../config';
 
 export const weConnectQueryFn = async (queryKey, params) => {
@@ -14,6 +15,7 @@ export const weConnectQueryFn = async (queryKey, params) => {
 };
 
 const useFetchData = (queryKey, fetchParams) => {
+  httpLog('useFetchData queryKey: ', queryKey, '  fetchParams: ', fetchParams);
   const { data, isSuccess, isFetching, isStale, refetch, error } = useQuery({
     queryKey,
     queryFn: () => weConnectQueryFn(queryKey, fetchParams),

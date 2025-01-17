@@ -1,21 +1,20 @@
 import { Button } from '@mui/material';
+import { withStyles } from '@mui/styles';
+import PropTypes from 'prop-types';
 import React, { useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router';
 import styled from 'styled-components';
-import PropTypes from 'prop-types';
-import { withStyles } from '@mui/styles';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import useFetchData from '../react-query/fetchData';
+import { renderLog } from '../common/utils/logging';
+import AddTeamDrawer from '../components/Drawers/AddTeamDrawer';
 import { SpanWithLinkStyle } from '../components/Style/linkStyles';
 import { PageContentContainer } from '../components/Style/pageLayoutStyles';
 import TeamHeader from '../components/Team/TeamHeader';
 import TeamMemberList from '../components/Team/TeamMemberList';
 import webAppConfig from '../config';
-import { renderLog } from '../common/utils/logging';
 import { useConnectAppContext } from '../contexts/ConnectAppContext';
+import useFetchData from '../react-query/fetchData';
 import { getTeamList } from '../react-query/TeamsQueryProcessing';
-import AddTeamDrawer from '../components/Drawers/AddTeamDrawer';
 
 
 const Teams = ({ classes, match }) => {
@@ -103,7 +102,6 @@ const Teams = ({ classes, match }) => {
           </Link>
         </div>
         {displayDrawer ? <AddTeamDrawer /> : null }
-        <ReactQueryDevtools initialIsOpen />
       </PageContentContainer>
     </div>
   );

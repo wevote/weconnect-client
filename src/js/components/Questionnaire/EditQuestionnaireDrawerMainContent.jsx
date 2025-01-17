@@ -1,18 +1,12 @@
+import { withStyles } from '@mui/styles';
 import React from 'react';
 import styled from 'styled-components';
-import { withStyles } from '@mui/styles';
 import { renderLog } from '../../common/utils/logging';
 import EditQuestionnaireForm from './EditQuestionnaireForm';
 
 
 const EditQuestionnaireDrawerMainContent = () => {
-  renderLog('EditQuestionnaireDrawerMainContent');  // Set LOG_RENDER_EVENTS to log all renders
-
-  // React.useEffect(() => {
-  //   if (apiCalming('personListRetrieve', 30000)) {
-  //     PersonActions.personListRetrieve();
-  //   }
-  // }, []);
+  renderLog('EditQuestionnaireDrawerMainContent');
 
   return (
     <EditQuestionnaireDrawerMainContentWrapper>

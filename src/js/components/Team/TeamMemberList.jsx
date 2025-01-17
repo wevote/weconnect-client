@@ -1,10 +1,10 @@
+import { withStyles } from '@mui/styles';
+import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
-import PropTypes from 'prop-types';
-import { withStyles } from '@mui/styles';
-import PersonSummaryRow from '../Person/PersonSummaryRow';
 import { renderLog } from '../../common/utils/logging';
 import { useConnectAppContext } from '../../contexts/ConnectAppContext';
+import PersonSummaryRow from '../Person/PersonSummaryRow';
 
 const TeamMemberList = ({ teamId }) => {
   renderLog('TeamMemberList');

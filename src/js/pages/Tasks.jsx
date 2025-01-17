@@ -1,20 +1,18 @@
+import { CircularProgress } from '@mui/material';
+import { withStyles } from '@mui/styles';
+import PropTypes from 'prop-types';
 import React, { useEffect } from 'react';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Helmet } from 'react-helmet-async';
 import styled from 'styled-components';
-import PropTypes from 'prop-types';
-import { withStyles } from '@mui/styles';
-import { CircularProgress } from '@mui/material';
-import useFetchData from '../react-query/fetchData';
-import TaskStore from '../stores/TaskStore';
-import { SpanWithLinkStyle } from '../components/Style/linkStyles';
-import { PageContentContainer } from '../components/Style/pageLayoutStyles';
+import { renderLog } from '../common/utils/logging';
 import PersonSummaryHeader from '../components/Person/PersonSummaryHeader';
 import PersonSummaryRow from '../components/Person/PersonSummaryRow';
+import { SpanWithLinkStyle } from '../components/Style/linkStyles';
+import { PageContentContainer } from '../components/Style/pageLayoutStyles';
 import TaskListForPerson from '../components/Task/TaskListForPerson';
 import webAppConfig from '../config';
-import { renderLog } from '../common/utils/logging';
-
+import useFetchData from '../react-query/fetchData';
+import TaskStore from '../stores/TaskStore';
 
 
 // eslint-disable-next-line no-unused-vars
@@ -50,25 +48,6 @@ const Tasks = ({ classes, match }) => {
     }
   }, [dataPerson, dataTask, isSuccessPerson, isSuccessTask]);
 
-
-  // const onRetrieveTaskStatusListChange = () => {
-  //   const personListTemp = PersonStore.getAllCachedPeopleList();
-  //   const taskListDictByPersonIdTemp = {};
-  //   for (let i = 0; i < personListTemp.length; i++) {
-  //     const person = personListTemp[i];
-  //     taskListDictByPersonIdTemp[person.personId] = TaskStore.getTaskListForPerson(person.personId);
-  //   }
-  //   setTaskListDictByPersonId(taskListDictByPersonIdTemp);
-  // };
-
-  // React.useEffect(() => {
-  //  // TaskActions.taskStatusListRetrieve();
-  //
-  //  // Needed?
-  //  // TeamActions.teamListRetrieve();
-  //
-  // }, []);
-
   const teamId = 0;  // hack 1/15/25
   return (
     <div>
@@ -103,7 +82,6 @@ const Tasks = ({ classes, match }) => {
             <TaskListForPerson personId={person.id} showCompletedTasks={showCompletedTasks} />
           </OneTeamWrapper>
         ))}
-        <ReactQueryDevtools />
       </PageContentContainer>
     </div>
   );

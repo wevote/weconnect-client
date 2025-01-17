@@ -1,16 +1,17 @@
 import { Edit } from '@mui/icons-material';
 import { Button } from '@mui/material';
+import { withStyles } from '@mui/styles';
+import { useQueryClient } from '@tanstack/react-query';
+import PropTypes from 'prop-types';
 import React, { useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
-// import { Link } from 'react-router';
+import { useNavigate } from 'react-router';
 import styled from 'styled-components';
-import PropTypes from 'prop-types';
-import { withStyles } from '@mui/styles';
-import { useConnectAppContext } from '../../contexts/ConnectAppContext';
 import DesignTokenColors from '../../common/components/Style/DesignTokenColors';
+import { renderLog } from '../../common/utils/logging';
 import { PageContentContainer } from '../../components/Style/pageLayoutStyles';
 import webAppConfig from '../../config';
-import { renderLog } from '../../common/utils/logging';
+import { useConnectAppContext } from '../../contexts/ConnectAppContext';
 import useFetchData from '../../react-query/fetchData';
 
 
@@ -23,54 +24,28 @@ const SystemSettings = ({ classes }) => {
   // eslint-disable-next-line no-unused-vars
   const [taskGroupList, setTaskGroupList] = React.useState([]);
 
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
-
-
-  const { data: dataQList, isSuccess: isSuccessQList, isFetching: isFetchingQList } = useFetchData(['questionnaire-list-retrieve'], {});
-  console.log('useFetchData in SystemSettings:', dataQList, isSuccessQList, isFetchingQList);
+  const { data: dataQList, isFetching: isFetchingQList } = useFetchData(['questionnaire-list-retrieve'], {});
   if (isFetchingQList) {
     console.log('isFetching  ------------');
   }
   useEffect(() => {
-    console.log('useFetchData in SystemSettings useEffect:', dataQList, isSuccessQList, isFetchingQList);
     if (dataQList !== undefined && isFetchingQList === false) {
-      console.log('useFetchData in SystemSettings useEffect data is good:', dataQList, isSuccessQList, isFetchingQList);
-      console.log('Successfully retrieved questionnaire-list-retrieve...');
       const questionnaireListTemp = dataQList.questionnaireList;
       setQuestionnaireList(questionnaireListTemp);
     }
   }, [dataQList]);
 
-
-  /* Hack 1/14/25 to get compile
-  const onQuestionnaireStoreChange = () => {
-    const questionnaireListTemp = QuestionnaireStore.getAllCachedQuestionnairesList();
-    // console.log('SystemSettings QuestionnaireStore.getQuestionnaireList:', questionnaireListTemp);
-    setQuestionnaireList(questionnaireListTemp);
-    if (apiCalming('questionnaireListRetrieve', 1000)) {
-      QuestionnaireActions.questionnaireListRetrieve();
-    }
-  };
-
-  const onTaskStoreChange = () => {
-    const taskGroupListTemp = TaskStore.getAllCachedTaskGroupList();
-    // console.log('SystemSettings TaskStore.getTaskGroupList:', taskGroupListTemp);
-    setTaskGroupList(taskGroupListTemp);
-    // setTaskGroupCount(taskGroupListTemp.length);
-    if (apiCalming('taskGroupListRetrieve', 1000)) {
-      TaskActions.taskGroupListRetrieve();
-    }
-  };
-*/
-
   const addQuestionnaireClick = () => {
     setAppContextValue('editQuestionnaireDrawerOpen', true);
-    setAppContextValue('editQuestionnaireDrawerQuestionnaireId', -1);
+    setAppContextValue('selectedQuestionnaire', undefined);
   };
 
-  const editQuestionnaireClick = (questionnaireId) => {
+  const editQuestionnaireClick = (questionnaire) => {
     setAppContextValue('editQuestionnaireDrawerOpen', true);
-    setAppContextValue('editQuestionnaireDrawerQuestionnaireId', questionnaireId);
+    setAppContextValue('selectedQuestionnaire', questionnaire);
   };
 
   const addTaskGroupClick = () => {
@@ -78,6 +53,16 @@ const SystemSettings = ({ classes }) => {
     // AppObservableStore.setGlobalVariableState('editTaskGroupDrawerOpen', true);
     // AppObservableStore.setGlobalVariableState('editTaskGroupDrawerTaskGroupId', -1);
   };
+
+  const goToQuestionnairePageClick = (questionnaire) => {
+    setAppContextValue('selectedQuestionnaire', questionnaire);
+
+    queryClient.invalidateQueries(['question-list-retrieve']).then(() => {});
+    // console.log('goToQuestionnairePageClick = (questionnaire)', questionnaire.questionnaireId);
+
+    navigate(`/questionnaire/${questionnaire.questionnaireId}`);
+  };
+
 
   // eslint-disable-next-line no-unused-vars
   const editTaskGroupClick = (taskGroupId) => {
@@ -136,13 +121,14 @@ const SystemSettings = ({ classes }) => {
         {/* ****  **** */}
         <SettingsSubtitle>Questionnaires</SettingsSubtitle>
         {questionnaireList.map((questionnaire) => (
-          <OneQuestionnaireWrapper key={`questionnaire-${questionnaire.id}`}>
+          <OneQuestionnaireWrapper key={`questionnaire-${questionnaire.questionnaireId}`}>
             <QuestionnaireInnerWrapper>
-              {/* Hack 1/14/25 to get compile */}
-              {/* <Link to={`/questionnaire/${questionnaire.id}`}> */}
-              {/*  {questionnaire.questionnaireName} */}
-              {/* </Link> */}
-              <EditQuestionnaire onClick={() => editQuestionnaireClick(questionnaire.questionnaireId)}>
+              {/* {console.log('questionnaireList.map((questionnaire)', questionnaire.questionnaireId)} */}
+              <GoToQuestionairePage onClick={() => goToQuestionnairePageClick(questionnaire)}>
+                {questionnaire.questionnaireName}
+              </GoToQuestionairePage>
+              <span style={{ width: '25px' }} />
+              <EditQuestionnaire onClick={() => editQuestionnaireClick(questionnaire)}>
                 <EditStyled />
               </EditQuestionnaire>
             </QuestionnaireInnerWrapper>
@@ -208,6 +194,9 @@ const AddButtonWrapper = styled('div')`
 `;
 
 const EditQuestionnaire = styled('div')`
+`;
+
+const GoToQuestionairePage = styled('div')`
 `;
 
 const EditStyled = styled(Edit)`

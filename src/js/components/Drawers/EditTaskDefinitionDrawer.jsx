@@ -8,7 +8,7 @@ import EditTaskDefinitionDrawerMainContent from '../Task/EditTaskDefinitionDrawe
 const EditTaskDefinitionDrawer = () => {
   renderLog('EditTaskDefinitionDrawer');  // Set LOG_RENDER_EVENTS to log all renders
   const [headerTitleJsx, setHeaderTitleJsx] = React.useState(<></>);
-  const [headerFixedJsx, setHeaderFixedJsx] = React.useState(<></>);
+  const [headerFixedJsx] = React.useState(<></>);
 
   const onAppObservableStoreChange = () => {
     const questionnaireIdTemp = AppObservableStore.getGlobalVariableState('editTaskDefinitionDrawerTaskDefinitionId');

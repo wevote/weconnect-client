@@ -46,10 +46,6 @@ const CopyQuestionnaireLink = () => {
     </CopyQuestionnaireLinkWrapper>
   );
 };
-CopyQuestionnaireLink.propTypes = {
-  personId: PropTypes.number,
-  questionnaireId: PropTypes.number,
-};
 
 const styles = () => ({
 });

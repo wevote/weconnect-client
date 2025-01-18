@@ -7,7 +7,7 @@ import DrawerTemplateA from './DrawerTemplateA';
 
 const EditTaskGroupDrawer = () => {
   renderLog('EditTaskGroupDrawer');  // Set LOG_RENDER_EVENTS to log all renders
-  const { getAppContextValue, getAppContextData } = useConnectAppContext();
+  const { getAppContextValue } = useConnectAppContext();
 
   const [headerTitleJsx, setHeaderTitleJsx] = useState(<></>);
   const [headerFixedJsx] = useState(<></>);

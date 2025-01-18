@@ -3,7 +3,7 @@
 // allCachedTasksDict: {}, // This is a dictionary key: personId, value: another dictionary key: taskDefinitionId, value: Task dict
 
 
-export const personListRetrieve = (data, teamId) => {
+const personListRetrieve = (data, teamId) => {
   const personListRaw = data.personList;
 
   const personList = [];
@@ -17,3 +17,5 @@ export const personListRetrieve = (data, teamId) => {
   }
   return personList;
 };
+
+export default personListRetrieve;

@@ -28,7 +28,7 @@ const AddPersonDrawerMainContent = ({ classes }) => {
   const [allStaffList, setAllStaffList] = React.useState(getAppContextValue('allStaffList'));
   const [thisTeamsCurrentMembersList, setThisTeamsCurrentMembersList] = React.useState([]);
   const [teamId, setTeamId] = React.useState(getAppContextValue('teamId'));
-  const [teamName, setTeamName] = React.useState("");
+  const [teamName, setTeamName] = React.useState('');
 
   // eslint-disable-next-line no-unused-vars
   const [teamMemberPersonIdList, setTeamMemberPersonIdList] = React.useState([]);
@@ -37,7 +37,7 @@ const AddPersonDrawerMainContent = ({ classes }) => {
 
   let memberList = [];
   const teamListFromContext = getAppContextValue('teamListNested');
-  if (teamListFromContext  && thisTeamsCurrentMembersList.length === 0 && teamName === "") {
+  if (teamListFromContext  && thisTeamsCurrentMembersList.length === 0 && teamName === '') {
     const oneTeam = teamListFromContext.find((team) => team.id === parseInt(teamId));
     setTeamName(oneTeam.teamName);
     setTeamId(oneTeam.id);

@@ -63,8 +63,9 @@ const TeamHeader = ({ classes, showHeaderLabels, showIcons, team }) => {
 };
 TeamHeader.propTypes = {
   classes: PropTypes.object.isRequired,
-  // showHeaderLabels: PropTypes.bool,
-  // team: PropTypes.object.isRequired,
+  showHeaderLabels: PropTypes.bool,
+  team: PropTypes.object.isRequired,
+  showIcons: PropTypes.bool,
 };
 
 const styles = (theme) => ({

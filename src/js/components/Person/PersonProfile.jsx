@@ -31,8 +31,7 @@ const PersonProfile = () => {
   );
 };
 PersonProfile.propTypes = {
-  classes: PropTypes.object.isRequired,
-  personId: PropTypes.number,
+  classes: PropTypes.object,
 };
 
 const styles = () => ({

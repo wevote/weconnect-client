@@ -1,94 +1,80 @@
-import React, { Suspense } from 'react';
-import styled from 'styled-components';
-import PropTypes from 'prop-types';
-import { Edit, Info, Launch } from '@mui/icons-material';
+import { Info, Launch } from '@mui/icons-material';
 import { Checkbox, FormControlLabel } from '@mui/material'; // FormLabel, Radio, RadioGroup,
 import Tooltip from '@mui/material/Tooltip';
 import { withStyles } from '@mui/styles';
-import TaskActions from '../../actions/TaskActions';
-import TaskStore from '../../stores/TaskStore';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import PropTypes from 'prop-types';
+import React, { Suspense, useRef } from 'react';
+import styled from 'styled-components';
 import DesignTokenColors from '../../common/components/Style/DesignTokenColors';
 import { renderLog } from '../../common/utils/logging';
+import makeRequestParams from '../../common/utils/requestParamsUtils';
+import weConnectQueryFn from '../../react-query/WeConnectQuery';
 
 
 const OpenExternalWebSite = React.lazy(() => import(/* webpackChunkName: 'OpenExternalWebSite' */ '../../common/components/Widgets/OpenExternalWebSite'));
 
-const TaskSummaryRow = (
-  { classes, hideIfCompleted, personId, rowNumberForDisplay, taskDefinitionId,
-    taskGroupId },
-) => {
+const TaskSummaryRow = ({ classes, hideIfCompleted, personId, rowNumberForDisplay, taskDefinition, task }) => {
   renderLog('TaskSummaryRow');  // Set LOG_RENDER_EVENTS to log all renders
-  // const [person, setTask] = React.useState({});
+
+  const doneCheckboxFldRef = useRef('');
+  const queryClient = useQueryClient();
+
+  const saveTaskMutation = useMutation({
+    mutationFn: (requestParams) => weConnectQueryFn('task-save', requestParams),
+    onSuccess: () => {
+      // console.log('--------- saveTaskMutation mutated ---------');
+      queryClient.invalidateQueries('task-status-list-retrieve').then(() => {});
+    },
+
+  });
 
   const updateTaskFieldInstant = (event) => {
-    if (event.target.name) {
-      let newValue;
-      if (event.target.type === 'checkbox') {
-        newValue = event.target.checked;
-      } else {
-        newValue = event.target.value || '';
-      }
-      const data = {
-        doneByPersonIdChanged: true,
-        // doneByPersonIdToBeSaved: PersonStore.getSignedInPersonId(),
-        doneByPersonIdToBeSaved: 1, // hard-coded for testing
-        [`${event.target.name}Changed`]: true,
-        [`${event.target.name}ToBeSaved`]: newValue,
-      };
-      let taskGroupIdTemp = taskGroupId;
-      if (!taskGroupId) {
-        taskGroupIdTemp = TaskStore.getTaskGroupIdByTaskDefinitionId(taskDefinitionId);
-      }
-      if (taskGroupIdTemp >= 0) {
-        data.taskGroupIdChanged = true;
-        data.taskGroupIdToBeSaved = taskGroupIdTemp;
-      } else {
-        data.taskGroupIdChanged = false;
-      }
-      // console.log('== updateTaskFieldInstant Before taskSave data:', data);
-      TaskActions.taskSave(personId, taskDefinitionId, taskGroupIdTemp, data);
-    } else {
-      console.error('updateTaskFieldInstant Invalid event:', event);
-    }
+    console.log('updateTaskFieldInstant event:', event);
+    const elementId = event.target.id;
+    console.log(elementId);
+
+    const requestParams = makeRequestParams({
+      personId,
+      taskDefinitionId: task.taskDefinitionId,
+    }, {
+      statusDone: !event.target.checked,
+    });
+    saveTaskMutation.mutate(requestParams);
   };
 
-  React.useEffect(() => {
-  }, []);
-
-  // const hasEditRights = true;
-  const task = TaskStore.getTask(personId, taskDefinitionId);
-  const taskDefinition = TaskStore.getTaskDefinitionById(taskDefinitionId);
-  const taskId = `${personId}-${taskDefinitionId}`;
   if (hideIfCompleted && task.statusDone) {
     return null;
   }
+  const taskDef = taskDefinition[0];
   return (
-    <OneTaskWrapper key={`teamMember-${taskId}`}>
+    <OneTaskWrapper key={`teamMember-${task.taskDefinitionId}`}>
       {rowNumberForDisplay && (
-        <TaskCell id={`index-personId-${taskId}`} width={15}>
+        <TaskCell id={`index-personId-${task.taskDefinitionId}`} width={15}>
           <GraySpan>
-            &nbsp;&nbsp;
+            {rowNumberForDisplay}
           </GraySpan>
         </TaskCell>
       )}
-      <TaskCell id={`taskName-${taskId}`} width={300}>
-        {taskDefinition.taskDescription ? (
-          <Tooltip arrow id={`taskDescription-${taskId}`} title={taskDefinition.taskDescription}>
-            <span>{taskDefinition.taskName}</span>
+      <TaskCell id={`taskName-${task.taskDefinitionId}`} width={300}>
+        {taskDef.taskDescription ? (
+          <Tooltip arrow id={`taskDescription-${task.taskDefinitionId}`} title={taskDef.taskDescription}>
+            <span>{taskDef.taskName}</span>
           </Tooltip>
         ) : (
-          <span>{taskDefinition.taskName}</span>
+          <span>{taskDef.taskName}</span>
         )}
       </TaskCell>
-      <TaskCell id={`statusDoneCell-${taskId}`} width={75}>
+      <TaskCell id={`statusDoneCell-${task.taskDefinitionId}`} width={75}>
         {task.statusDone ? (
           <CheckboxDoneWrapper>
             <Checkbox
-              id={`statusDoneCheckbox-${taskId}`}
               checked
               className={classes.checkboxDoneRoot}
               color="primary"
               disabled
+              id={`statusDoneCheckbox-${task.taskDefinitionId}`}
+              inputRef={doneCheckboxFldRef}
               name="statusDone"
             />
             <CheckboxDone>Done</CheckboxDone>
@@ -98,9 +84,10 @@ const TaskSummaryRow = (
             classes={{ label: classes.checkboxLabel }}
             control={(
               <Checkbox
-                id={`statusDoneCheckbox-${taskId}`}
                 className={classes.checkboxRoot}
                 color="primary"
+                id={`statusDoneCheckbox-${task.taskDefinitionId}`}
+                inputRef={doneCheckboxFldRef}
                 name="statusDone"
                 onChange={updateTaskFieldInstant}
               />
@@ -109,28 +96,28 @@ const TaskSummaryRow = (
           />
         )}
       </TaskCell>
-      <TaskCell id={`taskInstructions-${taskId}`} width={24}>
-        {(taskDefinition.taskInstructions) && (
+      <TaskCell id={`taskInstructions-${task.taskDefinitionId}`} width={24}>
+        {(taskDef.taskInstructions) && (
           <Tooltip
             arrow
             enterTouchDelay={0} // show with click in mobile
-            id={`taskDescription-${taskId}`}
+            id={`taskDescription-${task.taskDefinitionId}`}
             leaveTouchDelay={3000}
-            title={taskDefinition.taskInstructions}
+            title={taskDef.taskInstructions}
           >
             <InfoStyled />
           </Tooltip>
         )}
       </TaskCell>
-      <TaskCell id={`taskActionUrlDiv-${taskId}`} width={24}>
-        {(taskDefinition.taskActionUrl) && (
+      <TaskCell id={`taskActionUrlDiv-${task.taskDefinitionId}`} width={24}>
+        {(taskDef.taskActionUrl) && (
           <Suspense fallback={<></>}>
             <OpenExternalWebSite
-              linkIdAttribute={`taskActionUrl-${taskId}`}
-              url={taskDefinition.taskActionUrl}
+              linkIdAttribute={`taskActionUrl-${task.taskDefinitionId}`}
+              url={taskDef.taskActionUrl}
               target="_blank"
               body={(
-                <Tooltip arrow id={`taskActionUrlTooltip-${taskId}`} title={taskDefinition.taskActionUrl}>
+                <Tooltip arrow id={`taskActionUrlTooltip-${task.taskDefinitionId}`} title={taskDef.taskActionUrl}>
                   <LaunchStyled />
                 </Tooltip>
               )}
@@ -143,11 +130,11 @@ const TaskSummaryRow = (
 };
 TaskSummaryRow.propTypes = {
   classes: PropTypes.object.isRequired,
-  hideIfCompleted: PropTypes.bool,
+  hideIfCompleted: PropTypes.bool.isRequired,
   personId: PropTypes.number.isRequired,
-  rowNumberForDisplay: PropTypes.number,
-  taskDefinitionId: PropTypes.number.isRequired,
-  taskGroupId: PropTypes.number,
+  rowNumberForDisplay: PropTypes.number.isRequired,
+  taskDefinition: PropTypes.object.isRequired,
+  task: PropTypes.object.isRequired,
 };
 
 const styles = () => ({
@@ -180,13 +167,6 @@ const CheckboxDoneWrapper = styled('div')`
 
 const CheckboxLabel = styled(FormControlLabel)`
   margin-bottom: 0 !important;
-`;
-
-const EditStyled = styled(Edit)`
-  color: ${DesignTokenColors.neutral100};
-  height: 16px;
-  margin-left: 2px;
-  width: 16px;
 `;
 
 const InfoStyled = styled(Info)`

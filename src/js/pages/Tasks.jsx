@@ -12,42 +12,43 @@ import { PageContentContainer } from '../components/Style/pageLayoutStyles';
 import TaskListForPerson from '../components/Task/TaskListForPerson';
 import webAppConfig from '../config';
 import useFetchData from '../react-query/fetchData';
-import TaskStore from '../stores/TaskStore';
 
 
 // eslint-disable-next-line no-unused-vars
 const Tasks = ({ classes, match }) => {
   renderLog('Tasks');  // Set LOG_RENDER_EVENTS to log all renders
-  // const { getAppContextValue, setAppContextValue } = useConnectAppContext();
 
   const [showCompletedTasks, setShowCompletedTasks] = React.useState(false);
-  // const [personList, setPersonList] = React.useState([]);
-  // eslint-disable-next-line no-unused-vars
-  const [taskListDictByPersonId, setTaskListDictByPersonId] = React.useState({});
-  // const [teamCount, setTeamCount] = React.useState(0);
+  const [taskList, setTaskList] = React.useState(undefined);
+  const [taskDefinitionList, setTaskDefinitionList] = React.useState(undefined);
   const [allStaffList, setAllStaffList] = React.useState([]);
   const [isFetching, setIsFetching] = React.useState([false]);
+  let personIdsList;
 
   // Roughly equivalent to PersonStore.getAllCachedPeopleList(); and TaskActions.taskStatusListRetrieve();
   const { data: dataPerson, isSuccess: isSuccessPerson, isFetching: isFetchingPerson } = useFetchData(['person-list-retrieve'], {});
-  const ids = ['1', '2', '3', '4', '5'];
-  const { data: dataTask, isSuccess: isSuccessTask, isFetching: isFetchingTask } = useFetchData(['task-status-list-retrieve'], { personIdList: ids });
+  useEffect(() => {
+    if (dataPerson) {
+      personIdsList = dataPerson.personList.map((dataPersonObj) => dataPersonObj.id);
+      setAllStaffList(dataPerson.personList);
+    }
+  }, [dataPerson, isSuccessPerson]);
+
+  const { data: dataTask, isSuccess: isSuccessTask, isFetching: isFetchingTask } = useFetchData(['task-status-list-retrieve'], { personIdList: personIdsList });
   useEffect(() => {
     console.log('useFetchData in Tasks (person-list-retrieve) useEffect:', isSuccessPerson, isFetchingPerson, dataPerson);
     console.log('useFetchData in Tasks (task-status-list-retrieve) useEffect:', isSuccessTask, isFetchingTask, dataTask);
     setIsFetching(isFetchingTask || isFetchingPerson);
     if (isSuccessPerson && isSuccessTask) {
-      const allStaff = dataPerson ? dataPerson.personList : [];
-      setAllStaffList(allStaff);
-      const taskListDictByPersonIdTemp = {};
-      for (let i = 0; i < allStaff.length; i++) {
-        const person = allStaff[i];
-        taskListDictByPersonIdTemp[person.personId] = TaskStore.getTaskListForPerson(person.personId);
-      }
-      setTaskListDictByPersonId(taskListDictByPersonIdTemp);
+      setTaskDefinitionList(dataTask.taskDefinitionList);
+      setTaskList(dataTask.taskList);
     }
-  }, [dataPerson, dataTask, isSuccessPerson, isSuccessTask]);
+  }, [personIdsList, dataTask, isSuccessPerson, isSuccessTask]);
 
+  if (taskDefinitionList) {
+    const test = taskDefinitionList.filter((taskDefEntry) => taskDefEntry.personId === 1);
+    console.log(test);
+  }
   const teamId = 0;  // hack 1/15/25
   return (
     <div>
@@ -76,10 +77,15 @@ const Tasks = ({ classes, match }) => {
             <CircularProgress />
           </div>
         )}
-        {allStaffList.map((person) => (
-          <OneTeamWrapper key={`team-${person.id}`}>
+        {taskList && allStaffList.map((person) => (
+          <OneTeamWrapper key={`team-${person.personId}`}>
             <PersonSummaryRow person={person} teamId={teamId} />
-            <TaskListForPerson personId={person.id} showCompletedTasks={showCompletedTasks} />
+            <TaskListForPerson
+              personId={person.personId}
+              showCompletedTasks={showCompletedTasks}
+              taskDefinitionList={taskDefinitionList}
+              taskListForPersonId={taskList.filter((taskEntry) => taskEntry.personId === person.personId)}
+            />
           </OneTeamWrapper>
         ))}
       </PageContentContainer>

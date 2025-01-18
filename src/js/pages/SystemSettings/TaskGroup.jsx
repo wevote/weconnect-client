@@ -18,49 +18,39 @@ import useFetchData from '../../react-query/fetchData';
 // eslint-disable-next-line no-unused-vars
 const TaskGroup = ({ classes, match }) => {
   renderLog('TaskGroup');
-  const { getAppContextValue, setAppContextValue } = useConnectAppContext();
-
+  const { setAppContextValue } = useConnectAppContext();
 
   const [taskGroupId] = React.useState(parseInt(useParams().taskGroupId));
-  const [taskGroup, setTaskGroup] = React.useState({});
+  const [taskGroup, setTaskGroup] = React.useState(undefined);
 
-  // eslint-disable-next-line no-unused-vars
-  const [taskGroupCount, setTaskGroupCount] = React.useState(0);
   const [taskDefinitionList, setTaskDefinitionList] = React.useState(undefined);
 
-
-  const { data: dataTDL, isSuccess: isSuccessTDL, isFetching: isFetchingTDL } = useFetchData(['task-definition-list-retrieve'], {taskGroupId});
+  const { data: dataTSL, isSuccess: isSuccessTSL, isFetching: isFetchingTSL } = useFetchData(['task-status-list-retrieve'], {});
   useEffect(() => {
-    if (isSuccessTDL) {
-      console.log('useFetchData in TeamHome (task-definition-list-retrieve) useEffect data good:', dataTDL);
-      setTaskDefinitionList(dataTDL ? dataTDL.taskDefinitionList : []);
+    if (isSuccessTSL) {
+      console.log('useFetchData in TeamHome (task-group-retrieve) useEffect data good:', dataTSL);
+      // We don't need this list for this object, but extracting as an example for other objects
+      // setTaskGroupList(dataTSL ? dataTSL.taskGroupList : {});
+      setTaskDefinitionList(dataTSL ? dataTSL.taskDefinitionList : undefined);
+      // We don't need this list for this object, but extracting as an example for other objects
+      // setTaskList(dataTSL ? dataTSL.taskList : []);
+      const oneGroup = dataTSL.taskList.find((group) => group.taskGroupId === parseInt(taskGroupId));
+      setTaskGroup(oneGroup);
     }
-  }, [dataTDL, isSuccessTDL, isFetchingTDL]);
-
-  const { data: dataTG, isSuccess: isSuccessTG, isFetching: isFetchingTG } = useFetchData(['task-group-retrieve'], {taskGroupId});
-  useEffect(() => {
-    if (isSuccessTG) {
-      console.log('useFetchData in TeamHome (task-group-retrieve) useEffect data good:', dataTG);
-      setTaskGroup(dataTG ? dataTG : []);
-    }
-  }, [dataTG, isSuccessTG, isFetchingTG]);
+  }, [dataTSL, isSuccessTSL, isFetchingTSL]);
 
 
   const addTaskDefinitionClick = () => {
-    // const { params } = match;
-    // const taskGroupIdTemp = convertToInteger(params.taskGroupId);
     setAppContextValue('editTaskDefinitionDrawerOpen', true);
     setAppContextValue('editTaskDefinitionDrawerTaskDefinitionId', -1);
-    setAppContextValue('editTaskDefinitionDrawerTaskGroupId', taskGroupId);
+    setAppContextValue('editTaskDefinitionDrawerTaskGroup', taskGroup);
   };
 
   // eslint-disable-next-line no-unused-vars
-  const editTaskDefinitionClick = (taskDefinitionId) => {
-    // const { params } = match;
-    // const taskGroupIdTemp = convertToInteger(params.taskGroupId);
-    // AppObservableStore.setGlobalVariableState('editTaskDefinitionDrawerOpen', true);
-    // AppObservableStore.setGlobalVariableState('editTaskDefinitionDrawerTaskDefinitionId', taskDefinitionId);
-    // AppObservableStore.setGlobalVariableState('editTaskDefinitionDrawerTaskGroupId', taskGroupIdTemp);
+  const editTaskDefinitionClick = (taskDefinition) => {
+    setAppContextValue('editTaskDefinitionDrawerOpen', true);
+    setAppContextValue('editTaskDefinitionDrawerTaskDefinition', taskDefinition);
+    setAppContextValue('editTaskDefinitionDrawerTaskGroup', taskGroup);
   };
 
   const editTaskGroupClick = () => {
@@ -69,33 +59,6 @@ const TaskGroup = ({ classes, match }) => {
     // AppObservableStore.setGlobalVariableState('editTaskGroupDrawerOpen', true);
     // AppObservableStore.setGlobalVariableState('editTaskGroupDrawerTaskGroupId', taskGroupIdTemp);
   };
-
-  // React.useEffect(() => {
-  //   const { params } = match;
-  //   const taskGroupIdTemp = convertToInteger(params.taskGroupId);
-  //
-  //   const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
-  //   onAppObservableStoreChange();
-  //   const taskGroupStoreListener = TaskStore.addListener(onTaskStoreChange);
-  //   onTaskStoreChange();
-  //
-  //   if (taskGroupIdTemp >= 0) {
-  //     if (apiCalming('taskGroupListRetrieve', 1000)) {
-  //       TaskActions.taskGroupListRetrieve();
-  //     }
-  //     if (apiCalming(`taskDefinitionListRetrieve-${taskGroupIdTemp}`, 1000)) {
-  //       TaskActions.taskDefinitionListRetrieve(taskGroupIdTemp);
-  //     }
-  //   }
-  //
-  //   return () => {
-  //     appStateSubscription.unsubscribe();
-  //     taskGroupStoreListener.remove();
-  //   };
-  // }, []);
-
-  // const { params } = match;
-  // const taskGroupIdTemp = convertToInteger(params.taskGroupId);
 
   return (
     <>
@@ -113,27 +76,27 @@ const TaskGroup = ({ classes, match }) => {
           {' '}
           &gt;
           {' '}
-          {taskGroup.taskGroupName}
+          {taskGroup && taskGroup.taskGroupName}
           <SpanWithLinkStyle onClick={editTaskGroupClick}>
             <EditStyled />
           </SpanWithLinkStyle>
         </TaskGroupTitleWrapper>
-      {/*  {taskGroup.taskGroupDescription && (*/}
-      {/*    <InstructionsWrapper>*/}
-      {/*      {taskGroup.taskGroupDescription}*/}
-      {/*    </InstructionsWrapper>*/}
-      {/*  )}*/}
-      {/*  <TaskDefinitionListWrapper>*/}
-      {/*    {taskDefinitionList.map((taskDefinition) => (*/}
-      {/*      <OneTaskGroupWrapper key={`taskDefinition-${taskDefinition.id}`}>*/}
-      {/*        {taskDefinition.taskName}*/}
-      {/*        {' '}*/}
-      {/*        <SpanWithLinkStyle onClick={() => editTaskDefinitionClick(taskDefinition.id)}>*/}
-      {/*          <EditStyled />*/}
-      {/*        </SpanWithLinkStyle>*/}
-      {/*      </OneTaskGroupWrapper>*/}
-      {/*    ))}*/}
-      {/*  </TaskDefinitionListWrapper>*/}
+        {taskGroup && taskGroup.taskGroupDescription && (
+          <InstructionsWrapper>
+            {taskGroup.taskGroupDescription}
+          </InstructionsWrapper>
+        )}
+        <TaskDefinitionListWrapper>
+          {taskDefinitionList && taskDefinitionList.map((taskDefinition) => (
+            <OneTaskGroupWrapper key={`taskDefinition-${taskDefinition.id}`}>
+              {taskDefinition.taskName}
+              {' '}
+              <SpanWithLinkStyle onClick={() => editTaskDefinitionClick(taskDefinition)}>
+                <EditStyled />
+              </SpanWithLinkStyle>
+            </OneTaskGroupWrapper>
+          ))}
+        </TaskDefinitionListWrapper>
         <AddButtonWrapper>
           <Button
             classes={{ root: classes.addTaskGroupButtonRoot }}

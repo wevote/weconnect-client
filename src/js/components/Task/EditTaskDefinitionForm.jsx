@@ -1,180 +1,148 @@
 import { Button, FormControl, TextField } from '@mui/material';
 import { withStyles } from '@mui/styles';
-import React from 'react';
-import styled from 'styled-components';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import PropTypes from 'prop-types';
-import AppObservableStore, { messageService } from '../../stores/AppObservableStore';
-import TaskActions from '../../actions/TaskActions';
-import TaskStore from '../../stores/TaskStore';
+import React, { useEffect, useRef, useState } from 'react';
+import styled from 'styled-components';
 import { renderLog } from '../../common/utils/logging';
-import prepareDataPackageFromAppObservableStore from '../../common/utils/prepareDataPackageFromAppObservableStore';
+import makeRequestParams from '../../common/utils/requestParamsUtils';
+import { useConnectAppContext } from '../../contexts/ConnectAppContext';
+import weConnectQueryFn from '../../react-query/WeConnectQuery';
 
-const TASK_DEFINITION_FIELDS_IN_FORM = [
-  'googleDriveFolderId',
-  'isGoogleDrivePermissionStep',
-  'order',
-  'taskGroupId',
-  'taskActionUrl',
-  'taskName',
-  'taskDescription',
-  'taskInstructions',
-];
+// const TASK_DEFINITION_FIELDS_IN_FORM = [
+//   'googleDriveFolderId',
+//   'isGoogleDrivePermissionStep',
+//   'order',
+//   'taskGroupId',
+//   'taskActionUrl',
+//   'taskName',
+//   'taskDescription',
+//   'taskInstructions',
+// ];
 
 const EditTaskDefinitionForm = ({ classes }) => {
   renderLog('EditTaskDefinitionForm');  // Set LOG_RENDER_EVENTS to log all renders
-  const [firstTaskDefinitionDataReceived, setFirstTaskDefinitionDataReceived] = React.useState(false);
-  const [inputValues, setInputValues] = React.useState({});
-  // const [taskGroupId, setTaskDefinitionId] = React.useState(-1);
-  // const [taskGroupDictAlreadySaved, setTaskDefinitionDictAlreadySaved] = React.useState({});
-  const [saveButtonActive, setSaveButtonActive] = React.useState(false);
+  const { getAppContextValue } = useConnectAppContext();
 
-  const clearEditFormValuesInAppObservableStore = () => {
-    const globalVariableStates = {};
-    for (let i = 0; i < TASK_DEFINITION_FIELDS_IN_FORM.length; i++) {
-      const fieldName = TASK_DEFINITION_FIELDS_IN_FORM[i];
-      globalVariableStates[`${fieldName}Changed`] = false;
-      globalVariableStates[`${fieldName}ToBeSaved`] = '';
+  const [group] = useState(getAppContextValue('editTaskDefinitionDrawerTaskGroup'));
+  const [taskDefinition] = useState(getAppContextValue('editTaskDefinitionDrawerTaskDefinition'));
+  const [taskNameValue, setTaskNameValue] = useState('');
+  const [taskDescValue, setTaskDescValue] = useState('');
+  const [taskInstValue, setTaskInstValue] = useState('');
+  const [taskUrlValue, setTaskUrlValue] = useState('');
+  const [saveButtonActive, setSaveButtonActive] = useState(false);
+
+  const queryClient = useQueryClient();
+  const taskNameFldRef = useRef('');
+  const taskDescFldRef = useRef('');
+  const taskInstFldRef = useRef('');
+  const taskUrlFldRef = useRef('');
+
+  useEffect(() => {
+    if (taskDefinition) {
+      setTaskNameValue(taskDefinition.taskName);
+      setTaskDescValue(taskDefinition.taskDescription);
+      setTaskInstValue(taskDefinition.taskInstructions);
+      setTaskUrlValue(taskDefinition.taskActionUrl);
+    } else {
+      setTaskNameValue('');
+      setTaskDescValue('');
+      setTaskInstValue('');
+      setTaskUrlValue('');
     }
-    globalVariableStates.editTaskDefinitionDrawerTaskDefinitionId = -1;
-    // console.log('clearEditFormValuesInAppObservableStore globalVariableStates:', globalVariableStates);
-    AppObservableStore.setGlobalVariableStateInBulk(globalVariableStates);
-  };
+  }, [taskDefinition]);
 
-  const clearEditedValues = () => {
-    setInputValues({});
-    setFirstTaskDefinitionDataReceived(false);
-    // setTaskDefinitionId(-1);
-    clearEditFormValuesInAppObservableStore();
-    AppObservableStore.setGlobalVariableState('editTaskDefinitionDrawerOpen', false);
-  };
-
-  const updateInputValuesFromTaskStore = (inputValuesIncoming) => {
-    const revisedInputValues = { ...inputValuesIncoming };
-    const taskGroupIdTemp = AppObservableStore.getGlobalVariableState('editTaskDefinitionDrawerTaskDefinitionId');
-    const taskGroupDict = TaskStore.getTaskDefinitionById(taskGroupIdTemp) || {};
-    // console.log('=== updateInputValuesFromTaskStore taskGroupIdTemp:', taskGroupIdTemp, ', taskGroupDict:', taskGroupDict);
-    if (taskGroupIdTemp && taskGroupDict.taskGroupId) {
-      // console.log('taskGroupIdTemp:', taskGroupIdTemp, ', taskGroupDict.taskGroupId:', taskGroupDict.taskGroupId);
-      // setTaskDefinitionDictAlreadySaved(taskGroupDict);
-      for (let i = 0; i < TASK_DEFINITION_FIELDS_IN_FORM.length; i++) {
-        const fieldName = TASK_DEFINITION_FIELDS_IN_FORM[i];
-        revisedInputValues[fieldName] = taskGroupDict[fieldName];
-      }
-    }
-    return revisedInputValues;
-  };
-
-  const onAppObservableStoreChange = () => {
-    const editTaskDefinitionDrawerOpenTemp = AppObservableStore.getGlobalVariableState('editTaskDefinitionDrawerOpen');
-    const taskGroupIdTemp = AppObservableStore.getGlobalVariableState('editTaskDefinitionDrawerTaskDefinitionId');
-    if (taskGroupIdTemp >= 0 && !editTaskDefinitionDrawerOpenTemp) {
-      clearEditedValues();
-    }
-  };
-
-  const onTaskStoreChange = () => {
-    const taskDefinitionIdTemp = AppObservableStore.getGlobalVariableState('editTaskDefinitionDrawerTaskDefinitionId');
-    const taskDefinitionDict = TaskStore.getTaskDefinitionById(taskDefinitionIdTemp) || {};
-    if (!firstTaskDefinitionDataReceived) {
-      if (taskDefinitionIdTemp && taskDefinitionDict.taskDefinitionId) {
-        const inputValuesRevised = updateInputValuesFromTaskStore(inputValues);
-        setFirstTaskDefinitionDataReceived(true);
-        setInputValues(inputValuesRevised);
-      }
-    }
-  };
+  const taskDefinitionSaveMutation = useMutation({
+    mutationFn: (requestParams) => weConnectQueryFn('task-definition-save', requestParams),
+    onSuccess: () => {
+      queryClient.invalidateQueries('task-status-list-retrieve').then(() => {});
+    },
+  });
 
   const saveTaskDefinition = () => {
-    const taskDefinitionIdTemp = AppObservableStore.getGlobalVariableState('editTaskDefinitionDrawerTaskDefinitionId');
-    const taskGroupIdTemp = AppObservableStore.getGlobalVariableState('editTaskDefinitionDrawerTaskGroupId');
-    const data = prepareDataPackageFromAppObservableStore(TASK_DEFINITION_FIELDS_IN_FORM);
-    // console.log('saveTaskDefinition data:', data);
-    TaskActions.taskDefinitionSave(taskGroupIdTemp, taskDefinitionIdTemp, data);
+    const requestParams = makeRequestParams({
+      taskDefinitionId: taskDefinition ? taskDefinition.id : '-1',
+      taskGroupId: group.taskGroupId,
+    }, {
+      taskName: taskNameFldRef.current.value,
+      taskDescription: taskDescFldRef.current.value,
+      taskInstructions: taskInstFldRef.current.value,
+      taskActionUrl: taskUrlFldRef.current.value,
+    });
+    taskDefinitionSaveMutation.mutate(requestParams);
+    console.log('saveTask requestParams:', requestParams);
     setSaveButtonActive(false);
-    setTimeout(() => {
-      clearEditedValues();
-    }, 250);
   };
 
-  const updateTaskDefinitionField = (event) => {
-    if (event.target.name) {
-      const newValue = event.target.value || '';
-      AppObservableStore.setGlobalVariableState(`${event.target.name}Changed`, true);
-      AppObservableStore.setGlobalVariableState(`${event.target.name}ToBeSaved`, newValue);
-      // console.log('updateTaskDefinitionField:', event.target.name, ', newValue:', newValue);
-      setInputValues({ ...inputValues, [event.target.name]: newValue });
-      setSaveButtonActive(true);
-    } else {
-      console.error('updateTaskDefinitionField Invalid event:', event);
+  const updateSaveButton = () => {
+    if (taskNameFldRef.current.value && taskNameFldRef.current.value.length &&
+      taskDescFldRef.current.value && taskDescFldRef.current.value.length &&
+      taskInstFldRef.current.value && taskInstFldRef.current.value.length &&
+      taskUrlFldRef.current.value && taskUrlFldRef.current.value.length) {
+      if (!saveButtonActive) {
+        setSaveButtonActive(true);
+      }
     }
   };
-
-  React.useEffect(() => {
-    const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
-    onAppObservableStoreChange();
-    const personStoreListener = TaskStore.addListener(onTaskStoreChange);
-    onTaskStoreChange();
-
-    return () => {
-      appStateSubscription.unsubscribe();
-      personStoreListener.remove();
-    };
-  }, []);
 
   return (
     <EditTaskDefinitionFormWrapper>
       <FormControl classes={{ root: classes.formControl }}>
         <TextField
           autoFocus
+          defaultValue={taskNameValue}
           id="taskNameToBeSaved"
+          inputRef={taskNameFldRef}
           label="Task Name"
-          name="taskName"
           margin="dense"
-          onChange={updateTaskDefinitionField}
+          name="taskName"
+          onChange={updateSaveButton}
           placeholder="Name of one task"
-          value={inputValues.taskName || ''}
           variant="outlined"
         />
         <TextField
+          defaultValue={taskDescValue}
           id="taskDescriptionToBeSaved"
+          inputRef={taskDescFldRef}
           label="Description of this task"
           margin="dense"
           multiline
           name="taskDescription"
-          onChange={updateTaskDefinitionField}
+          onChange={updateSaveButton}
           placeholder="Task description"
           rows={6}
-          value={inputValues.taskDescription || ''}
           variant="outlined"
         />
         <TextField
+          defaultValue={taskInstValue}
           id="taskInstructionsToBeSaved"
+          inputRef={taskInstFldRef}
           label="Instructions for completing this task"
           margin="dense"
           multiline
           name="taskInstructions"
-          onChange={updateTaskDefinitionField}
+          onChange={updateSaveButton}
           placeholder="Instructions for how to complete this task"
           rows={6}
-          value={inputValues.taskInstructions || ''}
           variant="outlined"
         />
         <TextField
+          defaultValue={taskUrlValue}
           id="taskActionUrlToBeSaved"
+          inputRef={taskUrlFldRef}
           label="Task Action URL"
-          name="taskActionUrl"
           margin="dense"
-          onChange={updateTaskDefinitionField}
+          name="taskActionUrl"
+          onChange={updateSaveButton}
           placeholder="Web address of the task"
-          value={inputValues.taskActionUrl || ''}
           variant="outlined"
         />
         <Button
           classes={{ root: classes.saveTaskDefinitionButton }}
           color="primary"
           disabled={!saveButtonActive}
-          variant="contained"
           onClick={saveTaskDefinition}
+          variant="contained"
         >
           Save Task
         </Button>

@@ -6,7 +6,6 @@ import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router';
 import styled from 'styled-components';
 import { renderLog } from '../common/utils/logging';
-import AddTeamDrawer from '../components/Drawers/AddTeamDrawer';
 import { SpanWithLinkStyle } from '../components/Style/linkStyles';
 import { PageContentContainer } from '../components/Style/pageLayoutStyles';
 import TeamHeader from '../components/Team/TeamHeader';
@@ -17,17 +16,13 @@ import useFetchData from '../react-query/fetchData';
 import { getTeamList } from '../react-query/TeamsQueryProcessing';
 
 
+// eslint-disable-next-line no-unused-vars
 const Teams = ({ classes, match }) => {
   renderLog('Teams');
   const { setAppContextValue, getAppContextValue } = useConnectAppContext();
 
   const [showAllTeamMembers, setShowAllTeamMembers] = React.useState(false);
   const [teamList, setTeamList] = React.useState([]);
-  // eslint-disable-next-line no-unused-vars
-  const [teamCount, setTeamCount] = React.useState(-1);
-  const [displayDrawer, setDisplayDrawer] = React.useState(getAppContextValue('addTeamDrawerOpen'));
-
-  console.log('match: ', match);  // dummy to clear warning
 
   const { data, isSuccess, isFetching, isStale } = useFetchData(['team-list-retrieve'], {});
   console.log('useFetchData in Teams:', data, isSuccess, isFetching, isStale);
@@ -42,14 +37,12 @@ const Teams = ({ classes, match }) => {
       const teamListTemp = getTeamList(data);
       setShowAllTeamMembers(true);
       setTeamList(teamListTemp);
-      setTeamCount(teamListTemp.length);
       setAppContextValue('teamListNested', teamListTemp);
     }
   }, [data]);
 
   const addTeamClick = () => {
     setAppContextValue('addTeamDrawerOpen', true);
-    setDisplayDrawer(true);
   };
 
   const personProfile = getAppContextValue('personProfileDrawerOpen');
@@ -101,7 +94,6 @@ const Teams = ({ classes, match }) => {
             Sign in
           </Link>
         </div>
-        {displayDrawer ? <AddTeamDrawer /> : null }
       </PageContentContainer>
     </div>
   );

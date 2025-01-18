@@ -72,7 +72,7 @@ function App () {
                   <Header hideHeader={hideHeader} params={{ }} pathname={normalizedHref()} />
                   <Drawers />
                   <Routes>
-                    <Route path="/answers/:questionnaireId/:personId" exact component={QuestionnaireAnswers} />
+                    <Route path="/answers/:questionnaireId/:personId" element={<QuestionnaireAnswers />} />
                     <Route element={<PrivateRoute />}>
                       <Route path="/faq" element={<FAQ />} />
                     </Route>

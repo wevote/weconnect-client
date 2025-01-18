@@ -2,6 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { withStyles } from '@mui/styles';
 import AddPersonDrawer from './AddPersonDrawer';
+import AddTeamDrawer from './AddTeamDrawer';
 import EditQuestionnaireDrawer from './EditQuestionnaireDrawer';
 import EditPersonDrawer from './EditPersonDrawer';
 import EditQuestionDrawer from './EditQuestionDrawer';
@@ -20,7 +21,7 @@ const Drawers = () => {
   // Maybe there is a better way...
   let personProfile = getAppContextValue('personProfileDrawerOpen');
   const addPerson = getAppContextValue('addPersonDrawerOpen');
-  // let team = getAppContextValue('addTeamDrawerOpen');
+  const team = getAppContextValue('addTeamDrawerOpen');
   const editPerson =  getAppContextValue('editPersonDrawerOpen');
   const question = getAppContextValue('editQuestionDrawerOpen');
   const questionnaire =  getAppContextValue('editQuestionnaireDrawerOpen');
@@ -37,9 +38,7 @@ const Drawers = () => {
     <DrawersWrapper>
       { personProfile === true ? <PersonProfileDrawer /> : null}
       { addPerson === true ? <AddPersonDrawer /> : null}
-      {/* Now called directly from  { team === true ? <AddTeamDrawer /> : null }
-      TODO: switch it back to being called from here 1/12/25
-      */}
+      { team === true ? <AddTeamDrawer /> : null }
       { editPerson === true ? <EditPersonDrawer /> : null}
       { question === true ? <EditQuestionDrawer /> : null}
       {questionnaire === true ? <EditQuestionnaireDrawer /> : null}

@@ -18,8 +18,7 @@ const PersonProfileDrawerMainContent = ({ classes }) => {
   return (
     <PersonProfileDrawerMainContentWrapper>
       <PersonProfile />
-      <PersonProfile personId={personIdTemp} />
-      <QuestionnaireResponsesList personId={personIdTemp} />
+      <QuestionnaireResponsesList />
     </PersonProfileDrawerMainContentWrapper>
   );
 };

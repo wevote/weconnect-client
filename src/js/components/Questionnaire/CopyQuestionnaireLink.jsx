@@ -21,20 +21,11 @@ const CopyQuestionnaireLink = () => {
 
   const copyLink = () => {
     // console.log('CopyQuestionnaireLink copyLink');
-    // openSnackbar({ message: 'Copied!' });
     setLinkCopied(true);
-    // setTimeout(() => {
-    // setLinkCopied(false);
-    // }, 1500);
+    setTimeout(() => {
+      setLinkCopied(false);
+    }, 1500);
   };
-
-  // React.useEffect(() => {
-  //   setLinkToBeShared(`${webAppConfig.PROTOCOL}${webAppConfig.HOSTNAME}/q/${questionnaireId}/${personId}`);
-  //
-  //   return () => {
-  //     // console.log('CopyQuestionnaireLink cleanup');
-  //   };
-  // }, []);
 
   return (
     <CopyQuestionnaireLinkWrapper>

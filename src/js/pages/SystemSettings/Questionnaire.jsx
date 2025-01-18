@@ -170,6 +170,7 @@ const QuestionnaireTitleWrapper = styled('div')`
   height: 100px;
   align-content: center;
 `;
+
 const OneQuestionnaireWrapper = styled('div')`
   margin-bottom: 20px;
 `;

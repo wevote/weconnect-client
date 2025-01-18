@@ -81,7 +81,7 @@ function App () {
                     <Route path="/questionnaire/:questionnaireId" element={<QuestionnaireQuestionList />} />
                     <Route path="/system-settings" element={<SystemSettings />} />
                     <Route path="/tasks" element={<Tasks />} />
-                    <Route path="/task-group/:taskGroupId" exact component={TaskGroup} />
+                    <Route path="/task-group/:taskGroupId" element={<TaskGroup />} />
                     <Route path="/teams" element={<Teams />} />
                     <Route path="/team-home/:teamId" element={<TeamHome />} />
                     <Route path="/" element={<Teams />} />

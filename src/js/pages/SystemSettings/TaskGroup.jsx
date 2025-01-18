@@ -1,106 +1,114 @@
 import { Edit } from '@mui/icons-material';
 import { Button } from '@mui/material';
-import React from 'react';
-import { Helmet } from 'react-helmet-async';
-import { Link } from 'react-router';
-import styled from 'styled-components';
-import PropTypes from 'prop-types';
 import { withStyles } from '@mui/styles';
-import AppObservableStore, { messageService } from '../../stores/AppObservableStore';
-import TaskActions from '../../actions/TaskActions';
-import TaskStore from '../../stores/TaskStore';
+import PropTypes from 'prop-types';
+import React, { useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
+import { Link, useParams } from 'react-router';
+import styled from 'styled-components';
+import DesignTokenColors from '../../common/components/Style/DesignTokenColors';
+import { renderLog } from '../../common/utils/logging';
 import { SpanWithLinkStyle } from '../../components/Style/linkStyles';
 import { PageContentContainer } from '../../components/Style/pageLayoutStyles';
-import DesignTokenColors from '../../common/components/Style/DesignTokenColors';
 import webAppConfig from '../../config';
-import apiCalming from '../../common/utils/apiCalming';
-import { renderLog } from '../../common/utils/logging';
-import convertToInteger from '../../common/utils/convertToInteger';
+import { useConnectAppContext } from '../../contexts/ConnectAppContext';
+import useFetchData from '../../react-query/fetchData';
 
 
+// eslint-disable-next-line no-unused-vars
 const TaskGroup = ({ classes, match }) => {
-  renderLog('TaskGroup');  // Set LOG_RENDER_EVENTS to log all renders
-  const [taskDefinitionList, setTaskDefinitionList] = React.useState([]);
+  renderLog('TaskGroup');
+  const { getAppContextValue, setAppContextValue } = useConnectAppContext();
+
+
+  const [taskGroupId] = React.useState(parseInt(useParams().taskGroupId));
   const [taskGroup, setTaskGroup] = React.useState({});
+
   // eslint-disable-next-line no-unused-vars
   const [taskGroupCount, setTaskGroupCount] = React.useState(0);
+  const [taskDefinitionList, setTaskDefinitionList] = React.useState(undefined);
 
-  const onAppObservableStoreChange = () => {
-  };
 
-  const onTaskStoreChange = () => {
-    const { params } = match;
-    const taskGroupIdTemp = convertToInteger(params.taskGroupId);
-    const taskGroupTemp = TaskStore.getTaskGroupById(taskGroupIdTemp);
-    setTaskGroup(taskGroupTemp);
-    const taskDefinitionListTemp = TaskStore.getTaskDefinitionListByTaskGroupId(taskGroupIdTemp);
-    // console.log('TaskGroup TaskStore.getTaskDefinitionList:', taskDefinitionListTemp);
-    setTaskDefinitionList(taskDefinitionListTemp);
-    setTaskGroupCount(taskDefinitionListTemp.length);
-  };
+  const { data: dataTDL, isSuccess: isSuccessTDL, isFetching: isFetchingTDL } = useFetchData(['task-definition-list-retrieve'], {taskGroupId});
+  useEffect(() => {
+    if (isSuccessTDL) {
+      console.log('useFetchData in TeamHome (task-definition-list-retrieve) useEffect data good:', dataTDL);
+      setTaskDefinitionList(dataTDL ? dataTDL.taskDefinitionList : []);
+    }
+  }, [dataTDL, isSuccessTDL, isFetchingTDL]);
+
+  const { data: dataTG, isSuccess: isSuccessTG, isFetching: isFetchingTG } = useFetchData(['task-group-retrieve'], {taskGroupId});
+  useEffect(() => {
+    if (isSuccessTG) {
+      console.log('useFetchData in TeamHome (task-group-retrieve) useEffect data good:', dataTG);
+      setTaskGroup(dataTG ? dataTG : []);
+    }
+  }, [dataTG, isSuccessTG, isFetchingTG]);
+
 
   const addTaskDefinitionClick = () => {
-    const { params } = match;
-    const taskGroupIdTemp = convertToInteger(params.taskGroupId);
-    AppObservableStore.setGlobalVariableState('editTaskDefinitionDrawerOpen', true);
-    AppObservableStore.setGlobalVariableState('editTaskDefinitionDrawerTaskDefinitionId', -1);
-    AppObservableStore.setGlobalVariableState('editTaskDefinitionDrawerTaskGroupId', taskGroupIdTemp);
+    // const { params } = match;
+    // const taskGroupIdTemp = convertToInteger(params.taskGroupId);
+    setAppContextValue('editTaskDefinitionDrawerOpen', true);
+    setAppContextValue('editTaskDefinitionDrawerTaskDefinitionId', -1);
+    setAppContextValue('editTaskDefinitionDrawerTaskGroupId', taskGroupId);
   };
 
+  // eslint-disable-next-line no-unused-vars
   const editTaskDefinitionClick = (taskDefinitionId) => {
-    const { params } = match;
-    const taskGroupIdTemp = convertToInteger(params.taskGroupId);
-    AppObservableStore.setGlobalVariableState('editTaskDefinitionDrawerOpen', true);
-    AppObservableStore.setGlobalVariableState('editTaskDefinitionDrawerTaskDefinitionId', taskDefinitionId);
-    AppObservableStore.setGlobalVariableState('editTaskDefinitionDrawerTaskGroupId', taskGroupIdTemp);
+    // const { params } = match;
+    // const taskGroupIdTemp = convertToInteger(params.taskGroupId);
+    // AppObservableStore.setGlobalVariableState('editTaskDefinitionDrawerOpen', true);
+    // AppObservableStore.setGlobalVariableState('editTaskDefinitionDrawerTaskDefinitionId', taskDefinitionId);
+    // AppObservableStore.setGlobalVariableState('editTaskDefinitionDrawerTaskGroupId', taskGroupIdTemp);
   };
 
   const editTaskGroupClick = () => {
-    const { params } = match;
-    const taskGroupIdTemp = convertToInteger(params.taskGroupId);
-    AppObservableStore.setGlobalVariableState('editTaskGroupDrawerOpen', true);
-    AppObservableStore.setGlobalVariableState('editTaskGroupDrawerTaskGroupId', taskGroupIdTemp);
+    // const { params } = match;
+    // const taskGroupIdTemp = convertToInteger(params.taskGroupId);
+    // AppObservableStore.setGlobalVariableState('editTaskGroupDrawerOpen', true);
+    // AppObservableStore.setGlobalVariableState('editTaskGroupDrawerTaskGroupId', taskGroupIdTemp);
   };
 
-  React.useEffect(() => {
-    const { params } = match;
-    const taskGroupIdTemp = convertToInteger(params.taskGroupId);
+  // React.useEffect(() => {
+  //   const { params } = match;
+  //   const taskGroupIdTemp = convertToInteger(params.taskGroupId);
+  //
+  //   const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
+  //   onAppObservableStoreChange();
+  //   const taskGroupStoreListener = TaskStore.addListener(onTaskStoreChange);
+  //   onTaskStoreChange();
+  //
+  //   if (taskGroupIdTemp >= 0) {
+  //     if (apiCalming('taskGroupListRetrieve', 1000)) {
+  //       TaskActions.taskGroupListRetrieve();
+  //     }
+  //     if (apiCalming(`taskDefinitionListRetrieve-${taskGroupIdTemp}`, 1000)) {
+  //       TaskActions.taskDefinitionListRetrieve(taskGroupIdTemp);
+  //     }
+  //   }
+  //
+  //   return () => {
+  //     appStateSubscription.unsubscribe();
+  //     taskGroupStoreListener.remove();
+  //   };
+  // }, []);
 
-    const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
-    onAppObservableStoreChange();
-    const taskGroupStoreListener = TaskStore.addListener(onTaskStoreChange);
-    onTaskStoreChange();
-
-    if (taskGroupIdTemp >= 0) {
-      if (apiCalming('taskGroupListRetrieve', 1000)) {
-        TaskActions.taskGroupListRetrieve();
-      }
-      if (apiCalming(`taskDefinitionListRetrieve-${taskGroupIdTemp}`, 1000)) {
-        TaskActions.taskDefinitionListRetrieve(taskGroupIdTemp);
-      }
-    }
-
-    return () => {
-      appStateSubscription.unsubscribe();
-      taskGroupStoreListener.remove();
-    };
-  }, []);
-
-  const { params } = match;
-  const taskGroupIdTemp = convertToInteger(params.taskGroupId);
+  // const { params } = match;
+  // const taskGroupIdTemp = convertToInteger(params.taskGroupId);
 
   return (
-    <div>
+    <>
       <Helmet>
         <title>
           TaskGroup Details -
           {' '}
           {webAppConfig.NAME_FOR_BROWSER_TAB_TITLE}
         </title>
-        <link rel="canonical" href={`${webAppConfig.WECONNECT_URL_FOR_SEO}/task-group/${taskGroupIdTemp}`} />
+        <link rel="canonical" href={`${webAppConfig.WECONNECT_URL_FOR_SEO}/task-group/${taskGroupId}`} />
       </Helmet>
       <PageContentContainer>
-        <div>
+        <TaskGroupTitleWrapper>
           <Link to="/system-settings">TaskGroups</Link>
           {' '}
           &gt;
@@ -109,23 +117,23 @@ const TaskGroup = ({ classes, match }) => {
           <SpanWithLinkStyle onClick={editTaskGroupClick}>
             <EditStyled />
           </SpanWithLinkStyle>
-        </div>
-        {taskGroup.taskGroupDescription && (
-          <InstructionsWrapper>
-            {taskGroup.taskGroupDescription}
-          </InstructionsWrapper>
-        )}
-        <TaskDefinitionListWrapper>
-          {taskDefinitionList.map((taskDefinition) => (
-            <OneTaskGroupWrapper key={`taskDefinition-${taskDefinition.id}`}>
-              {taskDefinition.taskName}
-              {' '}
-              <SpanWithLinkStyle onClick={() => editTaskDefinitionClick(taskDefinition.id)}>
-                <EditStyled />
-              </SpanWithLinkStyle>
-            </OneTaskGroupWrapper>
-          ))}
-        </TaskDefinitionListWrapper>
+        </TaskGroupTitleWrapper>
+      {/*  {taskGroup.taskGroupDescription && (*/}
+      {/*    <InstructionsWrapper>*/}
+      {/*      {taskGroup.taskGroupDescription}*/}
+      {/*    </InstructionsWrapper>*/}
+      {/*  )}*/}
+      {/*  <TaskDefinitionListWrapper>*/}
+      {/*    {taskDefinitionList.map((taskDefinition) => (*/}
+      {/*      <OneTaskGroupWrapper key={`taskDefinition-${taskDefinition.id}`}>*/}
+      {/*        {taskDefinition.taskName}*/}
+      {/*        {' '}*/}
+      {/*        <SpanWithLinkStyle onClick={() => editTaskDefinitionClick(taskDefinition.id)}>*/}
+      {/*          <EditStyled />*/}
+      {/*        </SpanWithLinkStyle>*/}
+      {/*      </OneTaskGroupWrapper>*/}
+      {/*    ))}*/}
+      {/*  </TaskDefinitionListWrapper>*/}
         <AddButtonWrapper>
           <Button
             classes={{ root: classes.addTaskGroupButtonRoot }}
@@ -137,7 +145,7 @@ const TaskGroup = ({ classes, match }) => {
           </Button>
         </AddButtonWrapper>
       </PageContentContainer>
-    </div>
+    </>
   );
 };
 TaskGroup.propTypes = {
@@ -156,6 +164,11 @@ const styles = (theme) => ({
     },
   },
 });
+
+const TaskGroupTitleWrapper = styled('div')`
+  height: 100px;
+  align-content: center;
+`;
 
 const AddButtonWrapper = styled('div')`
   margin-top: 24px;

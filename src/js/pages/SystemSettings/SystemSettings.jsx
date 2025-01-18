@@ -5,7 +5,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import PropTypes from 'prop-types';
 import React, { useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { useNavigate } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import styled from 'styled-components';
 import DesignTokenColors from '../../common/components/Style/DesignTokenColors';
 import { renderLog } from '../../common/utils/logging';
@@ -29,7 +29,7 @@ const SystemSettings = ({ classes }) => {
 
   const { data: dataQList, isFetching: isFetchingQList } = useFetchData(['questionnaire-list-retrieve'], {});
   if (isFetchingQList) {
-    console.log('isFetching  ------------');
+    console.log('isFetching questionnaire-list-retrieve ------------');
   }
   useEffect(() => {
     if (dataQList !== undefined && isFetchingQList === false) {
@@ -37,6 +37,17 @@ const SystemSettings = ({ classes }) => {
       setQuestionnaireList(questionnaireListTemp);
     }
   }, [dataQList]);
+
+  const { data: dataGroupList, isFetching: isFetchingGroupList } = useFetchData(['task-group-list-retrieve'], {});
+  if (isFetchingGroupList) {
+    console.log('isFetching task-group-retrieve ------------');
+  }
+  useEffect(() => {
+    if (dataGroupList !== undefined && isFetchingGroupList === false) {
+      const taskListTemp = dataGroupList.taskGroupList;
+      setTaskGroupList(taskListTemp);
+    }
+  }, [dataGroupList]);
 
   const addQuestionnaireClick = () => {
     setAppContextValue('editQuestionnaireDrawerOpen', true);
@@ -49,9 +60,14 @@ const SystemSettings = ({ classes }) => {
   };
 
   const addTaskGroupClick = () => {
-    // Hack 1/14/25 to get compile
-    // AppObservableStore.setGlobalVariableState('editTaskGroupDrawerOpen', true);
-    // AppObservableStore.setGlobalVariableState('editTaskGroupDrawerTaskGroupId', -1);
+    setAppContextValue('editTaskGroupDrawerOpen', true);
+    setAppContextValue('editTaskGroupDrawerTaskGroup', undefined);
+  };
+
+  // eslint-disable-next-line no-unused-vars
+  const editTaskGroupClick = (taskGroup) => {
+    setAppContextValue('editTaskGroupDrawerOpen', true);
+    setAppContextValue('editTaskGroupDrawerTaskGroup', taskGroup);
   };
 
   const goToQuestionnairePageClick = (questionnaire) => {
@@ -62,47 +78,6 @@ const SystemSettings = ({ classes }) => {
 
     navigate(`/questionnaire/${questionnaire.questionnaireId}`);
   };
-
-
-  // eslint-disable-next-line no-unused-vars
-  const editTaskGroupClick = (taskGroupId) => {
-    // Hack 1/14/25 to get compile
-    // AppObservableStore.setGlobalVariableState('editTaskGroupDrawerOpen', true);
-    // AppObservableStore.setGlobalVariableState('editTaskGroupDrawerTaskGroupId', taskGroupId);
-  };
-
-/* eslint-disable indent */
-//   React.useEffect(() => {
-// <<<<<<< HEAD
-//     // const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
-//     // onAppObservableStoreChange();
-//     const personStoreListener = QuestionnaireStore.addListener(onQuestionnaireStoreChange);
-// =======
-//     const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
-//     onAppObservableStoreChange();
-//     const questionnaireStoreListener = QuestionnaireStore.addListener(onQuestionnaireStoreChange);
-// >>>>>>> upstream/develop
-//     onQuestionnaireStoreChange();
-//     const taskStoreListener = TaskStore.addListener(onTaskStoreChange);
-//     onTaskStoreChange();
-//
-//     if (apiCalming('questionnaireListRetrieve', 1000)) {
-//       QuestionnaireActions.questionnaireListRetrieve();
-//     }
-//     if (apiCalming('taskGroupListRetrieve', 1000)) {
-//       TaskActions.taskGroupListRetrieve();
-//     }
-//
-//     return () => {
-// <<<<<<< HEAD
-//       // appStateSubscription.unsubscribe();
-//       personStoreListener.remove();
-// =======
-//       appStateSubscription.unsubscribe();
-//       questionnaireStoreListener.remove();
-//       taskStoreListener.remove();
-// >>>>>>> upstream/develop
-// End Hack 1/14/25 to get compile
 
   return (
     <div>
@@ -127,7 +102,6 @@ const SystemSettings = ({ classes }) => {
               <GoToQuestionairePage onClick={() => goToQuestionnairePageClick(questionnaire)}>
                 {questionnaire.questionnaireName}
               </GoToQuestionairePage>
-              <span style={{ width: '25px' }} />
               <EditQuestionnaire onClick={() => editQuestionnaireClick(questionnaire)}>
                 <EditStyled />
               </EditQuestionnaire>
@@ -149,13 +123,12 @@ const SystemSettings = ({ classes }) => {
         {taskGroupList.map((taskGroup) => (
           <OneQuestionnaireWrapper key={`taskGroup-${taskGroup.id}`}>
             <QuestionnaireInnerWrapper>
-              {/* Hack 1/14/25 to get compile */}
-              {/* <Link to={`/task-group/${taskGroup.id}`}> */}
-              {/*  {taskGroup.taskGroupName} */}
-              {/* </Link> */}
-              <EditQuestionnaire onClick={() => editTaskGroupClick(taskGroup.taskGroupId)}>
+              <Link to={`/task-group/${taskGroup.id}`}>
+                {taskGroup.taskGroupName}
+              </Link>
+              <EditTaskGroup onClick={() => editTaskGroupClick(taskGroup)}>
                 <EditStyled />
-              </EditQuestionnaire>
+              </EditTaskGroup>
             </QuestionnaireInnerWrapper>
           </OneQuestionnaireWrapper>
         ))}
@@ -194,6 +167,11 @@ const AddButtonWrapper = styled('div')`
 `;
 
 const EditQuestionnaire = styled('div')`
+  margin-left: 25px;
+`;
+
+const EditTaskGroup = styled('div')`
+  margin-left: 25px;
 `;
 
 const GoToQuestionairePage = styled('div')`

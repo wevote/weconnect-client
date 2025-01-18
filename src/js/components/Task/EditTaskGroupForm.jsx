@@ -1,141 +1,95 @@
 import { Button, FormControl, TextField } from '@mui/material';
 import { withStyles } from '@mui/styles';
-import React from 'react';
-import styled from 'styled-components';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import PropTypes from 'prop-types';
-import AppObservableStore, { messageService } from '../../stores/AppObservableStore';
-import TaskActions from '../../actions/TaskActions';
-import TaskStore from '../../stores/TaskStore';
+import React, { useEffect, useRef, useState } from 'react';
+import styled from 'styled-components';
 import { renderLog } from '../../common/utils/logging';
-import prepareDataPackageFromAppObservableStore from '../../common/utils/prepareDataPackageFromAppObservableStore';
+import makeRequestParams from '../../common/utils/requestParamsUtils';
+import { useConnectAppContext } from '../../contexts/ConnectAppContext';
+import weConnectQueryFn from '../../react-query/WeConnectQuery';
 
-const TASK_GROUP_FIELDS_IN_FORM = [
-  'taskGroupName', 'taskGroupDescription', 'taskGroupIsForTeam'];
+// const TASK_GROUP_FIELDS_IN_FORM = [
+//   'taskGroupName', 'taskGroupDescription', 'taskGroupIsForTeam'];
 
 const EditTaskGroupForm = ({ classes }) => {
-  renderLog('EditTaskGroupForm');  // Set LOG_RENDER_EVENTS to log all renders
-  const [firstTaskGroupDataReceived, setFirstTaskGroupDataReceived] = React.useState(false);
-  const [inputValues, setInputValues] = React.useState({});
-  // const [taskGroupId, setTaskGroupId] = React.useState(-1);
-  // const [taskGroupDictAlreadySaved, setTaskGroupDictAlreadySaved] = React.useState({});
-  const [saveButtonActive, setSaveButtonActive] = React.useState(false);
+  renderLog('EditTaskGroupForm');
+  const { getAppContextValue } = useConnectAppContext();
 
-  const clearEditFormValuesInAppObservableStore = () => {
-    const globalVariableStates = {};
-    for (let i = 0; i < TASK_GROUP_FIELDS_IN_FORM.length; i++) {
-      const fieldName = TASK_GROUP_FIELDS_IN_FORM[i];
-      globalVariableStates[`${fieldName}Changed`] = false;
-      globalVariableStates[`${fieldName}ToBeSaved`] = '';
+  const [group] = useState(getAppContextValue('editTaskGroupDrawerTaskGroup'));
+  const [groupNameValue, setGroupNameValue] = useState('');
+  const [groupDescValue, setGroupDescValue] = useState('');
+  const [saveButtonActive, setSaveButtonActive] = useState(false);
+
+  const queryClient = useQueryClient();
+  const groupNameFldRef = useRef('');
+  const groupDescFldRef = useRef('');
+
+  useEffect(() => {
+    if (group) {
+      setGroupNameValue(group.taskGroupName);
+      setGroupDescValue(group.taskGroupDescription);
+    } else {
+      setGroupNameValue('');
+      setGroupDescValue('');
     }
-    globalVariableStates.editTaskGroupDrawerTaskGroupId = -1;
-    // console.log('clearEditFormValuesInAppObservableStore globalVariableStates:', globalVariableStates);
-    AppObservableStore.setGlobalVariableStateInBulk(globalVariableStates);
-  };
+  }, [group]);
 
-  const clearEditedValues = () => {
-    setInputValues({});
-    setFirstTaskGroupDataReceived(false);
-    // setTaskGroupId(-1);
-    clearEditFormValuesInAppObservableStore();
-    AppObservableStore.setGlobalVariableState('editTaskGroupDrawerOpen', false);
-  };
-
-  const updateInputValuesFromTaskStore = (inputValuesIncoming) => {
-    const revisedInputValues = { ...inputValuesIncoming };
-    const taskGroupIdTemp = AppObservableStore.getGlobalVariableState('editTaskGroupDrawerTaskGroupId');
-    const taskGroupDict = TaskStore.getTaskGroupById(taskGroupIdTemp) || {};
-    // console.log('=== updateInputValuesFromTaskStore taskGroupIdTemp:', taskGroupIdTemp, ', taskGroupDict:', taskGroupDict);
-    if (taskGroupIdTemp && taskGroupDict.taskGroupId) {
-      // console.log('taskGroupIdTemp:', taskGroupIdTemp, ', taskGroupDict.taskGroupId:', taskGroupDict.taskGroupId);
-      // setTaskGroupDictAlreadySaved(taskGroupDict);
-      for (let i = 0; i < TASK_GROUP_FIELDS_IN_FORM.length; i++) {
-        const fieldName = TASK_GROUP_FIELDS_IN_FORM[i];
-        revisedInputValues[fieldName] = taskGroupDict[fieldName];
-      }
-    }
-    return revisedInputValues;
-  };
-
-  const onAppObservableStoreChange = () => {
-    const editTaskGroupDrawerOpenTemp = AppObservableStore.getGlobalVariableState('editTaskGroupDrawerOpen');
-    const taskGroupIdTemp = AppObservableStore.getGlobalVariableState('editTaskGroupDrawerTaskGroupId');
-    if (taskGroupIdTemp >= 0 && !editTaskGroupDrawerOpenTemp) {
-      clearEditedValues();
-    }
-  };
-
-  const onTaskStoreChange = () => {
-    const taskGroupIdTemp = AppObservableStore.getGlobalVariableState('editTaskGroupDrawerTaskGroupId');
-    const taskGroupDict = TaskStore.getTaskGroupById(taskGroupIdTemp) || {};
-    if (!firstTaskGroupDataReceived) {
-      if (taskGroupIdTemp && taskGroupDict.taskGroupId) {
-        const inputValuesRevised = updateInputValuesFromTaskStore(inputValues);
-        setFirstTaskGroupDataReceived(true);
-        setInputValues(inputValuesRevised);
-      }
-    }
-  };
+  const groupSaveMutation = useMutation({
+    mutationFn: (requestParams) => weConnectQueryFn('task-group-save', requestParams),
+    onSuccess: () => {
+      // console.log('--------- groupSaveMutation mutated --------- ');
+      queryClient.invalidateQueries('task-group-retrieve').then(() => {});
+    },
+  });
 
   const saveTaskGroup = () => {
-    const taskGroupIdTemp = AppObservableStore.getGlobalVariableState('editTaskGroupDrawerTaskGroupId');
-    const data = prepareDataPackageFromAppObservableStore(TASK_GROUP_FIELDS_IN_FORM);
-    // console.log('saveTaskGroup data:', data);
-    TaskActions.taskGroupSave(taskGroupIdTemp, data);
+    const requestParams = makeRequestParams({
+      taskGroupId: group ? group.id : '-1',
+    }, {
+      taskGroupName: groupNameFldRef.current.value,
+      taskGroupDescription: groupDescFldRef.current.value,
+    });
+    groupSaveMutation.mutate(requestParams);
+    console.log('saveTaskGroup requestParams:', requestParams);
     setSaveButtonActive(false);
-    setTimeout(() => {
-      clearEditedValues();
-    }, 250);
   };
 
-  const updateTaskGroupField = (event) => {
-    if (event.target.name) {
-      const newValue = event.target.value || '';
-      AppObservableStore.setGlobalVariableState(`${event.target.name}Changed`, true);
-      AppObservableStore.setGlobalVariableState(`${event.target.name}ToBeSaved`, newValue);
-      // console.log('updateTaskGroupField:', event.target.name, ', newValue:', newValue);
-      setInputValues({ ...inputValues, [event.target.name]: newValue });
-      setSaveButtonActive(true);
-    } else {
-      console.error('updateTaskGroupField Invalid event:', event);
+  const updateSaveButton = () => {
+    if (groupNameFldRef.current.value && groupNameFldRef.current.value.length &&
+      groupDescFldRef.current.value && groupDescFldRef.current.value.length) {
+      if (!saveButtonActive) {
+        setSaveButtonActive(true);
+      }
     }
   };
-
-  React.useEffect(() => {
-    const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
-    onAppObservableStoreChange();
-    const personStoreListener = TaskStore.addListener(onTaskStoreChange);
-    onTaskStoreChange();
-
-    return () => {
-      appStateSubscription.unsubscribe();
-      personStoreListener.remove();
-    };
-  }, []);
 
   return (
     <EditTaskGroupFormWrapper>
       <FormControl classes={{ root: classes.formControl }}>
         <TextField
           autoFocus
+          defaultValue={groupNameValue}
           id="taskGroupNameToBeSaved"
+          inputRef={groupNameFldRef}
           label="Task Grouping Name"
-          name="taskGroupName"
           margin="dense"
-          onChange={updateTaskGroupField}
+          name="taskGroupName"
+          onChange={() => updateSaveButton()}
           placeholder="Name of sequence of tasks"
-          value={inputValues.taskGroupName || ''}
           variant="outlined"
         />
         <TextField
+          defaultValue={groupDescValue}
           id="taskGroupDescriptionToBeSaved"
+          inputRef={groupDescFldRef}
           label="Description of this task grouping"
           margin="dense"
           multiline
           name="taskGroupDescription"
-          onChange={updateTaskGroupField}
+          onChange={() => updateSaveButton()}
           placeholder="Task grouping description"
           rows={6}
-          value={inputValues.taskGroupDescription || ''}
           variant="outlined"
         />
         <Button

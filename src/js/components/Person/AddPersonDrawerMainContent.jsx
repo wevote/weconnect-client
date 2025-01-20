@@ -1,104 +1,120 @@
-import React from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import React, { useState } from 'react';
+import { useParams } from 'react-router';
 import styled from 'styled-components';
-import PropTypes from 'prop-types';
-import { withStyles } from '@mui/styles';
-import { SpanWithLinkStyle } from '../Style/linkStyles';
-import AppObservableStore, { messageService } from '../../stores/AppObservableStore';
-import PersonActions from '../../actions/PersonActions';
-import TeamActions from '../../actions/TeamActions';
-import PersonStore from '../../stores/PersonStore';
-import TeamStore from '../../stores/TeamStore';
-import apiCalming from '../../common/utils/apiCalming';
 import SearchBar2024 from '../../common/components/Search/SearchBar2024';
 import arrayContains from '../../common/utils/arrayContains';
 import { renderLog } from '../../common/utils/logging';
+import { useConnectAppContext } from '../../contexts/ConnectAppContext';
+import weConnectQueryFn from '../../react-query/WeConnectQuery';
+import { SpanWithLinkStyle } from '../Style/linkStyles';
 import AddPersonForm from './AddPersonForm';
 
 
-const AddPersonDrawerMainContent = ({ classes }) => {  //  classes, teamId
-  renderLog('AddPersonDrawerMainContent');  // Set LOG_RENDER_EVENTS to log all renders
-  const [allCachedPeopleList, setAllCachedPeopleList] = React.useState([]);
-  const [searchText, setSearchText] = React.useState('');
-  const [personSearchResultsList, setPersonSearchResultsList] = React.useState([]);
-  const [teamId, setTeamId] = React.useState(-1);
-  const [teamMemberPersonIdList, setTeamMemberPersonIdList] = React.useState([]);
+// eslint-disable-next-line no-unused-vars
+const AddPersonDrawerMainContent = () => {
+  renderLog('AddPersonDrawerMainContent');
+  const { getAppContextValue } = useConnectAppContext();
 
-  const onAppObservableStoreChange = () => {
-    // console.log('AddPersonDrawerMainContent AppObservableStore-addPersonDrawerTeamId: ', AppObservableStore.getGlobalVariableState('addPersonDrawerTeamId'));
-    setTeamId(AppObservableStore.getGlobalVariableState('addPersonDrawerTeamId'));
-  };
+  const params  = useParams();
+  console.log('AddPersonDrawerMainContent params: ', params);
+  const queryClient = useQueryClient();
 
-  const onPersonStoreChange = () => {
-    const personSearchResultsListTemp = PersonStore.getSearchResults();
-    // console.log('AddPersonDrawerMainContent personSearchResultsList:', personSearchResultsListTemp);
-    setAllCachedPeopleList(PersonStore.getAllCachedPeopleList());
-    setPersonSearchResultsList(personSearchResultsListTemp);
-    const teamIdTemp = AppObservableStore.getGlobalVariableState('addPersonDrawerTeamId');
-    // console.log('AddPersonDrawerMainContent-onPersonStoreChange teamIdTemp: ', teamIdTemp, ', teamMemberPersonIdList:', TeamStore.getTeamMemberPersonIdList(teamIdTemp));
-    setTeamMemberPersonIdList(TeamStore.getTeamMemberPersonIdList(teamIdTemp));
-    setTeamId(teamIdTemp);
-  };
+  const [staffToDisplayList, setStaffToDisplayList] = useState([]);
+  // eslint-disable-next-line no-unused-vars
+  const [searchText, setSearchText] = useState('');
+  const [allStaffList, setAllStaffList] = useState(getAppContextValue('allStaffList'));
+  const [thisTeamsCurrentMembersList, setThisTeamsCurrentMembersList] = useState([]);
+  const [teamId, setTeamId] = useState(getAppContextValue('teamId'));
+  const [teamName, setTeamName] = useState('');
 
-  const onTeamStoreChange = () => {
-    const teamIdTemp = AppObservableStore.getGlobalVariableState('addPersonDrawerTeamId');
-    // console.log('AddPersonDrawerMainContent-onTeamStoreChange teamIdTemp: ', teamIdTemp, ', teamMemberPersonIdList:', TeamStore.getTeamMemberPersonIdList(teamIdTemp));
-    setTeamMemberPersonIdList(TeamStore.getTeamMemberPersonIdList(teamIdTemp));
-    setTeamId(teamIdTemp);
-  };
+  // eslint-disable-next-line no-unused-vars
+  const [teamMemberPersonIdList, setTeamMemberPersonIdList] = useState([]);
+  // eslint-disable-next-line no-unused-vars
+  const [searchResultsList, setSearchResultsList] = useState([]);
 
-  const searchFunction = (incomingSearchText) => {
-    let searchingJustStarted = false;
-    if (searchText.length === 0 && incomingSearchText.length > 0) {
-      searchingJustStarted = true;
+  let memberList = [];
+  const teamListFromContext = getAppContextValue('teamListNested');
+  if (teamListFromContext  && thisTeamsCurrentMembersList.length === 0 && teamName === '') {
+    const oneTeam = teamListFromContext.find((team) => team.id === parseInt(teamId));
+    setTeamName(oneTeam.teamName);
+    setTeamId(oneTeam.id);
+
+    if (oneTeam && oneTeam.teamMemberList.length > 0) {
+      memberList = oneTeam.teamMemberList;
+      setThisTeamsCurrentMembersList(memberList);
     }
-    const isSearching = (incomingSearchText && incomingSearchText.length > 0);
-    const teamIdTemp = AppObservableStore.getGlobalVariableState('addPersonDrawerTeamId');
-    if (apiCalming(`addPersonToTeamSearch-${teamIdTemp}-${incomingSearchText}`, 60000)) { // Only once per 60 seconds
-      PersonActions.personListRetrieve(incomingSearchText);
-    }
-    setSearchText(incomingSearchText);
-  };
+  } else {
+    // console.log('no teamListFromContext yet!');
+  }
+
+  if (staffToDisplayList.length === 0 && allStaffList && allStaffList.length > 0) {
+    const staffToDisplay = [];
+    allStaffList.forEach((oneStaff) => {
+      const isOnTeam = memberList.some((obj) => obj.id === oneStaff.id);
+      if (!isOnTeam) {
+        staffToDisplay.push(oneStaff);
+      }
+    });
+    setStaffToDisplayList(staffToDisplay);
+  }
+
+  const addPersonToTeamMutation = useMutation({
+    mutationFn: (person) => weConnectQueryFn('add-person-to-team', {
+      personId: person.id,
+      teamId,
+      teamMemberFirstName: person.firstName,
+      teamMemberLastName: person.lastName,
+      teamName,
+    }),
+  });
+
+  // TODO: 1/6/25: revive search
+  // const searchFunction = (incomingSearchText) => {
+  // let searchingJustStarted = false;
+  // if (searchText.length === 0 && incomingSearchText.length > 0) {
+  //   searchingJustStarted = true;
+  // }
+  // const isSearching = (incomingSearchText && incomingSearchText.length > 0);
+  //   const teamIdTemp = getAppContextValue('addPersonDrawerTeamId');
+  //   if (apiCalming(`addPersonToTeamSearch-${teamIdTemp}-${incomingSearchText}`, 60000)) { // Only once per 60 seconds
+  //     PersonActions.personListRetrieve(incomingSearchText);
+  //   }
+  //   setSearchText(incomingSearchText);
+  // };
 
   const clearFunction = () => {
-    setPersonSearchResultsList([]);
+    setAllStaffList([]);
     setSearchText('');
   };
 
-  React.useEffect(() => {
-    const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
-    onAppObservableStoreChange();
-    const personStoreListener = PersonStore.addListener(onPersonStoreChange);
-    onPersonStoreChange();
-    const teamStoreListener = TeamStore.addListener(onTeamStoreChange);
-    onTeamStoreChange();
-
-    if (apiCalming('personListRetrieve', 30000)) {
-      PersonActions.personListRetrieve();
+  const addClicked = (person) => {
+    addPersonToTeamMutation.mutate(person);
+    if (addPersonToTeamMutation.isSuccess) {
+      queryClient.invalidateQueries('team-list-retrieve').then(() => {
+        // This removes the recently "added" staff, from the list of staff who can be added, the staffToDisplayList
+        const updatedStaffToDisplayList = staffToDisplayList.filter((staff) => staff.id !== person.id);
+        setStaffToDisplayList(updatedStaffToDisplayList);
+      });
     }
-
-    return () => {
-      // console.log('AddPersonDrawerMainContent cleanup');
-      appStateSubscription.unsubscribe();
-      personStoreListener.remove();
-      teamStoreListener.remove();
-    };
-  }, []);
+  };
 
   return (
     <AddPersonDrawerMainContentWrapper>
       <SearchBarWrapper>
         <SearchBar2024
           placeholder="Search by name"
-          searchFunction={searchFunction}
+          // searchFunction={searchFunction}
+          searchFunction={() => console.log('searchFunction')}
           clearFunction={clearFunction}
           searchUpdateDelayTime={750}
         />
       </SearchBarWrapper>
-      {(personSearchResultsList && personSearchResultsList.length > 0) && (
+      {(searchResultsList && searchResultsList.length > 0) && (
         <PersonSearchResultsWrapper>
           <PersonListTitle>Search Results:</PersonListTitle>
           <PersonList>
-            {personSearchResultsList.map((person, index) => (
+            {searchResultsList.map((person) => (
               <PersonItem key={`personResult-${person.id}`}>
                 {person.firstName}
                 {' '}
@@ -106,7 +122,7 @@ const AddPersonDrawerMainContent = ({ classes }) => {  //  classes, teamId
                 {!arrayContains(person.id, teamMemberPersonIdList) && (
                   <>
                     {' '}
-                    <SpanWithLinkStyle onClick={() => TeamActions.addPersonToTeam(person.id, teamId)}>add</SpanWithLinkStyle>
+                    <SpanWithLinkStyle onClick={() => addClicked(person)}>add</SpanWithLinkStyle>
                   </>
                 )}
               </PersonItem>
@@ -117,7 +133,7 @@ const AddPersonDrawerMainContent = ({ classes }) => {  //  classes, teamId
       <PersonDirectoryWrapper>
         <PersonListTitle>All Staff:</PersonListTitle>
         <PersonList>
-          {allCachedPeopleList.map((person, index) => (
+          {staffToDisplayList.map((person) => (
             <PersonItem key={`personResult-${person.id}`}>
               {person.firstName}
               {' '}
@@ -125,7 +141,7 @@ const AddPersonDrawerMainContent = ({ classes }) => {  //  classes, teamId
               {!arrayContains(person.id, teamMemberPersonIdList) && (
                 <>
                   {' '}
-                  <SpanWithLinkStyle onClick={() => TeamActions.addPersonToTeam(person.id, teamId)}>add</SpanWithLinkStyle>
+                  <SpanWithLinkStyle onClick={() => addClicked(person)}>add</SpanWithLinkStyle>
                 </>
               )}
             </PersonItem>
@@ -138,12 +154,6 @@ const AddPersonDrawerMainContent = ({ classes }) => {  //  classes, teamId
     </AddPersonDrawerMainContentWrapper>
   );
 };
-AddPersonDrawerMainContent.propTypes = {
-  classes: PropTypes.object.isRequired,
-};
-
-const styles = () => ({
-});
 
 const AddPersonDrawerMainContentWrapper = styled('div')`
 `;
@@ -173,4 +183,4 @@ const SearchBarWrapper = styled('div')`
   margin-bottom: 16px;
 `;
 
-export default withStyles(styles)(AddPersonDrawerMainContent);
+export default AddPersonDrawerMainContent;

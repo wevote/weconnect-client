@@ -1,36 +1,26 @@
+import { withStyles } from '@mui/styles';
+import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
-import PropTypes from 'prop-types';
-import { withStyles } from '@mui/styles';
-import TeamStore from '../../stores/TeamStore';
-import PersonSummaryRow from '../Person/PersonSummaryRow';
 import { renderLog } from '../../common/utils/logging';
-
+import { useConnectAppContext } from '../../contexts/ConnectAppContext';
+import PersonSummaryRow from '../Person/PersonSummaryRow';
 
 const TeamMemberList = ({ teamId }) => {
-  renderLog('TeamMemberList');  // Set LOG_RENDER_EVENTS to log all renders
-  // const [teamMemberList, setTeamMemberList] = React.useState([]);
+  renderLog('TeamMemberList');
+  const { getAppContextValue } = useConnectAppContext();
 
-  const onTeamStoreChange = () => {
-    // onRetrieveTeamListChange();
-  };
+  let teamMemberList = [];
+  const teamListFromContext = getAppContextValue('teamListNested');
+  if (teamListFromContext) {
+    const oneTeam = teamListFromContext.find((staff) => staff.teamId === parseInt(teamId));
+    if (oneTeam && oneTeam.teamMemberList.length > 0) {
+      teamMemberList = oneTeam.teamMemberList;
+    }
+  } else {
+    console.log('no teamListFromContext yet!');
+  }
 
-  React.useEffect(() => {
-    // setTeamMemberList([]);
-    const teamStoreListener = TeamStore.addListener(onTeamStoreChange);
-    onTeamStoreChange();
-
-    return () => {
-      teamStoreListener.remove();
-    };
-  }, []);
-
-  React.useEffect(() => {
-    // console.log('useEffect teamId changed:', teamId);
-    onTeamStoreChange();
-  }, [teamId]);
-
-  const teamMemberList = TeamStore.getTeamMemberList(teamId);
   return (
     <TeamMembersWrapper>
       {teamMemberList.map((person, index) => (
@@ -45,7 +35,7 @@ const TeamMemberList = ({ teamId }) => {
   );
 };
 TeamMemberList.propTypes = {
-  teamId: PropTypes.number.isRequired,
+  teamId: PropTypes.any.isRequired,
 };
 
 const styles = (theme) => ({

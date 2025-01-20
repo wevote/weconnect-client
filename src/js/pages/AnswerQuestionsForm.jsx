@@ -1,42 +1,37 @@
 import { Button, FormControl, TextField } from '@mui/material';
-import React from 'react';
+import { withStyles } from '@mui/styles';
+import PropTypes from 'prop-types';
+import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import styled from 'styled-components';
-import PropTypes from 'prop-types';
-import { withStyles } from '@mui/styles';
-import AppObservableStore, { messageService } from '../stores/AppObservableStore';
 import QuestionnaireActions from '../actions/QuestionnaireActions';
-import QuestionnaireStore from '../stores/QuestionnaireStore';
+import DesignTokenColors from '../common/components/Style/DesignTokenColors';
+import convertToInteger from '../common/utils/convertToInteger';
+import { renderLog } from '../common/utils/logging';
 import { PageContentContainer } from '../components/Style/pageLayoutStyles';
 import webAppConfig from '../config';
-import DesignTokenColors from '../common/components/Style/DesignTokenColors';
-import apiCalming from '../common/utils/apiCalming';
-import { renderLog } from '../common/utils/logging';
-import convertToInteger from '../common/utils/convertToInteger';
 
 
 const AnswerQuestionsForm = ({ classes, match }) => {
   renderLog('AnswerQuestionsForm');  // Set LOG_RENDER_EVENTS to log all renders
-  const [questionList, setQuestionList] = React.useState([]);
-  const [questionnaire, setQuestionnaire] = React.useState({});
-  const [questionnaireCount, setQuestionnaireCount] = React.useState(0);
-  const [questionnaireId, setQuestionnaireId] = React.useState(-1);
-  const [saveButtonActive, setSaveButtonActive] = React.useState(false);
-  const [inputValues, setInputValues] = React.useState({});
+  const [questionList] = useState([]);
+  const [questionnaire] = useState({});
+  // const [questionnaireCount, setQuestionnaireCount] = useState(0);
+  // const [questionnaireId, setQuestionnaireId] = useState(-1);
+  const [saveButtonActive, setSaveButtonActive] = useState(false);
+  const [inputValues, setInputValues] = useState({});
 
-  const onAppObservableStoreChange = () => {
-  };
-
-  const onQuestionnaireStoreChange = () => {
-    const { params } = match;
-    const questionnaireIdTemp = convertToInteger(params.questionnaireId);
-    const questionnaireTemp = QuestionnaireStore.getQuestionnaireById(questionnaireIdTemp);
-    setQuestionnaire(questionnaireTemp);
-    const questionListTemp = QuestionnaireStore.getQuestionListByQuestionnaireId(questionnaireIdTemp);
-    // console.log('AnswerQuestionsForm QuestionnaireStore.getQuestionList:', questionListTemp);
-    setQuestionList(questionListTemp);
-    setQuestionnaireCount(questionListTemp.length);
-  };
+  //
+  // const onQuestionnaireStoreChange = () => {
+  //   const { params } = match;
+  //   const questionnaireIdTemp = convertToInteger(params.questionnaireId);
+  //   const questionnaireTemp = QuestionnaireStore.getQuestionnaireById(questionnaireIdTemp);
+  //   setQuestionnaire(questionnaireTemp);
+  //   const questionListTemp = QuestionnaireStore.getQuestionListByQuestionnaireId(questionnaireIdTemp);
+  //   // console.log('AnswerQuestionsForm QuestionnaireStore.getQuestionList:', questionListTemp);
+  //   setQuestionList(questionListTemp);
+  //   setQuestionnaireCount(questionListTemp.length);
+  // };
 
   const updateQuestionAnswer = (event) => {
     // The input name must match the person field being updated
@@ -62,32 +57,32 @@ const AnswerQuestionsForm = ({ classes, match }) => {
     setSaveButtonActive(false);
   };
 
-  React.useEffect(() => {
-    const { params } = match;
-    const questionnaireIdTemp = convertToInteger(params.questionnaireId);
+  // React.useEffect(() => {
+  //   const { params } = match;
+  //   const questionnaireIdTemp = convertToInteger(params.questionnaireId);
+  //
+  //   // const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
+  //   // onAppObservableStoreChange();
+  //   // const questionnaireStoreListener = QuestionnaireStore.addListener(onQuestionnaireStoreChange);
+  //   // onQuestionnaireStoreChange();
+  //
+  //   if (questionnaireIdTemp >= 0) {
+  //     if (apiCalming('questionnaireListRetrieve', 10000)) {
+  //       QuestionnaireActions.questionnaireListRetrieve();
+  //     }
+  //     if (apiCalming(`questionListRetrieve-${questionnaireIdTemp}`, 10000)) {
+  //       QuestionnaireActions.questionListRetrieve(questionnaireIdTemp);
+  //     }
+  //   }
+  //
+  //   return () => {
+  //     // appStateSubscription.unsubscribe();
+  //     // questionnaireStoreListener.remove();
+  //   };
+  // }, []);
 
-    const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
-    onAppObservableStoreChange();
-    const questionnaireStoreListener = QuestionnaireStore.addListener(onQuestionnaireStoreChange);
-    onQuestionnaireStoreChange();
-
-    if (questionnaireIdTemp >= 0) {
-      if (apiCalming('questionnaireListRetrieve', 10000)) {
-        QuestionnaireActions.questionnaireListRetrieve();
-      }
-      if (apiCalming(`questionListRetrieve-${questionnaireIdTemp}`, 10000)) {
-        QuestionnaireActions.questionListRetrieve(questionnaireIdTemp);
-      }
-    }
-
-    return () => {
-      appStateSubscription.unsubscribe();
-      questionnaireStoreListener.remove();
-    };
-  }, []);
-
-  const { params } = match;
-  const questionnaireIdTemp = convertToInteger(params.questionnaireId);
+  // const { params } = match;
+  // const questionnaireIdTemp = convertToInteger(params.questionnaireId);
 
   return (
     <div>

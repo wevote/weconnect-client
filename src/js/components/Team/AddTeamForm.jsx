@@ -1,83 +1,61 @@
 import { Button, FormControl, TextField } from '@mui/material';
 import { withStyles } from '@mui/styles';
-import React from 'react';
-import styled from 'styled-components';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import PropTypes from 'prop-types';
-import AppObservableStore, { messageService } from '../../stores/AppObservableStore';
-import TeamActions from '../../actions/TeamActions';
-import TeamStore from '../../stores/TeamStore';
+import React, { useRef, useState } from 'react';
+import styled from 'styled-components';
 import { renderLog } from '../../common/utils/logging';
-import prepareDataPackageFromAppObservableStore from '../../common/utils/prepareDataPackageFromAppObservableStore';
+import { useConnectAppContext } from '../../contexts/ConnectAppContext';
+import weConnectQueryFn from '../../react-query/WeConnectQuery';
 
 
-const AddTeamForm = ({ classes }) => {  //  classes, teamId
-  renderLog('AddTeamForm');  // Set LOG_RENDER_EVENTS to log all renders
-  const [teamName, setTeamName] = React.useState('');
+const AddTeamForm = ({ classes }) => {
+  renderLog('AddTeamForm');
+  const { getAppContextValue } = useConnectAppContext();
 
-  const onAppObservableStoreChange = () => {
-  };
+  const teamNameFldRef = useRef('');
+  const queryClient = useQueryClient();
+  const [team] = useState(getAppContextValue('teamForAddTeamDrawer'));
+  const [teamNameCached, setTeamNameCached] = useState(team && team.teamName);
+  const [errorText, setErrorText] = useState('');
 
-  const saveNewTeamSuccessful = () => {
-    AppObservableStore.setGlobalVariableState('addTeamDrawerOpen', false);
-    AppObservableStore.setGlobalVariableState('teamNameChanged', false);
-    AppObservableStore.setGlobalVariableState('teamNameToBeSaved', '');
-  };
-
-  const onTeamStoreChange = () => {
-    const mostRecentTeamChanged = TeamStore.getMostRecentTeamChanged();
-    // console.log('AddTeamForm onTeamStoreChange mostRecentTeamChanged:', mostRecentTeamChanged);
-    // TODO: Figure out why teamName is not being updated locally
-    // console.log('teamName:', teamName);
-    if (mostRecentTeamChanged.teamName === AppObservableStore.getGlobalVariableState('teamNameToBeSaved')) {
-      saveNewTeamSuccessful();
-    }
-  };
+  const saveTeamMutation = useMutation({
+    mutationFn: () => weConnectQueryFn(['team-save'], {
+      teamName: teamNameCached,
+      teamNameChanged: true,
+      teamId: team ? team.id : '-1',
+    }),
+    onSuccess: () => {
+      console.log('--------- saveTeamMutation addTeamForm mutated ---------');
+      queryClient.invalidateQueries(['team-list-retrieve']).then(() => {});
+    },
+  });
 
   const saveNewTeam = () => {
-    const acceptedVariables = ['teamName'];
-    const data = prepareDataPackageFromAppObservableStore(acceptedVariables);
-    // console.log('saveNewTeam data:', data);
-    TeamActions.teamSave('-1', data);
-  };
-
-  const updateTeamName = (event) => {
-    if (event.target.name === 'teamNameToBeSaved') {
-      const newTeamName = event.target.value;
-      AppObservableStore.setGlobalVariableState('teamNameChanged', true);
-      AppObservableStore.setGlobalVariableState('teamNameToBeSaved', newTeamName);
-      // console.log('updateTeamName:', newTeamName);
-      setTeamName(newTeamName);
+    const teamName = teamNameFldRef.current.value;
+    if (teamName.length === 0) {
+      setErrorText('Enter a valid team name');
+      return;
     }
+    setErrorText('');
+    setTeamNameCached(teamName);
+    console.log('saveNewTeam data:', teamName);
+    saveTeamMutation.mutate();
   };
-
-  React.useEffect(() => {
-    const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
-    onAppObservableStoreChange();
-    const teamStoreListener = TeamStore.addListener(onTeamStoreChange);
-    onTeamStoreChange();
-    if (AppObservableStore.getGlobalVariableState('teamNameToBeSaved')) {
-      setTeamName(AppObservableStore.getGlobalVariableState('teamNameToBeSaved'));
-    }
-
-    return () => {
-      appStateSubscription.unsubscribe();
-      teamStoreListener.remove();
-    };
-  }, []);
 
   return (
     <AddTeamFormWrapper>
+      <ErrorTeamLine>{errorText}</ErrorTeamLine>
       <FormControl classes={{ root: classes.formControl }}>
         <TextField
           autoFocus
-          // classes={{ root: classes.textField }} // Not working yet
+          defaultValue={teamNameCached}
           id="teamNameToBeSaved"
+          inputRef={teamNameFldRef}
           label="Team Name"
           name="teamNameToBeSaved"
           margin="dense"
-          onChange={updateTeamName}
           placeholder="Team Name"
-          value={teamName}
           variant="outlined"
         />
         <Button
@@ -86,7 +64,7 @@ const AddTeamForm = ({ classes }) => {  //  classes, teamId
           onClick={saveNewTeam}
           variant="contained"
         >
-          Save New Team
+          {team ? 'Save Team' : 'Save New Team'}
         </Button>
       </FormControl>
     </AddTeamFormWrapper>
@@ -107,6 +85,12 @@ const styles = (theme) => ({
     },
   },
 });
+
+const ErrorTeamLine = styled('div')`
+  fontWeight: 800;
+  paddingBottom: '10px';
+  color: coral;
+`;
 
 const AddTeamFormWrapper = styled('div')`
 `;

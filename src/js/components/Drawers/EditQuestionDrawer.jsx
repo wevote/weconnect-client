@@ -1,32 +1,25 @@
-import React from 'react';
-import DrawerTemplateA from './DrawerTemplateA';
+import React, { useEffect, useState } from 'react';
 import { renderLog } from '../../common/utils/logging';
+import { useConnectAppContext } from '../../contexts/ConnectAppContext';
 import EditQuestionDrawerMainContent from '../Questionnaire/EditQuestionDrawerMainContent';
-import AppObservableStore, { messageService } from '../../stores/AppObservableStore';
-
+import DrawerTemplateA from './DrawerTemplateA';
 
 const EditQuestionDrawer = () => {
-  renderLog('EditQuestionDrawer');  // Set LOG_RENDER_EVENTS to log all renders
-  const [headerTitleJsx, setHeaderTitleJsx] = React.useState(<></>);
-  const [headerFixedJsx, setHeaderFixedJsx] = React.useState(<></>);
+  renderLog('EditQuestionDrawer');
+  const { getAppContextValue } = useConnectAppContext();
 
-  const onAppObservableStoreChange = () => {
-    const questionIdTemp = AppObservableStore.getGlobalVariableState('editQuestionDrawerQuestionId');
-    if (questionIdTemp >= 0) {
+  const [headerTitleJsx, setHeaderTitleJsx] = useState(<></>);
+  const [headerFixedJsx] = useState(<></>);
+
+  useEffect(() => {  // Replaces onAppObservableStoreChange and will be called whenever the context value changes
+    console.log('EditQuestionDrawer: Context value changed:', true);
+    const question = getAppContextValue('selectedQuestion');
+    if (question && question.id >= 0) {
       setHeaderTitleJsx(<>Edit Question</>);
     } else {
       setHeaderTitleJsx(<>Add Question</>);
     }
-  };
-
-  React.useEffect(() => {
-    const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
-    onAppObservableStoreChange();
-
-    return () => {
-      appStateSubscription.unsubscribe();
-    };
-  }, []);
+  }, [getAppContextValue]);
 
   return (
     <DrawerTemplateA

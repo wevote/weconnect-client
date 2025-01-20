@@ -3,26 +3,45 @@ import styled from 'styled-components';
 import { withStyles } from '@mui/styles';
 import AddPersonDrawer from './AddPersonDrawer';
 import AddTeamDrawer from './AddTeamDrawer';
+import EditQuestionnaireDrawer from './EditQuestionnaireDrawer';
 import EditPersonDrawer from './EditPersonDrawer';
 import EditQuestionDrawer from './EditQuestionDrawer';
-import EditQuestionnaireDrawer from './EditQuestionnaireDrawer';
 import EditTaskDefinitionDrawer from './EditTaskDefinitionDrawer';
 import EditTaskGroupDrawer from './EditTaskGroupDrawer';
 import PersonProfileDrawer from './PersonProfileDrawer';
 import { renderLog } from '../../common/utils/logging';
+import { useConnectAppContext } from '../../contexts/ConnectAppContext';
 
 
-const Drawers = () => {  //  classes, teamId
-  renderLog('Drawers');  // Set LOG_RENDER_EVENTS to log all renders
+const Drawers = () => {
+  renderLog('Drawers');
+  const { getAppContextValue } = useConnectAppContext();
 
+  // Note 12/6/24, not using all these '...DrawerOpen' context values was more elegant, but lots of rendering was happening for little benefit.
+  // Maybe there is a better way...
+  let personProfile = getAppContextValue('personProfileDrawerOpen');
+  const addPerson = getAppContextValue('addPersonDrawerOpen');
+  const team = getAppContextValue('addTeamDrawerOpen');
+  const editPerson =  getAppContextValue('editPersonDrawerOpen');
+  const question = getAppContextValue('editQuestionDrawerOpen');
+  const questionnaire =  getAppContextValue('editQuestionnaireDrawerOpen');
+
+  if (personProfile === undefined) {
+    console.log('addTeamDrawerOpen setting it to false');
+    personProfile = false;
+    // team = false;
+    // setAppContextValue('personProfileDrawerOpen', false);
+    // setAppContextValue('addTeamDrawerOpen', false);
+  }
+  console.log('addTeamDrawerOpen =', getAppContextValue('addTeamDrawerOpen'));
   return (
     <DrawersWrapper>
-      <PersonProfileDrawer />
-      <AddPersonDrawer />
-      <AddTeamDrawer />
-      <EditPersonDrawer />
-      <EditQuestionDrawer />
-      <EditQuestionnaireDrawer />
+      { personProfile === true ? <PersonProfileDrawer /> : null}
+      { addPerson === true ? <AddPersonDrawer /> : null}
+      { team === true ? <AddTeamDrawer /> : null }
+      { editPerson === true ? <EditPersonDrawer /> : null}
+      { question === true ? <EditQuestionDrawer /> : null}
+      {questionnaire === true ? <EditQuestionnaireDrawer /> : null}
       <EditTaskDefinitionDrawer />
       <EditTaskGroupDrawer />
     </DrawersWrapper>

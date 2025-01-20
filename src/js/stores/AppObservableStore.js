@@ -1,8 +1,8 @@
 import { Subject } from 'rxjs';
-import VoterActions from '../actions/VoterActions'; // eslint-disable-line import/no-cycle
+// import VoterActions from '../actions/VoterActions'; // eslint-disable-line import/no-cycle
 import stringContains from '../common/utils/stringContains';
 import webAppConfig from '../config';
-import VoterStore from './VoterStore'; // eslint-disable-line import/no-cycle
+// import VoterStore from './VoterStore'; // eslint-disable-line import/no-cycle
 import { dumpObjProps } from '../utils/appleSiliconUtils';
 import $ajax from '../utils/service';
 
@@ -839,7 +839,7 @@ export default {
           if (externalVoterId && siteOwnerOrganizationWeVoteId) {
             if (!this.voterExternalIdHasBeenSavedOnce(externalVoterId, siteOwnerOrganizationWeVoteId)) {
               // console.log('voterExternalIdHasBeenSavedOnce has NOT been saved before.');
-              VoterActions.voterExternalIdSave(externalVoterId, siteOwnerOrganizationWeVoteId);
+              // Hack 1/14/25 VoterActions.voterExternalIdSave(externalVoterId, siteOwnerOrganizationWeVoteId);
               if (!voterExternalIdHasBeenSavedOnce[externalVoterId]) {
                 voterExternalIdHasBeenSavedOnce[externalVoterId] = {};
               }
@@ -893,8 +893,10 @@ export default {
   },
 
   voterCanStartCampaignXForThisPrivateLabelSite () {
-    const canEditCampaignXOwnedByOrganizationList = VoterStore.getCanEditCampaignXOwnedByOrganizationList();
-    return canEditCampaignXOwnedByOrganizationList.includes(nonFluxState.siteOwnerOrganizationWeVoteId);
+    // Hack 1/14/25 to get compile
+    // const canEditCampaignXOwnedByOrganizationList = VoterStore.getCanEditCampaignXOwnedByOrganizationList();
+    // return canEditCampaignXOwnedByOrganizationList.includes(nonFluxState.siteOwnerOrganizationWeVoteId);
+    // End Hack 1/14/25 to get compile
   },
 
   voterExternalIdHasBeenSavedOnce (externalVoterId, membershipOrganizationWeVoteId) {
@@ -910,7 +912,9 @@ export default {
   },
 
   voterIsAdminForThisUrl () {
-    const linkedOrganizationWeVoteId = VoterStore.getLinkedOrganizationWeVoteId();
-    return nonFluxState.siteOwnerOrganizationWeVoteId === linkedOrganizationWeVoteId;
+    // Hack 1/14/25 to get compile
+    // const linkedOrganizationWeVoteId = VoterStore.getLinkedOrganizationWeVoteId();
+    // return nonFluxState.siteOwnerOrganizationWeVoteId === linkedOrganizationWeVoteId;
+    // End Hack 1/14/25 to get compile
   },
 };

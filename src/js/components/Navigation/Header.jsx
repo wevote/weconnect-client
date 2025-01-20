@@ -1,9 +1,9 @@
 import PropTypes from 'prop-types';
-import React from 'react';
-import { messageService } from '../../stores/AppObservableStore';
+import React, { useState } from 'react';
 import { isCordova } from '../../common/utils/isCordovaOrWebApp';
 import { handleResize } from '../../common/utils/isMobileScreenSize';
 import { renderLog } from '../../common/utils/logging';
+import { messageService } from '../../stores/AppObservableStore';
 import cordovaTopHeaderTopMargin from '../../utils/cordovaTopHeaderTopMargin';
 import { HeadroomWrapper } from '../Style/pageLayoutStyles';
 import IPhoneSpacer from '../Widgets/IPhoneSpacer';
@@ -12,7 +12,7 @@ import HeaderBar from './HeaderBar';
 
 const Header = ({ hideHeader }) => {
   renderLog('Header');  // Set LOG_RENDER_EVENTS to log all renders
-  const [pageHeaderClasses, setPageHeaderClasses] = React.useState('');
+  const [pageHeaderClasses, setPageHeaderClasses] = useState('');
 
   const handleResizeLocal = () => {
     if (handleResize('Header')) {
@@ -48,7 +48,7 @@ const Header = ({ hideHeader }) => {
       <IPhoneSpacer />
       <HeadroomWrapper id="hw1">
         <div className={pageHeaderClasses} style={cordovaTopHeaderTopMargin()} id="header-container">
-          {!hideHeader && <HeaderBar />}
+          <HeaderBar style={hideHeader ? { display: 'none' } : { display: 'unset' }} />
         </div>
       </HeadroomWrapper>
     </div>

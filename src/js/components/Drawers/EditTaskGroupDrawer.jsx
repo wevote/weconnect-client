@@ -1,31 +1,24 @@
-import React from 'react';
-import AppObservableStore, { messageService } from '../../stores/AppObservableStore';
-import DrawerTemplateA from './DrawerTemplateA';
+import React, { useEffect, useState } from 'react';
 import { renderLog } from '../../common/utils/logging';
+import { useConnectAppContext } from '../../contexts/ConnectAppContext';
 import EditTaskGroupDrawerMainContent from '../Task/EditTaskGroupDrawerMainContent';
+import DrawerTemplateA from './DrawerTemplateA';
 
 
 const EditTaskGroupDrawer = () => {
   renderLog('EditTaskGroupDrawer');  // Set LOG_RENDER_EVENTS to log all renders
-  const [headerTitleJsx, setHeaderTitleJsx] = React.useState(<></>);
-  const [headerFixedJsx, setHeaderFixedJsx] = React.useState(<></>);
+  const { getAppContextValue } = useConnectAppContext();
 
-  const onAppObservableStoreChange = () => {
-    const questionnaireIdTemp = AppObservableStore.getGlobalVariableState('editTaskGroupDrawerTaskGroupId');
-    if (questionnaireIdTemp >= 0) {
-      setHeaderTitleJsx(<>Edit Task Grouping</>);
-    } else {
+  const [headerTitleJsx, setHeaderTitleJsx] = useState(<></>);
+  const [headerFixedJsx] = useState(<></>);
+
+  useEffect(() => {
+    const group = getAppContextValue('editTaskGroupDrawerTaskGroup');
+    if (group) {
       setHeaderTitleJsx(<>Add Task Grouping</>);
+    } else {
+      setHeaderTitleJsx(<>Edit Task Grouping</>);
     }
-  };
-
-  React.useEffect(() => {
-    const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
-    onAppObservableStoreChange();
-
-    return () => {
-      appStateSubscription.unsubscribe();
-    };
   }, []);
 
   return (

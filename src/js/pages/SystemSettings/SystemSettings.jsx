@@ -1,91 +1,83 @@
 import { Edit } from '@mui/icons-material';
 import { Button } from '@mui/material';
-import React from 'react';
-import { Helmet } from 'react-helmet-async';
-import { Link } from 'react-router-dom';
-import styled from 'styled-components';
-import PropTypes from 'prop-types';
 import { withStyles } from '@mui/styles';
-import AppObservableStore, { messageService } from '../../stores/AppObservableStore';
-import QuestionnaireActions from '../../actions/QuestionnaireActions';
-import QuestionnaireStore from '../../stores/QuestionnaireStore';
-import TaskActions from '../../actions/TaskActions';
-import TaskStore from '../../stores/TaskStore';
+import { useQueryClient } from '@tanstack/react-query';
+import PropTypes from 'prop-types';
+import React, { useEffect, useState } from 'react';
+import { Helmet } from 'react-helmet-async';
+import { Link, useNavigate } from 'react-router';
+import styled from 'styled-components';
 import DesignTokenColors from '../../common/components/Style/DesignTokenColors';
+import { renderLog } from '../../common/utils/logging';
 import { PageContentContainer } from '../../components/Style/pageLayoutStyles';
 import webAppConfig from '../../config';
-import apiCalming from '../../common/utils/apiCalming';
-import { renderLog } from '../../common/utils/logging';
+import { useConnectAppContext } from '../../contexts/ConnectAppContext';
+import useFetchData from '../../react-query/fetchData';
 
 
 const SystemSettings = ({ classes }) => {
-  renderLog('SystemSettings');  // Set LOG_RENDER_EVENTS to log all renders
-  const [questionnaireList, setQuestionnaireList] = React.useState([]);
-  const [taskGroupList, setTaskGroupList] = React.useState([]);
+  renderLog('SystemSettings');
+  const { setAppContextValue } = useConnectAppContext();
 
-  const onAppObservableStoreChange = () => {
-  };
+  // eslint-disable-next-line no-unused-vars
+  const [questionnaireList, setQuestionnaireList] = useState([]);
+  // eslint-disable-next-line no-unused-vars
+  const [taskGroupList, setTaskGroupList] = useState([]);
 
-  const onQuestionnaireStoreChange = () => {
-    const questionnaireListTemp = QuestionnaireStore.getAllCachedQuestionnairesList();
-    // console.log('SystemSettings QuestionnaireStore.getQuestionnaireList:', questionnaireListTemp);
-    setQuestionnaireList(questionnaireListTemp);
-    if (apiCalming('questionnaireListRetrieve', 1000)) {
-      QuestionnaireActions.questionnaireListRetrieve();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  const { data: dataQList, isFetching: isFetchingQList } = useFetchData(['questionnaire-list-retrieve'], {});
+  if (isFetchingQList) {
+    console.log('isFetching questionnaire-list-retrieve ------------');
+  }
+  useEffect(() => {
+    if (dataQList !== undefined && isFetchingQList === false) {
+      const questionnaireListTemp = dataQList.questionnaireList;
+      setQuestionnaireList(questionnaireListTemp);
     }
-  };
+  }, [dataQList]);
 
-  const onTaskStoreChange = () => {
-    const taskGroupListTemp = TaskStore.getAllCachedTaskGroupList();
-    // console.log('SystemSettings TaskStore.getTaskGroupList:', taskGroupListTemp);
-    setTaskGroupList(taskGroupListTemp);
-    // setTaskGroupCount(taskGroupListTemp.length);
-    if (apiCalming('taskGroupListRetrieve', 1000)) {
-      TaskActions.taskGroupListRetrieve();
+  const { data: dataGroupList, isFetching: isFetchingGroupList } = useFetchData(['task-group-list-retrieve'], {});
+  if (isFetchingGroupList) {
+    console.log('isFetching task-group-retrieve ------------');
+  }
+  useEffect(() => {
+    if (dataGroupList !== undefined && isFetchingGroupList === false) {
+      const taskListTemp = dataGroupList.taskGroupList;
+      setTaskGroupList(taskListTemp);
     }
-  };
+  }, [dataGroupList]);
 
   const addQuestionnaireClick = () => {
-    AppObservableStore.setGlobalVariableState('editQuestionnaireDrawerOpen', true);
-    AppObservableStore.setGlobalVariableState('editQuestionnaireDrawerQuestionnaireId', -1);
+    setAppContextValue('editQuestionnaireDrawerOpen', true);
+    setAppContextValue('selectedQuestionnaire', undefined);
   };
 
-  const editQuestionnaireClick = (questionnaireId) => {
-    AppObservableStore.setGlobalVariableState('editQuestionnaireDrawerOpen', true);
-    AppObservableStore.setGlobalVariableState('editQuestionnaireDrawerQuestionnaireId', questionnaireId);
+  const editQuestionnaireClick = (questionnaire) => {
+    setAppContextValue('editQuestionnaireDrawerOpen', true);
+    setAppContextValue('selectedQuestionnaire', questionnaire);
   };
 
   const addTaskGroupClick = () => {
-    AppObservableStore.setGlobalVariableState('editTaskGroupDrawerOpen', true);
-    AppObservableStore.setGlobalVariableState('editTaskGroupDrawerTaskGroupId', -1);
+    setAppContextValue('editTaskGroupDrawerOpen', true);
+    setAppContextValue('editTaskGroupDrawerTaskGroup', undefined);
   };
 
-  const editTaskGroupClick = (taskGroupId) => {
-    AppObservableStore.setGlobalVariableState('editTaskGroupDrawerOpen', true);
-    AppObservableStore.setGlobalVariableState('editTaskGroupDrawerTaskGroupId', taskGroupId);
+  // eslint-disable-next-line no-unused-vars
+  const editTaskGroupClick = (taskGroup) => {
+    setAppContextValue('editTaskGroupDrawerOpen', true);
+    setAppContextValue('editTaskGroupDrawerTaskGroup', taskGroup);
   };
 
-  React.useEffect(() => {
-    const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
-    onAppObservableStoreChange();
-    const questionnaireStoreListener = QuestionnaireStore.addListener(onQuestionnaireStoreChange);
-    onQuestionnaireStoreChange();
-    const taskStoreListener = TaskStore.addListener(onTaskStoreChange);
-    onTaskStoreChange();
+  const goToQuestionnairePageClick = (questionnaire) => {
+    setAppContextValue('selectedQuestionnaire', questionnaire);
 
-    if (apiCalming('questionnaireListRetrieve', 1000)) {
-      QuestionnaireActions.questionnaireListRetrieve();
-    }
-    if (apiCalming('taskGroupListRetrieve', 1000)) {
-      TaskActions.taskGroupListRetrieve();
-    }
+    queryClient.invalidateQueries(['question-list-retrieve']).then(() => {});
+    // console.log('goToQuestionnairePageClick = (questionnaire)', questionnaire.questionnaireId);
 
-    return () => {
-      appStateSubscription.unsubscribe();
-      questionnaireStoreListener.remove();
-      taskStoreListener.remove();
-    };
-  }, []);
+    navigate(`/questionnaire/${questionnaire.questionnaireId}`);
+  };
 
   return (
     <div>
@@ -104,12 +96,13 @@ const SystemSettings = ({ classes }) => {
         {/* ****  **** */}
         <SettingsSubtitle>Questionnaires</SettingsSubtitle>
         {questionnaireList.map((questionnaire) => (
-          <OneQuestionnaireWrapper key={`questionnaire-${questionnaire.id}`}>
+          <OneQuestionnaireWrapper key={`questionnaire-${questionnaire.questionnaireId}`}>
             <QuestionnaireInnerWrapper>
-              <Link to={`/questionnaire/${questionnaire.id}`}>
+              {/* {console.log('questionnaireList.map((questionnaire)', questionnaire.questionnaireId)} */}
+              <GoToQuestionairePage onClick={() => goToQuestionnairePageClick(questionnaire)}>
                 {questionnaire.questionnaireName}
-              </Link>
-              <EditQuestionnaire onClick={() => editQuestionnaireClick(questionnaire.questionnaireId)}>
+              </GoToQuestionairePage>
+              <EditQuestionnaire onClick={() => editQuestionnaireClick(questionnaire)}>
                 <EditStyled />
               </EditQuestionnaire>
             </QuestionnaireInnerWrapper>
@@ -133,9 +126,9 @@ const SystemSettings = ({ classes }) => {
               <Link to={`/task-group/${taskGroup.id}`}>
                 {taskGroup.taskGroupName}
               </Link>
-              <EditQuestionnaire onClick={() => editTaskGroupClick(taskGroup.taskGroupId)}>
+              <EditTaskGroup onClick={() => editTaskGroupClick(taskGroup)}>
                 <EditStyled />
-              </EditQuestionnaire>
+              </EditTaskGroup>
             </QuestionnaireInnerWrapper>
           </OneQuestionnaireWrapper>
         ))}
@@ -174,6 +167,14 @@ const AddButtonWrapper = styled('div')`
 `;
 
 const EditQuestionnaire = styled('div')`
+  margin-left: 25px;
+`;
+
+const EditTaskGroup = styled('div')`
+  margin-left: 25px;
+`;
+
+const GoToQuestionairePage = styled('div')`
 `;
 
 const EditStyled = styled(Edit)`

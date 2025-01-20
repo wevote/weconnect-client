@@ -1,91 +1,63 @@
 import { FormControl, TextField } from '@mui/material';
-import React from 'react';
-import { Helmet } from 'react-helmet-async';
-import styled from 'styled-components';
-import PropTypes from 'prop-types';
 import { withStyles } from '@mui/styles';
-import PersonActions from '../actions/PersonActions';
-import PersonStore from '../stores/PersonStore';
-import QuestionnaireActions from '../actions/QuestionnaireActions';
-import QuestionnaireStore from '../stores/QuestionnaireStore';
+import PropTypes from 'prop-types';
+import React, { useEffect, useState } from 'react';
+import { Helmet } from 'react-helmet-async';
+import { useParams } from 'react-router';
+import styled from 'styled-components';
+import DesignTokenColors from '../common/components/Style/DesignTokenColors';
+import { renderLog } from '../common/utils/logging';
 import { PageContentContainer } from '../components/Style/pageLayoutStyles';
 import webAppConfig from '../config';
-import DesignTokenColors from '../common/components/Style/DesignTokenColors';
-import apiCalming from '../common/utils/apiCalming';
-import { renderLog } from '../common/utils/logging';
-import convertToInteger from '../common/utils/convertToInteger';
-import getAnswerValueFromAnswerDict from '../utils/getAnswerValueFromAnswerDict';
+import useFetchData from '../react-query/fetchData';
 
 
+// eslint-disable-next-line no-unused-vars
 const QuestionnaireAnswers = ({ classes, match }) => {
   renderLog('QuestionnaireAnswers');  // Set LOG_RENDER_EVENTS to log all renders
-  const [allCachedAnswersDict, setAllCachedAnswersDict] = React.useState({});
-  const [fullNamePreferred, setFullNamePreferred] = React.useState('');
-  const [questionList, setQuestionList] = React.useState([]);
-  const [questionnaire, setQuestionnaire] = React.useState({});
+  const [questionnaireId] = useState(parseInt(useParams().questionnaireId));
+  const [personId] = useState(parseInt(useParams().personId));
+  const [person, setPerson] = useState(undefined);
+  const [questionList, setQuestionList] = useState(undefined);
+  const [questionnaire] = useState({});
 
-  const onPersonStoreChange = () => {
-    const { params } = match;
-    const personIdTemp = convertToInteger(params.personId);
-    const fullNamePreferredTemp = PersonStore.getFullNamePreferred(personIdTemp);
-    setFullNamePreferred(fullNamePreferredTemp);
-    // console.log('QuestionnaireAnswers-onPersonStoreChange personIdTemp: ', personIdTemp, ', fullNamePreferredTemp:', fullNamePreferredTemp);
-  };
-
-  const onQuestionnaireStoreChange = () => {
-    const { params } = match;
-    const personIdTemp = convertToInteger(params.personId);
-    const questionnaireIdTemp = convertToInteger(params.questionnaireId);
-    const questionnaireTemp = QuestionnaireStore.getQuestionnaireById(questionnaireIdTemp);
-    setQuestionnaire(questionnaireTemp);
-    const questionListTemp = QuestionnaireStore.getQuestionListByQuestionnaireId(questionnaireIdTemp);
-    // console.log('QuestionnaireAnswers QuestionnaireStore.getQuestionList:', questionListTemp);
-    setQuestionList(questionListTemp);
-    const allCachedAnswersDictTemp = QuestionnaireStore.getAllCachedAnswersDictByPersonId(personIdTemp);
-    setAllCachedAnswersDict(allCachedAnswersDictTemp);
-  };
-
-  const getAnswerValue = (questionId) => {
-    if (allCachedAnswersDict && allCachedAnswersDict[questionId]) {
-      const questionAnswer = allCachedAnswersDict[questionId];
-      return getAnswerValueFromAnswerDict(questionAnswer);
+  const { data: dataQL, isSuccess: isSuccessQL, isFetching: isFetchingQL } = useFetchData(['question-list-retrieve'], {});
+  useEffect(() => {
+    console.log('useFetchData in QuestionnaireAnswers (question-list-retrieve) useEffect:', dataQL, isSuccessQL);
+    if (isSuccessQL) {
+      setQuestionList(dataQL ? dataQL.questionList : undefined);
     }
+  }, [dataQL, isSuccessQL, isFetchingQL]);
+
+  const { data: dataPerson, isSuccess: isSuccessPerson, isFetching: isFetchingPerson } = useFetchData(['person-retrieve'], { personId });
+  useEffect(() => {
+    console.log('useFetchData in QuestionnaireAnswers (person-retrieve) useEffect:', dataPerson, isSuccessPerson);
+    if (isSuccessPerson) {
+      setPerson(dataPerson);  // hack
+    }
+  }, [dataPerson, isSuccessPerson, isFetchingPerson]);
+
+  const { data: dataQuestionList, isSuccess: isSuccessQuestionList, isFetching: isFetchingQuestionList } =
+    useFetchData(['question-list-retrieve'], { questionnaireId });
+  useEffect(() => {
+    console.log('useFetchData question-list-retrieve in QuestionnaireAnswers useEffect:', dataQuestionList, isSuccessQuestionList, isFetchingQuestionList);
+    if (dataQuestionList !== undefined && isFetchingQuestionList === false) {
+      console.log('useFetchData question-list-retrieve in QuestionnaireAnswers useEffect data is good:', dataQuestionList, isSuccessQuestionList, isFetchingQuestionList);
+      const questionListTemp = dataQuestionList.questionList;
+      console.log('Successfully retrieved question-list-retrieve... questionListTemp', questionListTemp);
+      setQuestionList(dataQuestionList.questionList);
+    }
+  }, [dataQuestionList, isFetchingQuestionList]);
+
+  /* eslint-disable arrow-body-style */
+  // eslint-disable-next-line no-unused-vars
+  const getAnswerValue = (questionId) => {
+    // if (allCachedAnswersDict && allCachedAnswersDict[questionId]) {
+    //   const questionAnswer = allCachedAnswersDict[questionId];
+    //   return getAnswerValueFromAnswerDict(questionAnswer);
+    // }
     return '';
   };
-
-  React.useEffect(() => {
-    const { params } = match;
-    const personIdTemp = convertToInteger(params.personId);
-    const questionnaireIdTemp = convertToInteger(params.questionnaireId);
-
-    const personStoreListener = PersonStore.addListener(onPersonStoreChange);
-    onPersonStoreChange();
-    const questionnaireStoreListener = QuestionnaireStore.addListener(onQuestionnaireStoreChange);
-    onQuestionnaireStoreChange();
-
-    if (questionnaireIdTemp >= 0) {
-      if (apiCalming('questionnaireListRetrieve', 10000)) {
-        QuestionnaireActions.questionnaireListRetrieve();
-      }
-      if (apiCalming(`questionListRetrieve-${questionnaireIdTemp}`, 10000)) {
-        QuestionnaireActions.questionListRetrieve(questionnaireIdTemp);
-      }
-    }
-    if (personIdTemp >= 0) {
-      if (apiCalming(`personRetrieve-${personIdTemp}`, 30000)) {
-        PersonActions.personRetrieve(personIdTemp);
-      }
-      const personIdList = [personIdTemp];
-      if (apiCalming(`questionnaireResponsesListRetrieve-${personIdTemp}`, 10000)) {
-        QuestionnaireActions.questionnaireResponsesListRetrieve(personIdList);
-      }
-    }
-
-    return () => {
-      personStoreListener.remove();
-      questionnaireStoreListener.remove();
-    };
-  }, []);
 
   return (
     <div>
@@ -106,10 +78,10 @@ const QuestionnaireAnswers = ({ classes, match }) => {
         <AnsweredBy>
           Answered by:
           {' '}
-          <AnsweredBySpan>{fullNamePreferred}</AnsweredBySpan>
+          <AnsweredBySpan>{person ? `${person.firstName} ${person.lastName}` : 'tbd'}</AnsweredBySpan>
         </AnsweredBy>
         <FormControl classes={{ root: classes.formControl }}>
-          {questionList.map((question) => (
+          {questionList && questionList.map((question) => (
             <OneQuestionWrapper key={`questionnaire-${question.id}`}>
               <QuestionText>
                 {question.questionText}
@@ -161,6 +133,8 @@ const styles = (theme) => ({
 const AnsweredBy = styled('div')`
   font-size: 1.3em;
   font-weight: 300;
+  height: 100px;
+  align-content: center;
 `;
 
 const AnsweredBySpan = styled('span')`

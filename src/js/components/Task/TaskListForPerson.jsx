@@ -1,63 +1,22 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
-import PropTypes from 'prop-types';
-import AppObservableStore, { messageService } from '../../stores/AppObservableStore';
-import PersonStore from '../../stores/PersonStore';
-import TaskStore from '../../stores/TaskStore';
-import TaskSummaryRow from './TaskSummaryRow';
 import { renderLog } from '../../common/utils/logging';
+import TaskSummaryRow from './TaskSummaryRow';
 
 
-const TaskListForPerson = ({ personId, showCompletedTasks }) => {
+const TaskListForPerson = ({ personId, showCompletedTasks, taskDefinitionList, taskListForPersonId }) => {
   renderLog('TaskListForPerson');  // Set LOG_RENDER_EVENTS to log all renders
-  const [taskList, setTaskList] = React.useState([]);
 
-  const onAppObservableStoreChange = () => {
-  };
-
-  const onRetrieveTaskStatusListChange = () => {
-    const taskListTemp = TaskStore.getTaskListForPerson(personId);
-    setTaskList(taskListTemp);
-  };
-
-  const onPersonStoreChange = () => {
-    onRetrieveTaskStatusListChange();
-  };
-
-  const onTaskStoreChange = () => {
-    onRetrieveTaskStatusListChange();
-  };
-
-  React.useEffect(() => {
-    // setTaskListForPerson([]);
-    const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
-    onAppObservableStoreChange();
-    const personStoreListener = PersonStore.addListener(onPersonStoreChange);
-    onPersonStoreChange();
-    const taskStoreListener = TaskStore.addListener(onTaskStoreChange);
-    onTaskStoreChange();
-
-    return () => {
-      appStateSubscription.unsubscribe();
-      personStoreListener.remove();
-      taskStoreListener.remove();
-    };
-  }, []);
-
-  React.useEffect(() => {
-    // console.log('useEffect personId changed:', personId);
-  }, [personId]);
-
-  // const taskList = TaskStore.getTaskListForPerson(personId);
   return (
     <TaskListWrapper>
-      {taskList.map((task, index) => (
+      {taskListForPersonId.map((task, index) => (
         <TaskSummaryRow
           hideIfCompleted={!showCompletedTasks}
           key={`taskSummaryRow-${task.personId}-${task.taskDefinitionId}`}
           personId={personId}
-          taskDefinitionId={task.taskDefinitionId}
-          taskGroupId={task.taskGroupId}
+          taskDefinition={taskDefinitionList.filter((taskDefEntry) => taskDefEntry.taskDefinitionId === task.taskDefinitionId)}
+          task={task}
           rowNumberForDisplay={index + 1}
         />
       ))}
@@ -67,6 +26,8 @@ const TaskListForPerson = ({ personId, showCompletedTasks }) => {
 TaskListForPerson.propTypes = {
   personId: PropTypes.number.isRequired,
   showCompletedTasks: PropTypes.bool,
+  taskDefinitionList: PropTypes.object,
+  taskListForPersonId: PropTypes.object,
 };
 
 const TaskListWrapper = styled('div')`

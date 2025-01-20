@@ -1,152 +1,116 @@
 import { Button, FormControl, TextField } from '@mui/material';
 import { withStyles } from '@mui/styles';
-import React from 'react';
-import styled from 'styled-components';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import PropTypes from 'prop-types';
-import AppObservableStore, { messageService } from '../../stores/AppObservableStore';
-import PersonActions from '../../actions/PersonActions';
-import PersonStore from '../../stores/PersonStore';
-import TeamStore from '../../stores/TeamStore';
+import React, { useEffect, useRef, useState } from 'react';
+import styled from 'styled-components';
 import { renderLog } from '../../common/utils/logging';
-import prepareDataPackageFromAppObservableStore from '../../common/utils/prepareDataPackageFromAppObservableStore';
+import { useConnectAppContext } from '../../contexts/ConnectAppContext';
+import weConnectQueryFn from '../../react-query/WeConnectQuery';
 
-const FIELDS_IN_FORM = ['emailPersonal', 'firstName', 'lastName'];
 
 const AddPersonForm = ({ classes }) => {  //  classes, teamId
-  renderLog('AddPersonForm');  // Set LOG_RENDER_EVENTS to log all renders
-  const [emailPersonal, setEmailPersonal] = React.useState('');
-  const [firstName, setFirstName] = React.useState('');
-  const [lastName, setLastName] = React.useState('');
-  const [teamId, setTeamId] = React.useState(-1);
+  renderLog('AddPersonForm');
+  const { getAppContextValue } = useConnectAppContext();
 
-  const onAppObservableStoreChange = () => {
-    setTeamId(AppObservableStore.getGlobalVariableState('addPersonDrawerTeamId'));
-  };
+  const [teamId, setTeamId] = useState(-1);
+  const [teamName, setTeamName] = useState('');
+  const [saveButtonActive, setSaveButtonActive] = React.useState(false);
 
-  const saveNewPersonSuccessful = () => {
-    AppObservableStore.setGlobalVariableState('addPersonDrawerOpen', false);
-    AppObservableStore.setGlobalVariableState('addPersonDrawerTeamId', -1);
-    for (let i = 0; i < FIELDS_IN_FORM.length; i++){
-      const fieldName = FIELDS_IN_FORM[i];
-      AppObservableStore.setGlobalVariableState(`${fieldName}Changed`, false);
-      AppObservableStore.setGlobalVariableState(`${fieldName}ToBeSaved`, '');
-    }
-  };
 
-  const onPersonStoreChange = () => {
-    const mostRecentPersonChanged = PersonStore.getMostRecentPersonChanged();
-    // console.log('AddPersonForm onPersonStoreChange mostRecentPersonChanged:', mostRecentPersonChanged);
-    // TODO: Figure out why firstName, lastName, and emailPersonal are not being updated
-    // console.log('firstName:', firstName, ', lastName:', lastName, ', emailPersonal:', emailPersonal);
-    // console.log('emailPersonalToBeSaved:', AppObservableStore.getGlobalVariableState('emailPersonalToBeSaved'));
-    if (mostRecentPersonChanged.emailPersonal === AppObservableStore.getGlobalVariableState('emailPersonalToBeSaved')) {
-      saveNewPersonSuccessful();
-    }
+  const queryClient = useQueryClient();
+  const firstNameFldRef = useRef('');
+  const lastNameFldRef = useRef('');
+  const emailFldRef = useRef('');
+
+  useEffect(() => {  // Replaces onAppObservableStoreChange and will be called whenever the context value changes
+    console.log('AddPersonForm: Context value changed:', true);
+    setTeamId(getAppContextValue('addPersonDrawerTeam').id);
+    setTeamName(getAppContextValue('addPersonDrawerTeam').teamName);
+  }, [getAppContextValue]);
+
+  const saveNewPersonMutation = useMutation({
+    mutationFn: (params) => weConnectQueryFn(['person-save'], params),
+    onSuccess: () => {
+      console.log('--------- saveNewPersonMutation  mutated before invalidate ---------');
+      queryClient.invalidateQueries(['team-list-retrieve']).then(() => {});
+    },
+    onError: (err) => { console.log('saveNewPersonMutation error: ', err); },
+  });
+
+  const makeSavePersonDict = (data) => {
+    let requestParams = '';
+    Object.keys(data).forEach((key) => {
+      requestParams += `${key}ToBeSaved=${data[key]}&`;
+      requestParams += `${key}Changed=${true}&`;
+    });
+    requestParams += `personId=-1&teamId=${teamId}&teamName=${teamName}`;
+    return encodeURI(requestParams);
   };
 
   const saveNewPerson = () => {
-    const data = prepareDataPackageFromAppObservableStore(FIELDS_IN_FORM);
-    if (teamId >= 0) {
-      data.teamId = teamId;
-      data.teamName = TeamStore.getTeamById(teamId).teamName;
-    }
-    // console.log('saveNewPerson data:', data);
-    PersonActions.personSave('-1', data);
-  };
-
-  const updateEmailPersonal = (event) => {
-    if (event.target.name === 'emailPersonalToBeSaved') {
-      const newEmailPersonal = event.target.value;
-      AppObservableStore.setGlobalVariableState('emailPersonalChanged', true);
-      AppObservableStore.setGlobalVariableState('emailPersonalToBeSaved', newEmailPersonal);
-      // console.log('updateEmailPersonal:', newEmailPersonal);
-      setEmailPersonal(newEmailPersonal);
-    }
-  };
-
-  const updateFirstName = (event) => {
-    if (event.target.name === 'firstNameToBeSaved') {
-      const newFirstName = event.target.value;
-      AppObservableStore.setGlobalVariableState('firstNameChanged', true);
-      AppObservableStore.setGlobalVariableState('firstNameToBeSaved', newFirstName);
-      // console.log('updateFirstName:', newFirstName);
-      setFirstName(newFirstName);
-    }
-  };
-
-  const updateLastName = (event) => {
-    if (event.target.name === 'lastNameToBeSaved') {
-      const newLastName = event.target.value;
-      AppObservableStore.setGlobalVariableState('lastNameChanged', true);
-      AppObservableStore.setGlobalVariableState('lastNameToBeSaved', newLastName);
-      // console.log('updateLastName:', newLastName);
-      setLastName(newLastName);
-    }
-  };
-
-  React.useEffect(() => {
-    const appStateSubscription = messageService.getMessage().subscribe(() => onAppObservableStoreChange());
-    onAppObservableStoreChange();
-    const personStoreListener = PersonStore.addListener(onPersonStoreChange);
-    onPersonStoreChange();
-    // console.log('Initial load emailPersonalToBeSaved:', AppObservableStore.getGlobalVariableState('emailPersonalToBeSaved'));
-    if (AppObservableStore.getGlobalVariableState('emailPersonalToBeSaved')) {
-      setEmailPersonal(AppObservableStore.getGlobalVariableState('emailPersonalToBeSaved'));
-    }
-    if (AppObservableStore.getGlobalVariableState('firstNameToBeSaved')) {
-      setFirstName(AppObservableStore.getGlobalVariableState('firstNameToBeSaved'));
-    }
-    if (AppObservableStore.getGlobalVariableState('lastNameToBeSaved')) {
-      setLastName(AppObservableStore.getGlobalVariableState('lastNameToBeSaved'));
-    }
-
-    return () => {
-      appStateSubscription.unsubscribe();
-      personStoreListener.remove();
+    const data = {
+      firstName: firstNameFldRef.current.value,
+      lastName: lastNameFldRef.current.value,
+      emailPersonal: emailFldRef.current.value,
     };
-  }, []);
+    const requestParams = makeSavePersonDict(data);
+    // http://localhost:4500/apis/v1/person-save/?personId=-1&emailPersonalChanged=true&emailPersonalToBeSaved=steve%40gmail.com&firstNameChanged=true&firstNameToBeSaved=Steve&lastNameChanged=true&lastNameToBeSaved=Smithl&teamId=1&teamName=Levi
+    saveNewPersonMutation.mutate(requestParams);
+  };
+
+  const updateSaveButton = () => {
+    if (firstNameFldRef.current.value && firstNameFldRef.current.value.length &&
+      lastNameFldRef.current.value && lastNameFldRef.current.value.length &&
+      emailFldRef.current.value && emailFldRef.current.value.length) {
+      if (!saveButtonActive) {
+        setSaveButtonActive(true);
+      }
+    }
+  };
+
 
   return (
     <AddPersonFormWrapper>
       <FormControl classes={{ root: classes.formControl }}>
         <TextField
-          autoFocus
           // classes={{ root: classes.textField }} // Not working yet
+          autoFocus
           id="firstNameToBeSaved"
+          inputRef={firstNameFldRef}
           label="First Name"
-          name="firstNameToBeSaved"
           margin="dense"
-          variant="outlined"
+          name="firstNameToBeSaved"
+          onChange={() => updateSaveButton()}
           placeholder="First Name"
-          value={firstName}
-          onChange={updateFirstName}
+          variant="outlined"
         />
         <TextField
           // classes={{ root: classes.textField }} // Not working yet
           id="lastNameToBeSaved"
+          inputRef={lastNameFldRef}
           label="Last Name"
-          name="lastNameToBeSaved"
           margin="dense"
-          variant="outlined"
+          name="lastNameToBeSaved"
+          onChange={() => updateSaveButton()}
           placeholder="Last Name"
-          value={lastName}
-          onChange={updateLastName}
+          variant="outlined"
         />
         <TextField
           // classes={{ root: classes.textField }} // Not working yet
           id="emailPersonalToBeSaved"
+          inputRef={emailFldRef}
           label="Email Address, Personal"
-          name="emailPersonalToBeSaved"
           margin="dense"
-          variant="outlined"
+          name="emailPersonalToBeSaved"
+          onChange={() => updateSaveButton()}
           placeholder="Email Address, Personal"
-          value={emailPersonal}
-          onBlur={updateEmailPersonal}
-          onChange={updateEmailPersonal}
+          variant="outlined"
         />
         <Button
           classes={{ root: classes.saveNewPersonButton }}
           color="primary"
+          disabled={!saveButtonActive}
           variant="contained"
           onClick={saveNewPerson}
         >

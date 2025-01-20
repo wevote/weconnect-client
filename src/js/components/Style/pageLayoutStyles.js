@@ -1,18 +1,23 @@
-import { AppBar } from '@mui/material';
 import styled from 'styled-components';
 import standardBoxShadow from '../../common/components/Style/standardBoxShadow';
-import AppObservableStore from '../../stores/AppObservableStore';
-import { hasDynamicIsland, hasIPhoneNotch, isAndroidSizeMD, isAndroidSizeWide, isAndroidSizeXL, isIOS, isIOSAppOnMac, isIPad, isIPad11in, isIPadMini, isIPhone14Pro, isIPhone4p7in, isIPhone5p5inEarly, isIPhone5p5inMini, isIPhone6p1in, isIPhone6p5in } from '../../common/utils/cordovaUtils';
+import {
+  hasDynamicIsland,
+  isAndroidSizeMD,
+  isAndroidSizeWide,
+  isAndroidSizeXL,
+  isIOSAppOnMac,
+  isIPad,
+  isIPad11in,
+  isIPadMini,
+  isIPhone14Pro,
+  isIPhone4p7in,
+  isIPhone5p5inEarly,
+  isIPhone5p5inMini,
+} from '../../common/utils/cordovaUtils';
 import { normalizedHrefPage } from '../../common/utils/hrefUtils';
 import { isAndroid, isCordova, isWebApp } from '../../common/utils/isCordovaOrWebApp';
 import isMobileScreenSize, { isTablet } from '../../common/utils/isMobileScreenSize';
-import { cordovaOffsetLog } from '../../common/utils/logging';
-import CordovaPageConstants from '../../constants/CordovaPageConstants';
-import VoterStore from '../../stores/VoterStore';
-import { cordovaComplexHeaderPageContainerTopOffset, cordovaSimplePageContainerTopOffset } from '../../utils/cordovaCalculatedOffsets';
 import { cordovaBallotFilterTopMargin } from '../../utils/cordovaOffsets';
-import cordovaScrollablePaneTopPadding from '../../utils/cordovaScrollablePaneTopPadding';
-import { pageEnumeration } from '../../utils/cordovaUtilsPageEnumeration';
 
 
 export const IOSNotchedSpacer = styled('div')`
@@ -22,7 +27,7 @@ export const IOSNotchedSpacer = styled('div')`
     return                        '36px';
   }};
   top: 0;
-  position: fixed;
+  position: fixed;Ï
   background: white;
   width: 100%;
   opacity: 1;
@@ -44,6 +49,8 @@ export const IOSNoNotchSpacer = styled('div')`
 `;
 
 function getPaddingTop () {
+  /* removed until this can become a functional component 12/29/24
+
   if (isCordova()) {
     if ((normalizedHrefPage() === 'ballot') ||
         (normalizedHrefPage() === 'friends' && VoterStore.getVoterIsSignedIn())) {
@@ -55,6 +62,8 @@ function getPaddingTop () {
     }
   }
   return cordovaScrollablePaneTopPadding();  // 5/14/22 TODO: Refactor this...  Funny that this is no longer used for Cordova, only for the WebApp
+  */
+  return '';
 }
 
 function getPaddingBottom () {
@@ -219,71 +228,71 @@ export const TopRowTwoRightContainer = styled('div')`
   }};
 `;
 
-function getBackToPaddingTop () {
-  // Calculated approach Nov 2022
-  const { $ } = window;
-  if (!$) {
-    // To trap "$ is not a function" crash
-    return '0px';
-  }
-  const headerBack = $('#headerBackToBallotAppBar');
-  if (isIOS() && headerBack.length) {
-    const iOSNotchedSpacer = $('div[class*=\'IOSNotchedSpacer\']');
-    const iOSNoNotchSpacer = $('div[class*=\'IOSNoNotchSpacer\']');
-    const height = iOSNotchedSpacer.length ? iOSNotchedSpacer.outerHeight() : iOSNoNotchSpacer.outerHeight();
-    cordovaOffsetLog(`getBackToPaddingTop #headerBackToBallotAppBar iOS[No]NotchedSpacer.outerHeight(): ${height}, page: ${pageEnumeration()}`);
-    return `${height}px`;
-  }
-  // end calculated approach
+// function getBackToPaddingTop () {
+//   // Calculated approach Nov 2022
+//   const { $ } = window;
+//   if (!$) {
+//     // To trap "$ is not a function" crash
+//     return '0px';
+//   }
+//   const headerBack = $('#headerBackToBallotAppBar');
+//   if (isIOS() && headerBack.length) {
+//     const iOSNotchedSpacer = $('div[class*=\'IOSNotchedSpacer\']');
+//     const iOSNoNotchSpacer = $('div[class*=\'IOSNoNotchSpacer\']');
+//     const height = iOSNotchedSpacer.length ? iOSNotchedSpacer.outerHeight() : iOSNoNotchSpacer.outerHeight();
+//     cordovaOffsetLog(`getBackToPaddingTop #headerBackToBallotAppBar iOS[No]NotchedSpacer.outerHeight(): ${height}, page: ${pageEnumeration()}`);
+//     return `${height}px`;
+//   }
+//   // end calculated approach
+//
+//   // IMPORTANT: This is a last chance way to adjust the height, to be used only if cordovaScrollablePaneTopPadding can't do it!
+//   if ([CordovaPageConstants.candidateWild,
+//     CordovaPageConstants.officeWild,
+//     CordovaPageConstants.settingsProfile,
+//     CordovaPageConstants.settingsAccount,
+//     CordovaPageConstants.settingsNotifications,
+//     CordovaPageConstants.settingsSubscription,
+//     CordovaPageConstants.settingsWild,
+//     CordovaPageConstants.measureWild,
+//     CordovaPageConstants.valuesList,
+//     CordovaPageConstants.valuesWild].includes(pageEnumeration())) {
+//     if (isIPhone4p7in())      return '20px';
+//     if (isIPhone5p5inEarly()) return '20px';
+//     if (isIPhone5p5inMini())  return '39px';
+//     if (isIPhone6p1in())      return '34px';
+//     if (isIPhone6p5in())      return '34px';
+//     if (hasIPhoneNotch())     return '34px';
+//     if (isIPad())             return '24px';
+//   }
+//   return '0px';
+// }
 
-  // IMPORTANT: This is a last chance way to adjust the height, to be used only if cordovaScrollablePaneTopPadding can't do it!
-  if ([CordovaPageConstants.candidateWild,
-    CordovaPageConstants.officeWild,
-    CordovaPageConstants.settingsProfile,
-    CordovaPageConstants.settingsAccount,
-    CordovaPageConstants.settingsNotifications,
-    CordovaPageConstants.settingsSubscription,
-    CordovaPageConstants.settingsWild,
-    CordovaPageConstants.measureWild,
-    CordovaPageConstants.valuesList,
-    CordovaPageConstants.valuesWild].includes(pageEnumeration())) {
-    if (isIPhone4p7in())      return '20px';
-    if (isIPhone5p5inEarly()) return '20px';
-    if (isIPhone5p5inMini())  return '39px';
-    if (isIPhone6p1in())      return '34px';
-    if (isIPhone6p5in())      return '34px';
-    if (hasIPhoneNotch())     return '34px';
-    if (isIPad())             return '24px';
-  }
-  return '0px';
-}
-
-export const AppBarForBackTo = styled(AppBar)(({ theme }) => (`
-  border-top: none;
-  border-right: none;
-  border-left: none;
-  border-image: initial;
-  display: flex;
-  justify-content: center;
-  padding-top: ${getBackToPaddingTop()};
-  ${() => {
-    if (AppObservableStore.getScrolledDown() && ![
-      CordovaPageConstants.officeWild,
-      CordovaPageConstants.measureWild,
-      CordovaPageConstants.valuesList,
-      CordovaPageConstants.valuesWild].includes(pageEnumeration())) {
-      // Do not show border or shadow
-      return {};
-    }
-    return {
-      borderBottom: '1px solid rgb(170, 170, 170)',
-      boxShadow: standardBoxShadow('wide'),
-    };
-  }};
-  ${theme.breakpoints.down('sm')} {
-    display: inherit;
-  };
-`));
+// export const AppBarForBackTo = styled(AppBar)(({ theme }) => (`
+//   border-top: none;
+//   border-right: none;
+//   border-left: none;
+//   border-image: initial;
+//   display: flex;
+//   justify-content: center;
+//   padding-top: ${getBackToPaddingTop()};
+//   ${() => {
+//     if (AppObservableStore.getScrolledDown() && ![
+//       CordovaPageConstants.officeWild,
+//       CordovaPageConstants.measureWild,
+//       CordovaPageConstants.valuesList,
+//       CordovaPageConstants.valuesWild].includes(pageEnumeration())) {
+//       // Do not show border or shadow
+//       return {};
+//     }
+//     return {
+//       borderBottom: '1px solid rgb(170, 170, 170)',
+//       boxShadow: standardBoxShadow('wide'),
+//     };
+//   }};
+//   ${theme.breakpoints.down('sm')} {
+//     display: inherit;
+//   };
+// `));
 
 export const OfficeShareWrapper = styled('div')`
   margin-bottom: 12px;
@@ -291,7 +300,7 @@ export const OfficeShareWrapper = styled('div')`
 `;
 
 export const FirstRowPhoneOrEmail = styled('div')`
-  margin: 5px 0px 2px 0px;
+  margin: 5px 0 2px 0;
   text-align: center;
 `;
 

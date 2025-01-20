@@ -1,5 +1,3 @@
-import { withStyles } from '@mui/styles';
-import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { renderLog } from '../../common/utils/logging';
@@ -27,12 +25,6 @@ const PersonProfile = () => {
     </PersonProfileWrapper>
   );
 };
-PersonProfile.propTypes = {
-  classes: PropTypes.object,
-};
-
-const styles = () => ({
-});
 
 const FullName = styled('div')`
 `;
@@ -40,4 +32,4 @@ const FullName = styled('div')`
 const PersonProfileWrapper = styled('div')`
 `;
 
-export default withStyles(styles)(PersonProfile);
+export default PersonProfile;

@@ -1,16 +1,13 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import { withStyles } from '@mui/styles';
-import DrawerTemplateA from './DrawerTemplateA';
+import React, { useState } from 'react';
 import { renderLog } from '../../common/utils/logging';
 import EditPersonDrawerMainContent from '../Person/EditPersonDrawerMainContent';
+import DrawerTemplateA from './DrawerTemplateA';
 
-// eslint-disable-next-line no-unused-vars
-const EditPersonDrawer = ({ classes }) => {
+const EditPersonDrawer = () => {
   renderLog('EditPersonDrawer');
 
-  const [headerTitleJsx] = React.useState(<></>);
-  const [headerFixedJsx] = React.useState(<></>);
+  const [headerTitleJsx] = useState(<></>);
+  const [headerFixedJsx] = useState(<></>);
 
 
   return (
@@ -23,14 +20,5 @@ const EditPersonDrawer = ({ classes }) => {
     />
   );
 };
-EditPersonDrawer.propTypes = {
-  classes: PropTypes.object.isRequired,
-};
 
-const styles = () => ({
-});
-
-// const EditPersonDrawerWrapper = styled('div')`
-// `;
-
-export default withStyles(styles)(EditPersonDrawer);
+export default EditPersonDrawer;

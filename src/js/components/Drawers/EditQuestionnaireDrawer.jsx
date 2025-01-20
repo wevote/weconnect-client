@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useConnectAppContext } from '../../contexts/ConnectAppContext';
 import DrawerTemplateA from './DrawerTemplateA';
 import { renderLog } from '../../common/utils/logging';
@@ -9,8 +9,8 @@ const EditQuestionnaireDrawer = () => {
   renderLog('EditQuestionnaireDrawer');
   const { getAppContextValue } = useConnectAppContext();
 
-  const [headerTitleJsx, setHeaderTitleJsx] = React.useState(<></>);
-  const [headerFixedJsx] = React.useState(<></>);
+  const [headerTitleJsx, setHeaderTitleJsx] = useState(<></>);
+  const [headerFixedJsx] = useState(<></>);
 
 
   useEffect(() => {  // Replaces onAppObservableStoreChange and will be called whenever the context value changes

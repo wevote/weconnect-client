@@ -1,25 +1,31 @@
-import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router';
 import { Tab, Tabs } from '@mui/material';
 import { withStyles } from '@mui/styles';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router';
 import styled from 'styled-components';
 import standardBoxShadow from '../../common/components/Style/standardBoxShadow';
 import { hasIPhoneNotch } from '../../common/utils/cordovaUtils';
-// import { handleResize } from '../../common/utils/isMobileScreenSize';
 import { normalizedHrefPage } from '../../common/utils/hrefUtils';
 import { renderLog } from '../../common/utils/logging';
 import { displayTopMenuShadow } from '../../utils/applicationUtils';
-import { TopOfPageHeader, TopRowOneLeftContainer, TopRowOneMiddleContainer, TopRowOneRightContainer, TopRowTwoLeftContainer } from '../Style/pageLayoutStyles';
+import {
+  TopOfPageHeader,
+  TopRowOneLeftContainer,
+  TopRowOneMiddleContainer,
+  TopRowOneRightContainer,
+  TopRowTwoLeftContainer,
+} from '../Style/pageLayoutStyles';
 import HeaderBarLogo from './HeaderBarLogo';
+// import { handleResize } from '../../common/utils/isMobileScreenSize';
 
 
 const HeaderBar = () => {
   renderLog('HeaderBar');  // Set LOG_RENDER_EVENTS to log all renders
   // eslint-disable-next-line no-unused-vars
-  const [scrolledDown, setScrolledDown] = React.useState(false);
-  const [tabsValue, setTabsValue] = React.useState('1');
+  const [scrolledDown, setScrolledDown] = useState(false);
+  const [tabsValue, setTabsValue] = useState('1');
   // eslint-disable-next-line no-unused-vars
-  const [showTabs, setShowTabs] = React.useState(true);
+  const [showTabs, setShowTabs] = useState(true);
   const navigate = useNavigate();
 
 

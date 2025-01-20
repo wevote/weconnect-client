@@ -1,13 +1,11 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import { withStyles } from '@mui/styles';
-import DrawerTemplateA from './DrawerTemplateA';
 import { renderLog } from '../../common/utils/logging';
 import AddPersonDrawerMainContent from '../Person/AddPersonDrawerMainContent';
+import DrawerTemplateA from './DrawerTemplateA';
 
 
 // eslint-disable-next-line no-unused-vars
-const AddPersonDrawer = ({ classes }) => {
+const AddPersonDrawer = () => {
   renderLog('AddPersonDrawer');  // Set LOG_RENDER_EVENTS to log all renders
 
   return (
@@ -20,11 +18,5 @@ const AddPersonDrawer = ({ classes }) => {
     />
   );
 };
-AddPersonDrawer.propTypes = {
-  classes: PropTypes.object.isRequired,
-};
 
-const styles = () => ({
-});
-
-export default withStyles(styles)(AddPersonDrawer);
+export default AddPersonDrawer;

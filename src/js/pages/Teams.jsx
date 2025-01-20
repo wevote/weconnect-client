@@ -1,7 +1,7 @@
 import { Button } from '@mui/material';
 import { withStyles } from '@mui/styles';
 import PropTypes from 'prop-types';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router';
 import styled from 'styled-components';
@@ -21,8 +21,8 @@ const Teams = ({ classes, match }) => {
   renderLog('Teams');
   const { setAppContextValue, getAppContextValue } = useConnectAppContext();
 
-  const [showAllTeamMembers, setShowAllTeamMembers] = React.useState(false);
-  const [teamList, setTeamList] = React.useState([]);
+  const [showAllTeamMembers, setShowAllTeamMembers] = useState(false);
+  const [teamList, setTeamList] = useState([]);
 
   const { data, isSuccess, isFetching, isStale } = useFetchData(['team-list-retrieve'], {});
   console.log('useFetchData in Teams:', data, isSuccess, isFetching, isStale);

@@ -3,7 +3,7 @@ import { Button, Checkbox, FormControl, FormControlLabel, TextField } from '@mui
 import { withStyles } from '@mui/styles';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import PropTypes from 'prop-types';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import styled from 'styled-components';
 import DesignTokenColors from '../../common/components/Style/DesignTokenColors';
@@ -34,20 +34,20 @@ const EditQuestionForm = ({ classes }) => {
   renderLog('EditQuestionForm');
   const {  getAppContextValue } = useConnectAppContext();
 
-  const [question] = React.useState(getAppContextValue('selectedQuestion'));
-  const [questionnaire] = React.useState(getAppContextValue('selectedQuestionnaire'));
-  const [errorString, setErrorString] = React.useState('');
-  const [answerTypeValue, setAnswerTypeValue] = React.useState('');
-  const [fieldMappingRuleValue, setFieldMappingRuleValue] = React.useState('');
-  const [questionInstructionsValue, setQuestionInstructionsValue] = React.useState('');
-  const [questionTextValue, setQuestionTextValue] = React.useState('');
-  const [requireAnswerValue, setRequireAnswerValue] = React.useState(false);
-  const [statusActiveValue, setStatusActiveValue]  = React.useState(true);
+  const [question] = useState(getAppContextValue('selectedQuestion'));
+  const [questionnaire] = useState(getAppContextValue('selectedQuestionnaire'));
+  const [errorString, setErrorString] = useState('');
+  const [answerTypeValue, setAnswerTypeValue] = useState('');
+  const [fieldMappingRuleValue, setFieldMappingRuleValue] = useState('');
+  const [questionInstructionsValue, setQuestionInstructionsValue] = useState('');
+  const [questionTextValue, setQuestionTextValue] = useState('');
+  const [requireAnswerValue, setRequireAnswerValue] = useState(false);
+  const [statusActiveValue, setStatusActiveValue]  = useState(true);
 
   // eslint-disable-next-line no-unused-vars
-  const [fieldMappingRuleCopied, setFieldMappingRuleCopied] = React.useState('');
-  const [saveButtonActive, setSaveButtonActive] = React.useState(false);
-  const [showFieldMappingOptions, setShowFieldMappingOptions] = React.useState(false);
+  const [fieldMappingRuleCopied, setFieldMappingRuleCopied] = useState('');
+  const [saveButtonActive, setSaveButtonActive] = useState(false);
+  const [showFieldMappingOptions, setShowFieldMappingOptions] = useState(false);
 
   const queryClient = useQueryClient();
   const answerTypeFldRef = useRef('');

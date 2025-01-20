@@ -1,7 +1,7 @@
 import { Button } from '@mui/material';
 import { withStyles } from '@mui/styles';
 import PropTypes from 'prop-types';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link, useParams } from 'react-router';
 import { renderLog } from '../common/utils/logging';
@@ -15,13 +15,13 @@ import useFetchData from '../react-query/fetchData';
 import { getTeamList } from '../react-query/TeamsQueryProcessing';
 
 
-const TeamHome = ({ classes }) => {  //  classes, params
-  renderLog('TeamHome');  // Set LOG_RENDER_EVENTS to log all renders
+const TeamHome = ({ classes }) => {
+  renderLog('TeamHome');
   const { setAppContextValue, getAppContextValue } = useConnectAppContext();
 
   const params  = useParams();
-  const [team, setTeam] = React.useState({});
-  const [teamId] = React.useState(params.teamId);
+  const [team, setTeam] = useState({});
+  const [teamId] = useState(params.teamId);
   const displayAddDrawer = getAppContextValue('addPersonDrawerOpen');
 
   const updateTeam = (tList) => {
@@ -30,11 +30,11 @@ const TeamHome = ({ classes }) => {  //  classes, params
   };
 
   const isAddPersonDrawerOpen = document.getElementById('addPersonDrawer');
-  const { data, isSuccess, isFetching, isStale } = useFetchData(['team-list-retrieve'], {});
+  const { data, isSuccess, isFetching } = useFetchData(['team-list-retrieve'], {});
   useEffect(() => {
-    console.log('useFetchData in TeamHome (team-list-retrieve) useEffect:', data, isSuccess, isFetching, isStale);
+    console.log('useFetchData in TeamHome (team-list-retrieve) useEffect:', data, isSuccess, isFetching);
     if (isSuccess) {
-      console.log('useFetchData in TeamHome useEffect data good:', data, isSuccess, isFetching, isStale);
+      console.log('useFetchData in TeamHome useEffect data good:', data, isSuccess, isFetching);
       const tList = getTeamList(data);
       setAppContextValue('teamListNested', tList);
       updateTeam(tList);

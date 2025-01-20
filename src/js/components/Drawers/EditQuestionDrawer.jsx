@@ -1,15 +1,15 @@
-import React, { useEffect } from 'react';
-import DrawerTemplateA from './DrawerTemplateA';
+import React, { useEffect, useState } from 'react';
 import { renderLog } from '../../common/utils/logging';
-import EditQuestionDrawerMainContent from '../Questionnaire/EditQuestionDrawerMainContent';
 import { useConnectAppContext } from '../../contexts/ConnectAppContext';
+import EditQuestionDrawerMainContent from '../Questionnaire/EditQuestionDrawerMainContent';
+import DrawerTemplateA from './DrawerTemplateA';
 
 const EditQuestionDrawer = () => {
   renderLog('EditQuestionDrawer');
   const { getAppContextValue } = useConnectAppContext();
 
-  const [headerTitleJsx, setHeaderTitleJsx] = React.useState(<></>);
-  const [headerFixedJsx] = React.useState(<></>);
+  const [headerTitleJsx, setHeaderTitleJsx] = useState(<></>);
+  const [headerFixedJsx] = useState(<></>);
 
   useEffect(() => {  // Replaces onAppObservableStoreChange and will be called whenever the context value changes
     console.log('EditQuestionDrawer: Context value changed:', true);

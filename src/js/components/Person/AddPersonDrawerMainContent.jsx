@@ -1,20 +1,18 @@
-import React from 'react';
-import styled from 'styled-components';
-import PropTypes from 'prop-types';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import React, { useState } from 'react';
 import { useParams } from 'react-router';
-import { withStyles } from '@mui/styles';
-import { SpanWithLinkStyle } from '../Style/linkStyles';
-import { useConnectAppContext } from '../../contexts/ConnectAppContext';
+import styled from 'styled-components';
 import SearchBar2024 from '../../common/components/Search/SearchBar2024';
 import arrayContains from '../../common/utils/arrayContains';
 import { renderLog } from '../../common/utils/logging';
-import AddPersonForm from './AddPersonForm';
+import { useConnectAppContext } from '../../contexts/ConnectAppContext';
 import weConnectQueryFn from '../../react-query/WeConnectQuery';
+import { SpanWithLinkStyle } from '../Style/linkStyles';
+import AddPersonForm from './AddPersonForm';
 
 
 // eslint-disable-next-line no-unused-vars
-const AddPersonDrawerMainContent = ({ classes }) => {
+const AddPersonDrawerMainContent = () => {
   renderLog('AddPersonDrawerMainContent');
   const { getAppContextValue } = useConnectAppContext();
 
@@ -22,18 +20,18 @@ const AddPersonDrawerMainContent = ({ classes }) => {
   console.log('AddPersonDrawerMainContent params: ', params);
   const queryClient = useQueryClient();
 
-  const [staffToDisplayList, setStaffToDisplayList] = React.useState([]);
+  const [staffToDisplayList, setStaffToDisplayList] = useState([]);
   // eslint-disable-next-line no-unused-vars
-  const [searchText, setSearchText] = React.useState('');
-  const [allStaffList, setAllStaffList] = React.useState(getAppContextValue('allStaffList'));
-  const [thisTeamsCurrentMembersList, setThisTeamsCurrentMembersList] = React.useState([]);
-  const [teamId, setTeamId] = React.useState(getAppContextValue('teamId'));
-  const [teamName, setTeamName] = React.useState('');
+  const [searchText, setSearchText] = useState('');
+  const [allStaffList, setAllStaffList] = useState(getAppContextValue('allStaffList'));
+  const [thisTeamsCurrentMembersList, setThisTeamsCurrentMembersList] = useState([]);
+  const [teamId, setTeamId] = useState(getAppContextValue('teamId'));
+  const [teamName, setTeamName] = useState('');
 
   // eslint-disable-next-line no-unused-vars
-  const [teamMemberPersonIdList, setTeamMemberPersonIdList] = React.useState([]);
+  const [teamMemberPersonIdList, setTeamMemberPersonIdList] = useState([]);
   // eslint-disable-next-line no-unused-vars
-  const [searchResultsList, setSearchResultsList] = React.useState([]);
+  const [searchResultsList, setSearchResultsList] = useState([]);
 
   let memberList = [];
   const teamListFromContext = getAppContextValue('teamListNested');
@@ -156,12 +154,6 @@ const AddPersonDrawerMainContent = ({ classes }) => {
     </AddPersonDrawerMainContentWrapper>
   );
 };
-AddPersonDrawerMainContent.propTypes = {
-  classes: PropTypes.object.isRequired,
-};
-
-const styles = () => ({
-});
 
 const AddPersonDrawerMainContentWrapper = styled('div')`
 `;
@@ -191,4 +183,4 @@ const SearchBarWrapper = styled('div')`
   margin-bottom: 16px;
 `;
 
-export default withStyles(styles)(AddPersonDrawerMainContent);
+export default AddPersonDrawerMainContent;

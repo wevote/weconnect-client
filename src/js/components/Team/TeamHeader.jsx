@@ -1,7 +1,7 @@
 import { withStyles } from '@mui/styles';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router';
 import styled from 'styled-components';
 import { renderLog } from '../../common/utils/logging';
@@ -16,7 +16,7 @@ const TeamHeader = ({ classes, showHeaderLabels, showIcons, team }) => {
   const { getAppContextValue, setAppContextValue } = useConnectAppContext();
 
   const queryClient = useQueryClient();
-  const [teamLocal] = React.useState(useQueryClient(team || getAppContextValue('teamForAddTeamDrawer')));
+  const [teamLocal] = useState(useQueryClient(team || getAppContextValue('teamForAddTeamDrawer')));
 
   const removeTeamMutation = useMutation({
     mutationFn: (teamId) => weConnectQueryFn('team-delete', {

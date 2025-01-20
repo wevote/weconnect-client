@@ -2,7 +2,7 @@ import { Button, FormControl, TextField } from '@mui/material';
 import { withStyles } from '@mui/styles';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import PropTypes from 'prop-types';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { renderLog } from '../../common/utils/logging';
 import makeRequestParams from '../../common/utils/requestParamsUtils';
@@ -14,11 +14,11 @@ const EditQuestionnaireForm = ({ classes }) => {
   renderLog('EditQuestionnaireForm');
   const { getAppContextValue } = useConnectAppContext();
 
-  const [questionnaire]  = React.useState(getAppContextValue('selectedQuestionnaire'));
-  const [saveButtonActive, setSaveButtonActive] = React.useState(false);
-  const [nameFldValue, setNameFldValue] = React.useState('');
-  const [titleFldValue, setTitleFldValue] = React.useState('');
-  const [instructionsFldValue, setInstructionsFldValue] = React.useState('');
+  const [questionnaire]  = useState(getAppContextValue('selectedQuestionnaire'));
+  const [saveButtonActive, setSaveButtonActive] = useState(false);
+  const [nameFldValue, setNameFldValue] = useState('');
+  const [titleFldValue, setTitleFldValue] = useState('');
+  const [instructionsFldValue, setInstructionsFldValue] = useState('');
 
   const queryClient = useQueryClient();
   const nameFldRef = useRef('');

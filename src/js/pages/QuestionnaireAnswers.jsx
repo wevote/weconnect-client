@@ -1,7 +1,7 @@
 import { FormControl, TextField } from '@mui/material';
 import { withStyles } from '@mui/styles';
 import PropTypes from 'prop-types';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useParams } from 'react-router';
 import styled from 'styled-components';
@@ -15,11 +15,11 @@ import useFetchData from '../react-query/fetchData';
 // eslint-disable-next-line no-unused-vars
 const QuestionnaireAnswers = ({ classes, match }) => {
   renderLog('QuestionnaireAnswers');  // Set LOG_RENDER_EVENTS to log all renders
-  const [questionnaireId] = React.useState(parseInt(useParams().questionnaireId));
-  const [personId] = React.useState(parseInt(useParams().personId));
-  const [person, setPerson] = React.useState(undefined);
-  const [questionList, setQuestionList] = React.useState(undefined);
-  const [questionnaire] = React.useState({});
+  const [questionnaireId] = useState(parseInt(useParams().questionnaireId));
+  const [personId] = useState(parseInt(useParams().personId));
+  const [person, setPerson] = useState(undefined);
+  const [questionList, setQuestionList] = useState(undefined);
+  const [questionnaire] = useState({});
 
   const { data: dataQL, isSuccess: isSuccessQL, isFetching: isFetchingQL } = useFetchData(['question-list-retrieve'], {});
   useEffect(() => {

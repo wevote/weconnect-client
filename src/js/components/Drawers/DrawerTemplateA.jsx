@@ -1,22 +1,26 @@
 import { Close } from '@mui/icons-material'; // Info
 import { Drawer, IconButton } from '@mui/material';
-import React, { useEffect } from 'react';
-import styled from 'styled-components';
-import PropTypes from 'prop-types';
 import { withStyles } from '@mui/styles';
-import { DrawerHeaderAnimateDownInnerContainer, DrawerHeaderAnimateDownOuterContainer, DrawerTitle, DrawerHeaderWrapper } from '../Style/drawerLayoutStyles';
-import { cordovaDrawerTopMargin } from '../../utils/cordovaOffsets';
+import PropTypes from 'prop-types';
+import React, { useEffect, useState } from 'react';
+import styled from 'styled-components';
 import { hasIPhoneNotch } from '../../common/utils/cordovaUtils';
 import { renderLog } from '../../common/utils/logging';
 import { useConnectAppContext } from '../../contexts/ConnectAppContext';
-
+import { cordovaDrawerTopMargin } from '../../utils/cordovaOffsets';
+import {
+  DrawerHeaderAnimateDownInnerContainer,
+  DrawerHeaderAnimateDownOuterContainer,
+  DrawerHeaderWrapper,
+  DrawerTitle,
+} from '../Style/drawerLayoutStyles';
 
 
 const DrawerTemplateA = ({ classes, drawerId, drawerOpenGlobalVariableName, headerFixedJsx, headerTitleJsx, mainContentJsx }) => {  //  classes, teamId
   renderLog(`DrawerTemplateA (${drawerId})`);  // Set LOG_RENDER_EVENTS to log all renders
   const { getAppContextData, setAppContextValue, getAppContextValue } = useConnectAppContext();
 
-  const [scrolledDown, setScrolledDown] = React.useState(false);
+  const [scrolledDown, setScrolledDown] = useState(false);
   const drawerOpen = getAppContextValue(drawerOpenGlobalVariableName);
 
   console.log('DrawerTemplateA drawerOpen: ', drawerOpenGlobalVariableName, drawerOpen);

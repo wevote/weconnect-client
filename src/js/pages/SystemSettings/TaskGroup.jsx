@@ -2,7 +2,7 @@ import { Edit } from '@mui/icons-material';
 import { Button } from '@mui/material';
 import { withStyles } from '@mui/styles';
 import PropTypes from 'prop-types';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link, useParams } from 'react-router';
 import styled from 'styled-components';
@@ -20,10 +20,10 @@ const TaskGroup = ({ classes, match }) => {
   renderLog('TaskGroup');
   const { setAppContextValue } = useConnectAppContext();
 
-  const [taskGroupId] = React.useState(parseInt(useParams().taskGroupId));
-  const [taskGroup, setTaskGroup] = React.useState(undefined);
+  const [taskGroupId] = useState(parseInt(useParams().taskGroupId));
+  const [taskGroup, setTaskGroup] = useState(undefined);
 
-  const [taskDefinitionList, setTaskDefinitionList] = React.useState(undefined);
+  const [taskDefinitionList, setTaskDefinitionList] = useState(undefined);
 
   const { data: dataTSL, isSuccess: isSuccessTSL, isFetching: isFetchingTSL } = useFetchData(['task-status-list-retrieve'], {});
   useEffect(() => {
@@ -113,7 +113,7 @@ const TaskGroup = ({ classes, match }) => {
 };
 TaskGroup.propTypes = {
   classes: PropTypes.object.isRequired,
-  match: PropTypes.object.isRequired,
+  match: PropTypes.object,
 };
 
 const styles = (theme) => ({

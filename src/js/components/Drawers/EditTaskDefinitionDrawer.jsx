@@ -1,14 +1,14 @@
-import React from 'react';
-import AppObservableStore, { messageService } from '../../stores/AppObservableStore';
-import DrawerTemplateA from './DrawerTemplateA';
+import React, { useState } from 'react';
 import { renderLog } from '../../common/utils/logging';
+import AppObservableStore, { messageService } from '../../stores/AppObservableStore';
 import EditTaskDefinitionDrawerMainContent from '../Task/EditTaskDefinitionDrawerMainContent';
+import DrawerTemplateA from './DrawerTemplateA';
 
 
 const EditTaskDefinitionDrawer = () => {
   renderLog('EditTaskDefinitionDrawer');  // Set LOG_RENDER_EVENTS to log all renders
-  const [headerTitleJsx, setHeaderTitleJsx] = React.useState(<></>);
-  const [headerFixedJsx] = React.useState(<></>);
+  const [headerTitleJsx, setHeaderTitleJsx] = useState(<></>);
+  const [headerFixedJsx] = useState(<></>);
 
   const onAppObservableStoreChange = () => {
     const questionnaireIdTemp = AppObservableStore.getGlobalVariableState('editTaskDefinitionDrawerTaskDefinitionId');

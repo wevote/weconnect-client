@@ -42,9 +42,9 @@
   * Sometimes parameters that come into a functional component (with a render call), don't appear in the component. 
   * Sometimes `const params  = useParams();` gets the params (maybe if coming in as URL params).
   * Almost always something like 'getAppContextValue('addPersonDrawerOpen');' works
-  * Getters and Setters like 'const [team, setTeam] = React.useState({});' work well, but this fails...
+  * Getters and Setters like 'const [team, setTeam] = useState({});' work well, but this fails...
     ```
-    const [bob, setBob] = React.useState('yes');
+    const [bob, setBob] = useState('yes');
     console.log(bob);      // returns undefined   
     ```
     Since the state initialization is not complete until the component re-renders.

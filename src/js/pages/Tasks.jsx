@@ -1,7 +1,7 @@
 import { CircularProgress } from '@mui/material';
 import { withStyles } from '@mui/styles';
 import PropTypes from 'prop-types';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import styled from 'styled-components';
 import { renderLog } from '../common/utils/logging';
@@ -18,11 +18,11 @@ import useFetchData from '../react-query/fetchData';
 const Tasks = ({ classes, match }) => {
   renderLog('Tasks');  // Set LOG_RENDER_EVENTS to log all renders
 
-  const [showCompletedTasks, setShowCompletedTasks] = React.useState(false);
-  const [taskList, setTaskList] = React.useState(undefined);
-  const [taskDefinitionList, setTaskDefinitionList] = React.useState(undefined);
-  const [allStaffList, setAllStaffList] = React.useState([]);
-  const [isFetching, setIsFetching] = React.useState([false]);
+  const [showCompletedTasks, setShowCompletedTasks] = useState(false);
+  const [taskList, setTaskList] = useState(undefined);
+  const [taskDefinitionList, setTaskDefinitionList] = useState(undefined);
+  const [allStaffList, setAllStaffList] = useState([]);
+  const [isFetching, setIsFetching] = useState([false]);
   let personIdsList;
 
   // Roughly equivalent to PersonStore.getAllCachedPeopleList(); and TaskActions.taskStatusListRetrieve();

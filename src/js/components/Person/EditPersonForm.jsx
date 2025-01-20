@@ -1,9 +1,9 @@
-import React, { useRef } from 'react';
 import { Button, FormControl, TextField } from '@mui/material';
 import { withStyles } from '@mui/styles';
-import styled from 'styled-components';
-import PropTypes from 'prop-types';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import PropTypes from 'prop-types';
+import React, { useRef, useState } from 'react';
+import styled from 'styled-components';
 import { renderLog } from '../../common/utils/logging';
 import webAppConfig from '../../config';
 import { useConnectAppContext } from '../../contexts/ConnectAppContext';
@@ -13,9 +13,9 @@ const EditPersonForm = ({ classes }) => {
   renderLog('EditPersonForm');
   const { getAppContextValue } = useConnectAppContext();
 
-  const [saveButtonActive, setSaveButtonActive] = React.useState(false);
-  const [initialPerson] = React.useState(getAppContextValue('personDrawersPerson'));
-  const [activePerson, setActivePerson] = React.useState({ ...initialPerson });
+  const [saveButtonActive, setSaveButtonActive] = useState(false);
+  const [initialPerson] = useState(getAppContextValue('personDrawersPerson'));
+  const [activePerson, setActivePerson] = useState({ ...initialPerson });
 
   const emailPersonal = useRef('');
   const firstName = useRef('');

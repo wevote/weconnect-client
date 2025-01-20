@@ -1,7 +1,7 @@
-import React from 'react';
-import styled from 'styled-components';
-import PropTypes from 'prop-types';
 import { withStyles } from '@mui/styles';
+import PropTypes from 'prop-types';
+import React, { useState } from 'react';
+import styled from 'styled-components';
 import SearchBar2024 from '../../common/components/Search/SearchBar2024';
 import { renderLog } from '../../common/utils/logging';
 import AddTeamForm from './AddTeamForm';
@@ -11,7 +11,7 @@ import AddTeamForm from './AddTeamForm';
 const AddTeamDrawerMainContent = ({ classes }) => {  //  classes, teamId
   renderLog('AddTeamDrawerMainContent');  // Set LOG_RENDER_EVENTS to log all renders
   // eslint-disable-next-line no-unused-vars
-  const [personSearchResultsList, setPersonSearchResultsList] = React.useState([]);
+  const [personSearchResultsList, setPersonSearchResultsList] = useState([]);
 
   // TODO: 12/6/25, temporarily removed to simplify debug
   // const searchFunction = (incomingSearchText) => {

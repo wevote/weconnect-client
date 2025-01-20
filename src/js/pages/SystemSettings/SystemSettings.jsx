@@ -3,7 +3,7 @@ import { Button } from '@mui/material';
 import { withStyles } from '@mui/styles';
 import { useQueryClient } from '@tanstack/react-query';
 import PropTypes from 'prop-types';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link, useNavigate } from 'react-router';
 import styled from 'styled-components';
@@ -20,9 +20,9 @@ const SystemSettings = ({ classes }) => {
   const { setAppContextValue } = useConnectAppContext();
 
   // eslint-disable-next-line no-unused-vars
-  const [questionnaireList, setQuestionnaireList] = React.useState([]);
+  const [questionnaireList, setQuestionnaireList] = useState([]);
   // eslint-disable-next-line no-unused-vars
-  const [taskGroupList, setTaskGroupList] = React.useState([]);
+  const [taskGroupList, setTaskGroupList] = useState([]);
 
   const navigate = useNavigate();
   const queryClient = useQueryClient();

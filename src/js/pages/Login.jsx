@@ -1,11 +1,11 @@
 import { Button, TextField } from '@mui/material';
-import React, { useRef } from 'react';
-import { Helmet } from 'react-helmet-async';
-import PropTypes from 'prop-types';
-import validator from 'validator';
 import { withStyles } from '@mui/styles';
-import styled from 'styled-components';
+import PropTypes from 'prop-types';
+import React, { useRef, useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router';
+import styled from 'styled-components';
+import validator from 'validator';
 import { renderLog } from '../common/utils/logging';
 import { PageContentContainer } from '../components/Style/pageLayoutStyles';
 import webAppConfig from '../config';
@@ -23,11 +23,11 @@ const Login = ({ classes }) => {
   // const stateFldRef = useRef('');
   const passwordFldRef = useRef('');
   const confirmPasswordFldRef = useRef('');
-  const [showCreateStuff, setShowCreateStuff] = React.useState(false);
-  const [warningLine, setWarningLine] = React.useState('');
+  const [showCreateStuff, setShowCreateStuff] = useState(false);
+  const [warningLine, setWarningLine] = useState('');
   const isAuthenticated = localStorage.getItem('isAuthenticated');
   const initialSuccess = isAuthenticated ? `Signed in as ${isAuthenticated}` : 'Please sign in';
-  const [successLine, setSuccessLine] = React.useState(initialSuccess);
+  const [successLine, setSuccessLine] = useState(initialSuccess);
   const navigate = useNavigate();
 
   renderLog('Login');  // Set LOG_RENDER_EVENTS to log all renders

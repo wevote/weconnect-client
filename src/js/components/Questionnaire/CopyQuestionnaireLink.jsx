@@ -1,5 +1,5 @@
 import { withStyles } from '@mui/styles';
-import React from 'react';
+import React, { useState } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import styled from 'styled-components';
 import { renderLog } from '../../common/utils/logging';
@@ -12,10 +12,10 @@ const CopyQuestionnaireLink = () => {
   renderLog('CopyQuestionnaireLink');
   const { getAppContextValue } = useConnectAppContext();
 
-  const [person] = React.useState(getAppContextValue('personDrawersPerson'));
-  const [questionnaireId] = React.useState(getAppContextValue('QuestionnaireId'));
-  const [linkCopied, setLinkCopied] = React.useState(false);
-  const [linkToBeShared] = React.useState(`${webAppConfig.PROTOCOL}${webAppConfig.HOSTNAME}/q/${questionnaireId}/${person.id}`);
+  const [person] = useState(getAppContextValue('personDrawersPerson'));
+  const [questionnaireId] = useState(getAppContextValue('QuestionnaireId'));
+  const [linkCopied, setLinkCopied] = useState(false);
+  const [linkToBeShared] = useState(`${webAppConfig.PROTOCOL}${webAppConfig.HOSTNAME}/q/${questionnaireId}/${person.id}`);
 
   const copyLink = () => {
     // console.log('CopyQuestionnaireLink copyLink');

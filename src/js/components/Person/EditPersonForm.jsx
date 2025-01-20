@@ -14,7 +14,7 @@ const EditPersonForm = ({ classes }) => {
   const { getAppContextValue } = useConnectAppContext();
 
   const [saveButtonActive, setSaveButtonActive] = React.useState(false);
-  const [initialPerson] = React.useState(getAppContextValue('editPersonDrawerPerson'));
+  const [initialPerson] = React.useState(getAppContextValue('personDrawersPerson'));
   const [activePerson, setActivePerson] = React.useState({ ...initialPerson });
 
   const emailPersonal = useRef('');

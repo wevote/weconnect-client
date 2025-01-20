@@ -1,55 +1,57 @@
-import React, { Suspense } from 'react';
-import styled from 'styled-components';
-import PropTypes from 'prop-types';
 import { Launch } from '@mui/icons-material';
 import { Tooltip } from '@mui/material';
-import QuestionnaireActions from '../../actions/QuestionnaireActions';
-import QuestionnaireStore from '../../stores/QuestionnaireStore';
+import PropTypes from 'prop-types';
+import React, { Suspense, useEffect, useState } from 'react';
+import styled from 'styled-components';
 import DesignTokenColors from '../../common/components/Style/DesignTokenColors';
-import apiCalming from '../../common/utils/apiCalming';
 import { renderLog } from '../../common/utils/logging';
-import CopyQuestionnaireLink from './CopyQuestionnaireLink';
 import webAppConfig from '../../config';
+import { useConnectAppContext } from '../../contexts/ConnectAppContext';
+import useFetchData from '../../react-query/fetchData';
+import CopyQuestionnaireLink from './CopyQuestionnaireLink';
 
 const OpenExternalWebSite = React.lazy(() => import(/* webpackChunkName: 'OpenExternalWebSite' */ '../../common/components/Widgets/OpenExternalWebSite'));
 
 const QuestionnaireResponsesList = ({ personId }) => {
   renderLog('QuestionnaireList');  // Set LOG_RENDER_EVENTS to log all renders
-  const [questionnaireList, setQuestionnaireList] = React.useState([]);
+  const { getAppContextValue } = useConnectAppContext();
 
-  const onQuestionnaireStoreChange = () => {
-    const questionnaireListTemp = QuestionnaireStore.getQuestionnaireListByPersonId(personId);
-    // console.log('QuestionnaireList QuestionnaireStore.getQuestionnaireListByPersonId:', questionnaireListTemp);
-    const dateQuestionnairesCompletedDictTemp = QuestionnaireStore.getDateQuestionnairesCompletedDictByPersonId(personId);
-    const questionnaireListTempModified = [];
-    for (let i = 0; i < questionnaireListTemp.length; i++) {
-      const questionnaire = questionnaireListTemp[i];
-      if (dateQuestionnairesCompletedDictTemp[questionnaire.questionnaireId]) {
-        questionnaire.dateQuestionnaireCompleted = new Date(dateQuestionnairesCompletedDictTemp[questionnaire.questionnaireId]);
-      } else {
-        questionnaire.dateQuestionnaireCompleted = null;
-      }
-      // console.log('QuestionnaireList questionnaire:', questionnaire);
-      questionnaireListTempModified[i] = questionnaire;
+  const [person] = useState(getAppContextValue('personDrawersPerson'));
+  const [questionnaireList, setQuestionnaireList] = useState([]);
+
+  // Although we are sending a list, there will only be one person id, if there were more, just append them with commas
+  const requestParams = `personIdList[]=${person.id}`;
+
+  const { dataQRS, isSuccessQRS, isFetchingQRS } = useFetchData(['questionnaire-responses-list-retrieve'], requestParams);
+  if (isFetchingQRS) {
+    console.log('isFetching  ------------ \'questionnaire-responses-list-retrieve\'');
+  }
+  useEffect(() => {
+    if (dataQRS !== undefined && isFetchingQRS === false && person) {
+      console.log('useFetchData in QuestionnaireResponsesList useEffect dataQRS is good:', dataQRS, isSuccessQRS, isFetchingQRS);
+      console.log('Successfully retrieved QuestionnaireResponsesList...');
+
+      // TODO: 1/20/25 is this questionList or questionnaireList?
+      // It seems like an answered questionnaire question should be a questionAnswerList, but questionnaire and question seem tyo be used inconsistently
+      // So this is hard to figure out without having some "answers" data
+
+      // const questionnaireListTemp = dataQRS.questionAnswerList;
+      // const questionnaireListTempModified = [];
+      // for (let i = 0; i < questionnaireListTemp.length; i++) {
+      //   const questionnaire = questionnaireListTemp[i];
+      //   if (dateQuestionnairesCompletedDictTemp[questionnaire.questionnaireId]) {
+      //     questionnaire.dateQuestionnaireCompleted = new Date(dateQuestionnairesCompletedDictTemp[questionnaire.questionnaireId]);
+      //   } else {
+      //     questionnaire.dateQuestionnaireCompleted = null;
+      //   }
+      //   // console.log('QuestionnaireList questionnaire:', questionnaire);
+      //   questionnaireListTempModified[i] = questionnaire;
+      // }
+      // setQuestionnaireList(questionnaireListTempModified);
+
+      setQuestionnaireList(dataQRS.questionAnswerList);
     }
-    setQuestionnaireList(questionnaireListTempModified);
-  };
-
-  React.useEffect(() => {
-    const questionnaireStoreListener = QuestionnaireStore.addListener(onQuestionnaireStoreChange);
-    onQuestionnaireStoreChange();
-
-    if (personId >= 0) {
-      const personIdList = [personId];
-      if (apiCalming(`questionnaireResponsesListRetrieve-${personId}`, 10000)) {
-        QuestionnaireActions.questionnaireResponsesListRetrieve(personIdList);
-      }
-    }
-
-    return () => {
-      questionnaireStoreListener.remove();
-    };
-  }, []);
+  }, [dataQRS]);
 
   return (
     <div>

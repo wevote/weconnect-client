@@ -37,13 +37,13 @@ const PersonSummaryRow = ({ person, rowNumberForDisplay, teamId }) => {
   const editPersonClick = (hasEditRights = true) => {
     if (hasEditRights) {
       setAppContextValue('editPersonDrawerOpen', true);
-      setAppContextValue('editPersonDrawerPerson', person);
+      setAppContextValue('personDrawersPerson', person);
     }
   };
 
   const personProfileClick = () => {
     setAppContextValue('personProfileDrawerOpen', true);
-    setAppContextValue('personProfileDrawerPerson', person);
+    setAppContextValue('personDrawersPerson', person);
   };
 
   const hasEditRights = true;

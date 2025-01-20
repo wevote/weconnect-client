@@ -2,7 +2,7 @@ import { Button, FormControl, TextField } from '@mui/material';
 import { withStyles } from '@mui/styles';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import PropTypes from 'prop-types';
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import styled from 'styled-components';
 import { renderLog } from '../../common/utils/logging';
 import { useConnectAppContext } from '../../contexts/ConnectAppContext';
@@ -15,9 +15,9 @@ const AddTeamForm = ({ classes }) => {
 
   const teamNameFldRef = useRef('');
   const queryClient = useQueryClient();
-  const [team] = React.useState(getAppContextValue('teamForAddTeamDrawer'));
-  const [teamNameCached, setTeamNameCached] = React.useState(team && team.teamName);
-  const [errorText, setErrorText] = React.useState('');
+  const [team] = useState(getAppContextValue('teamForAddTeamDrawer'));
+  const [teamNameCached, setTeamNameCached] = useState(team && team.teamName);
+  const [errorText, setErrorText] = useState('');
 
   const saveTeamMutation = useMutation({
     mutationFn: () => weConnectQueryFn(['team-save'], {

@@ -1,6 +1,6 @@
 import { withStyles } from '@mui/styles';
 import PropTypes from 'prop-types';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { renderLog } from '../../common/utils/logging';
 import { useConnectAppContext } from '../../contexts/ConnectAppContext';
@@ -11,7 +11,7 @@ const PersonProfile = () => {
   renderLog('PersonProfile');  // Set LOG_RENDER_EVENTS to log all renders
   const { getAppContextValue, setAppContextValue } = useConnectAppContext();
 
-  const person = React.useState(getAppContextValue('personProfileDrawerPerson'));
+  const [person] = useState(getAppContextValue('personDrawersPerson'));
 
   useEffect(() => {
     setAppContextValue('QuestionnaireId', 1);
@@ -19,13 +19,10 @@ const PersonProfile = () => {
 
   return (
     <PersonProfileWrapper>
-      This is the stubbed out &quot;PersonProfile.jsx&quot; resulting <br /> from &lt;PersonProfileDrawer /&gt;
-      <br />
-      <br />
       <FullName>
         {`${person.firstName} ${person.lastName}`}
       </FullName>
-      {/* <PersonDetails /> */}
+      {/* <PersonDetails /> This was commented out as of January 28th, 2025 */}
       <CopyQuestionnaireLink />
     </PersonProfileWrapper>
   );

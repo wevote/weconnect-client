@@ -11,10 +11,6 @@ import PersonProfile from './PersonProfile';
 const PersonProfileDrawerMainContent = ({ classes }) => {
   renderLog('PersonProfileDrawerMainContent');
 
-  /* HACK 1/14/25 to get compile */
-  const personIdTemp = 1;
-  // End Hack
-
   return (
     <PersonProfileDrawerMainContentWrapper>
       <PersonProfile />

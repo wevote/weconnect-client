@@ -1,20 +1,18 @@
-import React from 'react';
-import styled from 'styled-components';
-import PropTypes from 'prop-types';
-import CopyToClipboard from 'react-copy-to-clipboard';
 import { withStyles } from '@mui/styles';
-import { SpanWithLinkStyle } from '../Style/linkStyles';
+import React from 'react';
+import CopyToClipboard from 'react-copy-to-clipboard';
+import styled from 'styled-components';
 import { renderLog } from '../../common/utils/logging';
 import webAppConfig from '../../config';
 import { useConnectAppContext } from '../../contexts/ConnectAppContext';
-
+import { SpanWithLinkStyle } from '../Style/linkStyles';
 
 
 const CopyQuestionnaireLink = () => {
   renderLog('CopyQuestionnaireLink');
   const { getAppContextValue } = useConnectAppContext();
 
-  const [person] = React.useState(getAppContextValue('personProfileDrawerPerson'));
+  const [person] = React.useState(getAppContextValue('personDrawersPerson'));
   const [questionnaireId] = React.useState(getAppContextValue('QuestionnaireId'));
   const [linkCopied, setLinkCopied] = React.useState(false);
   const [linkToBeShared] = React.useState(`${webAppConfig.PROTOCOL}${webAppConfig.HOSTNAME}/q/${questionnaireId}/${person.id}`);

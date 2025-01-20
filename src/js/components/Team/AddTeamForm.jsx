@@ -1,25 +1,29 @@
 import { Button, FormControl, TextField } from '@mui/material';
 import { withStyles } from '@mui/styles';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import PropTypes from 'prop-types';
 import React, { useRef } from 'react';
 import styled from 'styled-components';
-import PropTypes from 'prop-types';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { renderLog } from '../../common/utils/logging';
+import { useConnectAppContext } from '../../contexts/ConnectAppContext';
 import weConnectQueryFn from '../../react-query/WeConnectQuery';
 
-/* global $  */
 
 const AddTeamForm = ({ classes }) => {
   renderLog('AddTeamForm');
+  const { getAppContextValue } = useConnectAppContext();
 
   const teamNameFldRef = useRef('');
   const queryClient = useQueryClient();
+  const [team] = React.useState(getAppContextValue('teamForAddTeamDrawer'));
+  const [teamNameCached, setTeamNameCached] = React.useState(team && team.teamName);
+  const [errorText, setErrorText] = React.useState('');
 
   const saveTeamMutation = useMutation({
-    mutationFn: (team) => weConnectQueryFn(['team-save'], {
-      teamName: team,
+    mutationFn: () => weConnectQueryFn(['team-save'], {
+      teamName: teamNameCached,
       teamNameChanged: true,
-      teamId: '-1',
+      teamId: team ? team.id : '-1',
     }),
     onSuccess: () => {
       console.log('--------- saveTeamMutation addTeamForm mutated ---------');
@@ -30,25 +34,27 @@ const AddTeamForm = ({ classes }) => {
   const saveNewTeam = () => {
     const teamName = teamNameFldRef.current.value;
     if (teamName.length === 0) {
-      $('#teamErrorLine').css('display', 'block').text('Enter a valid team name');
+      setErrorText('Enter a valid team name');
       return;
     }
+    setErrorText('');
+    setTeamNameCached(teamName);
     console.log('saveNewTeam data:', teamName);
-    saveTeamMutation.mutate(teamName);
+    saveTeamMutation.mutate();
   };
 
   return (
     <AddTeamFormWrapper>
-      <div id="teamErrorLine" style={{ display: 'none', fontWeight: 800, paddingBottom: '10px' }} />
+      <ErrorTeamLine>{errorText}</ErrorTeamLine>
       <FormControl classes={{ root: classes.formControl }}>
         <TextField
           autoFocus
-          // classes={{ root: classes.textField }} // Not working yet
+          defaultValue={teamNameCached}
           id="teamNameToBeSaved"
+          inputRef={teamNameFldRef}
           label="Team Name"
           name="teamNameToBeSaved"
           margin="dense"
-          inputRef={teamNameFldRef}
           placeholder="Team Name"
           variant="outlined"
         />
@@ -58,7 +64,7 @@ const AddTeamForm = ({ classes }) => {
           onClick={saveNewTeam}
           variant="contained"
         >
-          Save New Team
+          {team ? 'Save Team' : 'Save New Team'}
         </Button>
       </FormControl>
     </AddTeamFormWrapper>
@@ -79,6 +85,12 @@ const styles = (theme) => ({
     },
   },
 });
+
+const ErrorTeamLine = styled('div')`
+  fontWeight: 800;
+  paddingBottom: '10px';
+  color: coral;
+`;
 
 const AddTeamFormWrapper = styled('div')`
 `;

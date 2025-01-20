@@ -70,7 +70,7 @@ const TeamHome = ({ classes }) => {  //  classes, params
         <link rel="canonical" href={`${webAppConfig.WECONNECT_URL_FOR_SEO}/team-home`} />
       </Helmet>
       <PageContentContainer>
-        <h1>{team.teamName}</h1>
+        <h1>{team ? team.teamName : 'none'}</h1>
         <div>
           Team Home for
           {' '}
@@ -88,7 +88,7 @@ const TeamHome = ({ classes }) => {  //  classes, params
         >
           Add Team Member
         </Button>
-        <TeamHeader team={team} showHeaderLabels={(team.teamMemberList && team.teamMemberList.length > 0)} showIcons={false} />
+        <TeamHeader team={team} showHeaderLabels={(team && team.teamMemberList && team.teamMemberList.length > 0)} showIcons={false} />
         <TeamMemberList teamId={teamId} />
         {displayAddDrawer ? <AddPersonDrawer /> : null }
       </PageContentContainer>

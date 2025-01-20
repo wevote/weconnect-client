@@ -10,10 +10,6 @@ const TeamMemberList = ({ teamId }) => {
   renderLog('TeamMemberList');
   const { getAppContextValue } = useConnectAppContext();
 
-  // const [removeTeamMember, { isLoading, error, data }] = RemoveTeamMemberMutation(personId, teamId);
-  // console.log('RemoveTeamMemberMutation called: ', isLoading, error, data);
-
-
   let teamMemberList = [];
   const teamListFromContext = getAppContextValue('teamListNested');
   if (teamListFromContext) {

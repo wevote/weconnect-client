@@ -43,6 +43,7 @@ const Teams = ({ classes, match }) => {
 
   const addTeamClick = () => {
     setAppContextValue('addTeamDrawerOpen', true);
+    setAppContextValue('AddTeamDrawerLabel', 'Add Team');
   };
 
   const personProfile = getAppContextValue('personProfileDrawerOpen');

@@ -266,7 +266,7 @@ const YourAccountWrapper = styled.div`
 const EditProfileDrawerWrapper = styled.div`
   display: flex;
   gap: 32px;
-  margin-top: 16px;
+  margin-top: 80px;
 `;
 
 const NavLinksContainer = styled.div`

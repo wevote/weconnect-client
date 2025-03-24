@@ -65,5 +65,5 @@ export const DrawerHeaderWrapper = styled('div')`
   justify-content: space-between;
   align-items: center;
   margin-right: 0;
-  min-height: 28px;
+  position: fixed;
 `;

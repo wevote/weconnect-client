@@ -223,11 +223,11 @@ EditPersonForm.propTypes = {
 };
 
 const styles = (theme) => ({
-  formControl: {
-    width: '100%',
-  },
   savePersonButton: {
-    width: 300,
+    position: 'sticky',
+    bottom: 0,
+    width: '330px',
+    zIndex: 20,
     [theme.breakpoints.down('md')]: {
       width: '100%',
     },
@@ -235,6 +235,9 @@ const styles = (theme) => ({
 });
 
 const EditPersonFormWrapper = styled('div')`
+  padding-bottom: 40px;
+  max-width: 600px;
+  margin: 0 auto;
 `;
 
 export default withStyles(styles)(EditPersonForm);

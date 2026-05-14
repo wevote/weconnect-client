@@ -29,6 +29,8 @@ const SectionTitle = styled.h2`
   color: #333;
 `;
 
+/* Accordion UI - collapsible container for grouped lists */
+
 const AccordionContainer = styled.div`
   margin-top: 10px;
   border: 1px solid #ddd;
@@ -55,18 +57,40 @@ const AccordionBody = styled.div`
   overflow-y: auto;
 `;
 
-function Accordion ({ title, count, children }) {
+/* Accordion component - reusable collapsible section for each category */
+
+function Accordion({ title, count, children }) {
   const [open, setOpen] = React.useState(false);
+
   return (
     <AccordionContainer>
-      <AccordionHeader onClick={() => setOpen(!open)}>
+      <AccordionHeader
+        onClick={() => {
+          if (count > 0) {
+            setOpen(!open);
+          }
+        }}
+      >
         <span>{title}</span>
-        <span>{count} {open ? '▲' : '▼'}</span>
+        <span>
+          {count} {count > 0 && (open ? '▲' : '▼')}
+        </span>
       </AccordionHeader>
-      {open && <AccordionBody>{children}</AccordionBody>}
+
+      {open && count > 0 && (
+        <AccordionBody>
+          {children}
+        </AccordionBody>
+      )}
     </AccordionContainer>
   );
 }
+
+Accordion.propTypes = {
+  title: PropTypes.string.isRequired,
+  count: PropTypes.number.isRequired,
+  children: PropTypes.node,
+};
 
 export default function ReportsPage () {
   const { apiDataCache } = useConnectAppContext();
@@ -133,8 +157,8 @@ export default function ReportsPage () {
     const notEither = [];
 
     Object.values(allPeopleCache).forEach((person) => {
-      // Check if the person is not marked as resigned
-      if (person.personId !== undefined && person.personId !== null && !person.statusResigned) {
+      // Check if the person is active and not resigned
+      if (person.personId !== undefined && person.personId !== null && person.statusActive !== false && !person.statusResigned) {
         const onC3 = c3Members.has(person.personId);
         const onC4 = c4Members.has(person.personId);
 
@@ -232,8 +256,3 @@ export default function ReportsPage () {
     </>
   );
 }
-Accordion.propTypes = {
-  title: PropTypes.string,
-  count: PropTypes.number,
-  children: PropTypes.node,
-};

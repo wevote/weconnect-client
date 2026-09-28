@@ -74,7 +74,7 @@ const AddPersonDrawerMainContent = () => {
     addToTeamListTemp = sortByNoTeamFirst(addToTeamListTemp, allPeopleTeamIdLists);
     addToTeamListTemp = orderListByFurthestFutureStartDate(addToTeamListTemp);
     addToTeamListTemp = filterNamesWithDEPRICATEKey(addToTeamListTemp);
-    addToTeamListTemp = addToTeamListTemp.filter((person) => (person.statusActive === true) && (person.statusResigned !== true) && (person.statusOfferWillNotBeMade !== true)).slice(0, LIMIT_NUMBER_SHOWN);
+    addToTeamListTemp = addToTeamListTemp.filter((person) => (person.statusOfferWillNotBeMade !== true)).slice(0, LIMIT_NUMBER_SHOWN);
     addToTeamListTemp = alphabetizePeoplesObject(addToTeamListTemp, true);
     setAddToTeamList(addToTeamListTemp);
   }, [searchResultsList, remainingPeopleToAdd]);

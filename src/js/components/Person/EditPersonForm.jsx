@@ -224,6 +224,7 @@ const EditPersonForm = ({ classes }) => {
 
   const setEmailOfficialFromChild = (emailOfficial) => {
     setEmailOfficialLocal(emailOfficial);
+    setEmailOfficialEdited(false);
     setIsEmailOfficialEditModeOn(false);
   };
 

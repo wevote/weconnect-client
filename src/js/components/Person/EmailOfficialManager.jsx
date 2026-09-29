@@ -61,7 +61,7 @@ const EmailOfficialManager = (
     if (setEmailOfficialInParent) {
       setEmailOfficialInParent(savedEmailOfficial);
     }
-    setIsEmailOfficialEditModeOn(false);
+    setIsEmailOfficialEditModeOnLocal(false);
   };
 
   const newPasswordNotificationOnCopy = () => {

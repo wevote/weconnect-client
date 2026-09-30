@@ -74,7 +74,7 @@ const AddPersonDrawerMainContent = () => {
     addToTeamListTemp = sortByNoTeamFirst(addToTeamListTemp, allPeopleTeamIdLists);
     addToTeamListTemp = orderListByFurthestFutureStartDate(addToTeamListTemp);
     addToTeamListTemp = filterNamesWithDEPRICATEKey(addToTeamListTemp);
-    addToTeamListTemp = addToTeamListTemp.filter((person) => (person.statusActive === true) && (person.statusResigned !== true) && (person.statusOfferWillNotBeMade !== true)).slice(0, LIMIT_NUMBER_SHOWN);
+    addToTeamListTemp = addToTeamListTemp.slice(0, LIMIT_NUMBER_SHOWN);
     addToTeamListTemp = alphabetizePeoplesObject(addToTeamListTemp, true);
     setAddToTeamList(addToTeamListTemp);
   }, [searchResultsList, remainingPeopleToAdd]);
@@ -173,7 +173,7 @@ const AddPersonDrawerMainContent = () => {
           <PersonList>
             {addToTeamList.map((person) => (
               <PersonItem key={`personResult-${person.id}`}>
-                {person.firstName}
+                {person.firstNamePreferred && person.firstNamePreferred !== person.firstName ? `${person.firstNamePreferred} (${person.firstName})` : person.firstName}
                 {' '}
                 {person.lastName}
                 {!arrayContains(person.id, teamMemberPersonIdList) && (

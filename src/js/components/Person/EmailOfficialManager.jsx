@@ -61,7 +61,7 @@ const EmailOfficialManager = (
     if (setEmailOfficialInParent) {
       setEmailOfficialInParent(savedEmailOfficial);
     }
-    setIsEmailOfficialEditModeOn(false);
+    setIsEmailOfficialEditModeOnLocal(false);
   };
 
   const newPasswordNotificationOnCopy = () => {
@@ -141,7 +141,9 @@ Please note that we prefer that you keep your Slack account connected to your pe
 
   const resetPassword = async () => {
     setEmailError('');
-    const { emailOfficial, emailPersonal, firstName } = activePerson;
+    let { emailOfficial, emailPersonal, firstName } = activePerson;
+    emailOfficial = emailOfficial.toLowerCase();
+    emailPersonal = emailPersonal.toLowerCase();
     if (!emailOfficial.includes('wevoteeducation.org') && !emailPersonal.includes('wevoteeducation.org')) {
       setEmailError(`"${firstName}" does not have a wevoteeducation.org email as either their official (${emailOfficial}) or private (${emailOfficial}) address`);
       return;

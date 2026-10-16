@@ -155,7 +155,8 @@ Please note that we prefer that you keep your Slack account connected to your pe
     }, METHOD.POST);
     // console.log('reset wevote password', data);
     if (data.success) {
-      setNewPasswordNotification(`Thank you for requesting that your password be reset. These are your new sign in credentials: \n https://team.wevote.org \n user: ${emailToChange} \n pass: ${newPassword}`);
+      setNewPasswordNotification(
+        `Thank you for requesting that the password be reset for your ${webAppConfig.ORGANIZATION_NAME} Gmail-powered email account. Can you please verify you can sign in?\n Username: ${emailToChange} \nPassword: ${newPassword}`);
       setShowNewPasswordNotification(true);
     } else {
       // console.error('Failed to reset password:', data);

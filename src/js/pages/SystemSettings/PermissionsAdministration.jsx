@@ -10,7 +10,11 @@ import { viewerCanSeeOrDo } from '../../models/AuthModel';
 import { getFullNamePreferredPerson } from '../../models/PersonModel';
 import { makeRequestParamsDictionary } from '../../react-query/makeRequestParams';
 import { usePersonSaveMutation } from '../../react-query/mutations';
+import normalizedImagePath from '../../common/utils/normalizedImagePath';
 import { alphabetizePeoplesObject } from '../../utils/utilities';
+
+
+const closeIcon = normalizedImagePath('../../../img/global/svg-icons/cross.svg');
 
 /* global $  */
 
@@ -41,6 +45,7 @@ const PermissionsAdministration = ({ classes }) => {
   const activeInputRef = useRef(undefined);
   const leaveInputRef = useRef(undefined);
   const resignedInputRef = useRef(undefined);
+  const [searchTerm, setSearchTerm] = useState('');
   const specialInputRef = useRef(undefined);
 
   useEffect(() => {
@@ -186,6 +191,8 @@ const PermissionsAdministration = ({ classes }) => {
     const personCached = Object.values(allPeopleCache).find((p) => parseInt(p.id) === personId);
 
     const data = {};
+    // set the search term to empty
+    setSearchTerm('');
     Object.keys(activePerson).forEach((key) => {
       const initialValue = personCached[key]; // || ''; This "||" doesn't work for booleans since it forces a 'false' to become ''
       const activeValue = activePerson[key];  //  || '';    and then doesn't send the 'false' to the server for the data update.
@@ -281,10 +288,12 @@ const PermissionsAdministration = ({ classes }) => {
     const filteredPeople = peopleWorkingArray.filter((person) => includePersonInFilteredArray(person));
     const srch = searchByNameRef.current.value;
     if (srch.length > 0) {
+      setSearchTerm(srch);
       const filteredSearchedPeople =
         filteredPeople.filter((person) => getFullNamePreferredPerson(person).toLowerCase().includes(srch.toLowerCase()));
       setPeopleWorkingArrayFiltered(filteredSearchedPeople);
     } else {
+      setSearchTerm('');
       setPeopleWorkingArrayFiltered(filteredPeople);
     }
   };
@@ -321,6 +330,17 @@ const PermissionsAdministration = ({ classes }) => {
     );
   };
 
+  const handleClear = () => {
+    setSearchTerm('');
+    if (searchByNameRef.current) {
+      searchByNameRef.current.value = '';
+      searchByNameRef.current.focus();
+    }
+    // Reset table to respect active filter buttons without search limiting
+    const filteredPeople = peopleWorkingArray.filter((person) => includePersonInFilteredArray(person));
+    setPeopleWorkingArrayFiltered(filteredPeople);
+  };
+
   return (
     <PermissionsWrapper>
       <PermissionsSearchBarWrapper>
@@ -331,8 +351,18 @@ const PermissionsAdministration = ({ classes }) => {
           name="searchByName"
           onChange={searchAndFilterFunction}
           placeholder="Search by name"
-          defaultValue=""
+          value={searchTerm}
           sx={{ minWidth: '200px', marginRight: '15px' }}
+          InputProps={{
+            endAdornment: searchTerm ? (
+              <span
+                onClick={handleClear}
+                style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+              >
+                <img src={closeIcon} alt="Clear" style={{ width: 14, height: 14 }} />
+              </span>
+            ) : null,
+          }}
         />
         <span style={{ paddingTop: '33px', color: 'gray' }}>Note: &apos;Leave&apos;, &apos;Resigned&apos;, and &apos;Special Projects&apos; default to off</span>
       </PermissionsSearchBarWrapper>

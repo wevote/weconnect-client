@@ -32,6 +32,7 @@ const AddPersonDrawerMainContent = () => {
   const [team] = useState(getAppContextValue('addPersonDrawerTeam'));
   const [teamMemberPersonIdList] = useState([]);
   const [matchingCountText, setMatchingCountText] = useState('');
+  const [personIsOnTeam, setPersonIsOnTeam] = useState([]);
 
   const searchStringInputRef = useRef(null);
 
@@ -96,16 +97,21 @@ const AddPersonDrawerMainContent = () => {
     if (currentValue.length === 0) {
       setMatchingCountText('');
       setSearchResultsList(undefined);
+      setPersonIsOnTeam([])
     } else {
-      const isMatch = (element) => (element.lastName.toLowerCase().includes(currentValue.toLowerCase()) ||
-          element.firstName.toLowerCase().includes(currentValue.toLowerCase()) || element.firstNamePreferred?.toLowerCase().includes(currentValue.toLowerCase()));
+      const searchLower = currentValue.toLowerCase()
+      const isMatch = (element) => (element.lastName.toLowerCase().includes(searchLower) ||
+          element.firstName.toLowerCase().includes(searchLower) || element.firstNamePreferred?.toLowerCase().includes(searchLower));
       const matchingElements = remainingPeopleToAdd ? remainingPeopleToAdd.filter((element) => isMatch(element)) : {};
+      const personOnTeam = thisTeamsCurrentMembersList ? thisTeamsCurrentMembersList.filter((element) => isMatch(element)) : [];
+      setPersonIsOnTeam(personOnTeam);
       if (matchingElements && matchingElements.length) {
         setSearchResultsList(matchingElements);
         setMatchingCounter(matchingElements);
         // console.log(matchingElements);
       } else {
         setMatchingCountText('');
+        setSearchResultsList(undefined);
       }
     }
   };
@@ -114,6 +120,7 @@ const AddPersonDrawerMainContent = () => {
     searchStringInputRef.current.value = '';
     setSearchResultsList(undefined);
     setMatchingCountText('');
+    setPersonIsOnTeam('');
   };
 
   const addClicked = (incomingPerson) => {
@@ -138,6 +145,13 @@ const AddPersonDrawerMainContent = () => {
       setSearchResultsList(updatedSearchResultsList);
       setMatchingCounter(updatedSearchResultsList);
     }
+  };
+
+  const getPersonDisplayName = (person) => {
+    const firstNameDisplay = person.firstNamePreferred && person.firstNamePreferred !== person.firstName
+      ? `${person.firstNamePreferred} (${person.firstName})`
+      : person.firstName;
+    return `${firstNameDisplay} ${person.lastName}`;
   };
 
   return (
@@ -169,13 +183,11 @@ const AddPersonDrawerMainContent = () => {
       )}
       {(addToTeamList && addToTeamList.length > 0) && (
         <PersonSearchResultsWrapper>
-          <PersonListTitle>{ searchResultsList ? 'Filtered list of people to add to team: ' : `Can be added to team (top ${LIMIT_NUMBER_SHOWN}): `}</PersonListTitle>
+          <PersonListTitle>{searchResultsList?.length > 0 ? 'Filtered list of people to add to team: ' : searchStringInputRef.current?.value ?'No matching people to add to team': `Can be added to team (top ${LIMIT_NUMBER_SHOWN}): `}</PersonListTitle>
           <PersonList>
-            {addToTeamList.map((person) => (
+            {(searchResultsList || !searchStringInputRef.current?.value) && addToTeamList.map((person) => (
               <PersonItem key={`personResult-${person.id}`}>
-                {person.firstNamePreferred && person.firstNamePreferred !== person.firstName ? `${person.firstNamePreferred} (${person.firstName})` : person.firstName}
-                {' '}
-                {person.lastName}
+                {getPersonDisplayName(person)}
                 {!arrayContains(person.id, teamMemberPersonIdList) && (
                   <>
                     {' '}
@@ -185,6 +197,17 @@ const AddPersonDrawerMainContent = () => {
               </PersonItem>
             ))}
           </PersonList>
+          {(personIsOnTeam && personIsOnTeam.length > 0 && searchStringInputRef.current?.value) && (
+            <>
+              <PersonList>
+                {personIsOnTeam.map((person) => (
+                  <PersonItem key={`personOnTeam-${person.id}`}> 
+                    {getPersonDisplayName(person)} - already on team {person.statusOnLeave? '(on leave)': person.statusResigned? '(resigned)': ''}
+                  </PersonItem>
+                ))}
+              </PersonList>
+            </>
+          )}
         </PersonSearchResultsWrapper>
       )}
 
